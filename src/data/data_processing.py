@@ -1,3 +1,4 @@
+import json
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
@@ -53,59 +54,54 @@ def merge_lables():
 
     all_labels = pd.concat([travel_insurance_claim_labels, know_your_customer_labels, hiring_employee_labels])
     all_labels.to_excel('../data/processed/all_labels.xlsx', index=False)
-
-def create_gpt_finetuning_data():
+ 
+def read_excel_file(filepath, columns):
     """
-    Creates the data for fine-tuning the GPT-3.5 model.
-
-    This function reads an Excel file containing the labels and associated processes
-    for a dataset, appends the appropriate process description from corresponding .txt files,
-    and formats it into a JSONL file with prompts and completions suitable for fine-tuning.
-
-    The prompts are structured with the process description, followed by the text,
-    and ending with 'Relevant:' to indicate where the model should give its classification.
-    The completion is the label '0' or '1'. The dataset is split into training and validation sets,
-    which are then saved to separate JSONL files.
-    I followed this best pracitise guide from OpenAI: https://platform.openai.com/docs/guides/legacy-fine-tuning/data-formatting
+    Reads an Excel file and returns a DataFrame with specified columns.
     """
+    return pd.read_excel(filepath)[columns]
 
-    all_labels = pd.read_excel('../data/processed/all_labels.xlsx')
-    all_labels = all_labels[['Process','Text', 'label']]
+def read_text_file(filepath):
+    """
+    Reads a text file and returns its content as a string.
+    """
+    with open(filepath, 'r') as file:
+        return file.read().strip()
 
-    # Dictionary to map process names to file paths
-    process_to_file = {
-        'Hiring Employee': '../data/external/processes/textual_description/hiring_employee.txt',
-        'Know Your Customer': '../data/external/processes/textual_description/know_your_customer.txt',
-        'Travel Insurance Claim': '../data/external/processes/textual_description/travel_insurance_claim_process.txt'
-    }
-
-    # Function to read the process description from a file
-    def read_process_description(process_name):
-        with open(process_to_file[process_name], 'r') as file:
-            return file.read().strip()
-
-   # Function to create the prompt with process description and the label indicator 'Relevant:'
-    def create_prompt(row):
-        process_description = read_process_description(row['Process'])
-        return f"Process: {process_description}\n\nText: {row['Text']}\n\nRelevant:"
-
-    # Apply the function to each row to create the prompts
-    all_labels['prompt'] = all_labels.apply(create_prompt, axis=1)
-
-    # Make sure the completion starts with a whitespace and ends with the designated stop sequence
-    stop_sequence = "###"
-    all_labels['completion'] = all_labels['label'].apply(lambda x: ' ' + str(x) + stop_sequence)
-
-    # Drop the original columns as they are no longer needed
+def create_finetuning_data(all_labels, process_to_file, prompt_creator):
+    """
+    General function to create fine-tuning data.
+    """
+    all_labels['prompt'] = all_labels.apply(prompt_creator, axis=1, process_to_file=process_to_file)
+    all_labels['completion'] = all_labels['label'].apply(lambda x: ' ' + str(x) + "###")
     all_labels = all_labels[['prompt', 'completion']]
+    return train_test_split(all_labels, test_size=0.20, random_state=42)
 
+def create_legacy_prompt(row, process_to_file):
+    """
+    Creates a prompt for the legacy fine-tuning format.
+    """
+    process_description = read_text_file(process_to_file[row['Process']])
+    return f"Process: {process_description}\n\nText: {row['Text']}\n\nRelevant:"
 
-    train, val = train_test_split(all_labels, test_size=0.20, random_state=42)
+def create_gpt3_5_prompt(row, process_to_file):
+    """
+    Creates a prompt for the GPT-3.5 fine-tuning format.
+    """
+    process_description = read_text_file(process_to_file[row['Process']])
+    user_message = f"Process Description: {process_description}.\nText to Classify: {row['Text']}\n0=Not Relevant 1=Relevant"
+    assistant_message = f"{row['label']}"
+    return {"messages": [{"role": "system", "content": "Determine if the text is relevant to the process description."},
+                         {"role": "user", "content": user_message},
+                         {"role": "assistant", "content": assistant_message}]}
 
-    train.to_json("../data/processed/train_text_classification.jsonl", orient='records', lines=True)
-    val.to_json("../data/processed/val_text_classification.jsonl", orient='records', lines=True)
-
-
+def save_to_jsonl(data, filepath):
+    """
+    Saves the data to a JSONL file.
+    """
+    with open(filepath, "w") as file:
+        for item in data:
+            file.write(f"{json.dumps(item)}\n")
 
 def main():
     # australinen_excel = pd.ExcelFile("../data/external/Australia_Use_Cases.xlsx")
@@ -115,7 +111,23 @@ def main():
     # process_matching_data("Know Your Customer", australinen_excel, "2_matching_reordered", "../data/interim/know_your_customer_labels.csv")
     # process_matching_data("Hiring Employee", australinen_excel_2, "training_matching", "../data/interim/hiring_employee_labels.csv")
     # merge_lables()
-    create_gpt_finetuning_data()
+
+    process_to_file = {
+        'Hiring Employee': '../data/external/processes/textual_description/hiring_employee.txt',
+        'Know Your Customer': '../data/external/processes/textual_description/know_your_customer.txt',
+        'Travel Insurance Claim': '../data/external/processes/textual_description/travel_insurance_claim_process.txt'
+    }
+    all_labels = read_excel_file('../data/processed/all_labels.xlsx', ['Process', 'Text', 'label'])
+    train, val = create_finetuning_data(all_labels, process_to_file, create_legacy_prompt)
+    save_to_jsonl(train, "../data/processed/train_davinci_classification.jsonl")
+    save_to_jsonl(val, "../data/processed/val_davinci_classification.jsonl")
+
+    # Main execution for GPT-3.5 format
+    all_labels = read_excel_file('../data/processed/all_labels.xlsx', ['Process', 'Text', 'label'])
+    train, val = create_finetuning_data(all_labels, process_to_file, create_gpt3_5_prompt)
+    save_to_jsonl(train, "../data/processed/train_gpt_finetuning.jsonl")
+    save_to_jsonl(val, "../data/processed/val_gpt_finetuning.jsonl")
+
 
 
 
