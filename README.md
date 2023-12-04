@@ -21,7 +21,6 @@ Submission of Patrick Ahrend. I am working on Case A with an ML Approach.
     │
     ├── references         <- Data dictionaries, manuals, and all other explanatory materials to understand the data better. 
     │
-    │
     ├── requirements.txt   <- The requirements file for reproducing the environment
     │                        
     │
@@ -43,7 +42,7 @@ Submission of Patrick Ahrend. I am working on Case A with an ML Approach.
     │   │
     │   └── visualization  <- Scripts to create exploratory and results-oriented visualizations
     │       └── visualize.py
-    
+    └
 ---
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
