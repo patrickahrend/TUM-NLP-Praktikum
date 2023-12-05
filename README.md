@@ -5,7 +5,7 @@ Submission of Patrick Ahrend. I am working on Case A with an ML Approach.
 
 ## Project Organization
 
-    ├── LICENSE
+    │
     ├── Makefile           <- Makefile with commands like `make data` or `make train`
     ├── README.md          <- The top-level README for documentation and instruction on how to run the code.
     ├── data
