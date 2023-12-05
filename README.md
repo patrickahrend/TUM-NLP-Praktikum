@@ -40,7 +40,7 @@ Submission of Patrick Ahrend. I am working on Case A with an ML Approach.
     │   │   ├── predict_model.py
     │   │   └── train_model.py
     │   │
-    │   └── visualization  <- Scripts to create exploratory and results-oriented visualizations
+    │   └── visualization  <- Scripts to create exploratory and results-oriented visualizations as well as visualizations of the word embeddings
     │       └── visualize.py
     └
 ---
