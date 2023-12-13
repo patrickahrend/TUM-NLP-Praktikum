@@ -54,6 +54,40 @@ def merge_lables():
 
     all_labels = pd.concat([travel_insurance_claim_labels, know_your_customer_labels, hiring_employee_labels])
     all_labels.to_excel('../data/processed/all_labels.xlsx', index=False)
+
+def create_gold_standard_data():
+
+    all_labels = pd.read_excel('../data/processed/all_labels.xlsx')
+    # Dictionary to map process names to file paths
+    process_to_file = {
+        'Hiring Employee': '../data/raw/processes/textual_description/hiring_employee.txt',
+        'Know Your Customer': '../data/raw/processes/textual_description/know_your_customer.txt',
+        'Travel Insurance Claim': '../data/raw/processes/textual_description/travel_insurance_claim_process.txt'
+    }
+
+    # Function to read the process description from a file
+    def read_process_description(process_name):
+        with open(process_to_file[process_name], 'r') as file:
+            return file.read().strip()
+        
+      # List to hold the new DataFrame rows
+    new_rows = []
+
+    # Iterate through each row in the all_labels DataFrame
+    for index, row in all_labels.iterrows():
+        process_description = read_process_description(row['Process'])
+        new_row = {'process_description': process_description, 'text': row['Text'], 'label': row['label']}
+        new_rows.append(new_row)
+
+    # Create the final DataFrame
+    final_df = pd.DataFrame(new_rows)
+    final_df.to_csv('../data/evaluation/gold_standard.csv', index=False)
+
+    
+    
+
+
+
  
 def create_gpt_finetuning_data():
     """
@@ -75,9 +109,9 @@ def create_gpt_finetuning_data():
 
     # Dictionary to map process names to file paths
     process_to_file = {
-        'Hiring Employee': '../data/external/processes/textual_description/hiring_employee.txt',
-        'Know Your Customer': '../data/external/processes/textual_description/know_your_customer.txt',
-        'Travel Insurance Claim': '../data/external/processes/textual_description/travel_insurance_claim_process.txt'
+        'Hiring Employee': '../data/raw/processes/textual_description/hiring_employee.txt',
+        'Know Your Customer': '../data/raw/processes/textual_description/know_your_customer.txt',
+        'Travel Insurance Claim': '../data/raw/processes/textual_description/travel_insurance_claim_process.txt'
     }
 
     # Function to read the process description from a file
@@ -157,9 +191,10 @@ def main():
     # process_matching_data("Hiring Employee", australinen_excel_2, "training_matching", "../data/interim/hiring_employee_labels.csv")
     # merge_lables()
 
-    create_gpt_finetuning_data()
-    create_gpt3_5_finetuning_data()
+    # create_gpt_finetuning_data()
+    # create_gpt3_5_finetuning_data()
 
+    create_gold_standard_data()
 
 
 

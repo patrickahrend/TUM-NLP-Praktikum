@@ -75,8 +75,11 @@ target/
 # Jupyter NB Checkpoints
 .ipynb_checkpoints/
 
-# exclude data from source control by default
-/data/
+# Included evaluation data from source control for grading 
+/data/processed/
+/data/interim/
+/data/raw/
+/data/external
 
 # Mac OS-specific storage files
 .DS_Store
