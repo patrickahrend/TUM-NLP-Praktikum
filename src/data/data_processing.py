@@ -235,7 +235,7 @@ def create_gpt_finetuning_data():
     )
 
 
-def create_gpt3_5_finetuning_data():
+def create_gpt3_5_fine_tuning_data():
     all_labels = pd.read_excel("../data/processed/all_labels.xlsx")
     all_labels = all_labels[["Process", "Text", "label"]]
 
@@ -293,8 +293,8 @@ def main():
     # process_matching_data("SM2_1", australinen_excel, "11_SM_2.1_matching", "../data/interim/SM2_1.csv")
     # process_matching_data("SM2_2", australinen_excel, "12_SM_2.2_matching", "../data/interim/SM2_2.csv")
 
-    # create_gpt_finetuning_data()
-    # create_gpt3_5_finetuning_data()
+    # create_gpt_fine_tuning_data()
+    # create_gpt3_5_fine_tuning_data()
 
     create_gold_standard_data()
 
