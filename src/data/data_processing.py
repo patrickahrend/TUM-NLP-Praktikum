@@ -25,9 +25,9 @@ def process_matching_data(process_name:str,excel_file:pd.ExcelFile, sheet_name:s
     
     print(matching_data.columns)
 
-    df_labels = matching_data[["document_title",'requirement_text', '0 = not relevant; 1 = business compliance relevance; 2 = (customer) informative relevance']].copy()
+    df_labels = matching_data[["document_title",'requirement_text', '0 = not relevant; 1 = relevant']].copy()
     df_labels = df_labels.rename(columns={
-        '0 = not relevant; 1 = business compliance relevance; 2 = (customer) informative relevance': 'label',
+        '0 = not relevant; 1 = relevant': 'label',
         'requirement_text': 'Text'
     })
     
@@ -51,8 +51,12 @@ def merge_lables():
     travel_insurance_claim_labels = pd.read_csv('../data/interim/travel_insurance_claim_labels.csv')
     know_your_customer_labels = pd.read_csv('../data/interim/know_your_customer_labels.csv')
     hiring_employee_labels = pd.read_csv('../data/interim/hiring_employee_labels.csv')
+    gpt_5 = pd.read_csv('../data/interim/GPT_5.csv')
+    gpt_6 = pd.read_csv('../data/interim/GPT_6.csv')
+    sm2_1 = pd.read_csv('../data/interim/SM2_1.csv')
+    sm2_2 = pd.read_csv('../data/interim/SM2_2.csv')
 
-    all_labels = pd.concat([travel_insurance_claim_labels, know_your_customer_labels, hiring_employee_labels])
+    all_labels = pd.concat([travel_insurance_claim_labels, know_your_customer_labels, hiring_employee_labels, gpt_5, gpt_6, sm2_1, sm2_2])
     all_labels.to_excel('../data/processed/all_labels.xlsx', index=False)
 
 def create_gold_standard_data():
@@ -62,7 +66,11 @@ def create_gold_standard_data():
     process_to_file = {
         'Hiring Employee': '../data/raw/processes/textual_description/hiring_employee.txt',
         'Know Your Customer': '../data/raw/processes/textual_description/know_your_customer.txt',
-        'Travel Insurance Claim': '../data/raw/processes/textual_description/travel_insurance_claim_process.txt'
+        'Travel Insurance Claim': '../data/raw/processes/textual_description/travel_insurance_claim_process.txt',
+        'GPT_5': '../data/raw/processes/textual_description/gpt_5.txt',
+        'GPT_6': '../data/raw/processes/textual_description/gpt_6.txt',
+        'SM2_1': '../data/raw/processes/textual_description/SM2_1.txt',
+        'SM2_2':'../data/raw/processes/textual_description/SM2_2.txt',
     }
 
     # Function to read the process description from a file
@@ -76,12 +84,54 @@ def create_gold_standard_data():
     # Iterate through each row in the all_labels DataFrame
     for index, row in all_labels.iterrows():
         process_description = read_process_description(row['Process'])
-        new_row = {'process_description': process_description, 'text': row['Text'], 'label': row['label']}
-        new_rows.append(new_row)
+        new_row = {"process":row['Process'],'process_description': process_description, 'text': row['Text'], 'label': row['label']}
+        new_rows.append(new_row) 
 
     # Create the final DataFrame
     final_df = pd.DataFrame(new_rows)
+
     final_df.to_csv('../data/evaluation/gold_standard.csv', index=False)
+
+    travel_insurance_df = final_df[final_df['process'] == 'Travel Insurance Claim']
+    travel_insurance_1 = travel_insurance_df[travel_insurance_df['label'] == 1].sample(n=10)
+    travel_insurance_0 = travel_insurance_df[travel_insurance_df['label'] == 0].sample(n=88)
+
+    kyc_insurance_df = final_df[final_df['process'] == 'Know Your Customer']
+    kyc_insurance_1 = kyc_insurance_df[kyc_insurance_df['label'] == 1].sample(n=7)
+    kyc_insurance_0 = kyc_insurance_df[kyc_insurance_df['label'] == 0].sample(n=55)
+
+
+    hiring_insurance_df = final_df[final_df['process'] == 'Hiring Employee']
+    hiring_insurance_1 = hiring_insurance_df[hiring_insurance_df['label'] == 1].sample(n=2)
+    hiring_insurance_0 = hiring_insurance_df[hiring_insurance_df['label'] == 0].sample(n=10)
+
+    gp5_insurance_df = final_df[final_df['process'] == 'GPT_5']
+    gp5_insurance_1 = gp5_insurance_df[gp5_insurance_df['label'] == 1].sample(n=3)
+    gp5_insurance_0 = gp5_insurance_df[gp5_insurance_df['label'] == 0].sample(n=29)
+
+    gpt_6_insurance_df = final_df[final_df['process'] == 'GPT_6']
+    gpt_6_insurance_1 = gpt_6_insurance_df[gpt_6_insurance_df['label'] == 1].sample(n=2)
+    gpt_6_insurance_0 = gpt_6_insurance_df[gpt_6_insurance_df['label'] == 0].sample(n=18)
+
+
+    sm21_insurance_df = final_df[final_df['process'] == 'SM2_1']
+    sm21_insurance_1 = sm21_insurance_df[sm21_insurance_df['label'] == 1].sample(n=2)
+    sm21_insurance_0 = sm21_insurance_df[sm21_insurance_df['label'] == 0].sample(n=14)
+
+
+    sm22_insurance_df = final_df[final_df['process'] == 'SM2_2']
+    sm22_insurance_1 = sm22_insurance_df[sm22_insurance_df['label'] == 1].sample(n=3)
+    sm22_insurance_0 = sm22_insurance_df[sm22_insurance_df['label'] == 0].sample(n=19)
+
+
+
+
+    subset_df = pd.concat([travel_insurance_1, travel_insurance_0,kyc_insurance_0,kyc_insurance_1, hiring_insurance_0,hiring_insurance_1,gp5_insurance_1, gp5_insurance_0, gpt_6_insurance_0,gp5_insurance_1, gpt_6_insurance_1, sm21_insurance_0,sm21_insurance_1, sm22_insurance_0, sm22_insurance_1], ignore_index=True)
+
+    subset_df.to_csv('../data/evaluation/gold_standard_subset.csv', index=False)
+
+
+
 
     
     
@@ -183,13 +233,14 @@ def create_gpt3_5_finetuning_data():
             file.write(f"{json.dumps(item)}\n")
 
 def main():
-    # australinen_excel = pd.ExcelFile("../data/external/Australia_Use_Cases.xlsx")
+    australinen_excel = pd.ExcelFile("../data/raw/Use_Case_Data(2).xlsx")
     # australinen_excel_2 = pd.ExcelFile("../data/external/Addition_Australia_data_small_use_case_3_hire_employee.xlsx")
 
-    # process_matching_data("Travel Insurance Claim", australinen_excel, "1_matching_reordered", "../data/interim/travel_insurance_claim_labels.csv")
-    # process_matching_data("Know Your Customer", australinen_excel, "2_matching_reordered", "../data/interim/know_your_customer_labels.csv")
-    # process_matching_data("Hiring Employee", australinen_excel_2, "training_matching", "../data/interim/hiring_employee_labels.csv")
-    # merge_lables()
+    # process_matching_data("GPT_5", australinen_excel, "8_GDPR_5_matching", "../data/interim/GPT_5.csv")
+    # process_matching_data("GPT_6", australinen_excel, "9_GDPR_6_matching", "../data/interim/GPT_6.csv")
+    # process_matching_data("SM2_1", australinen_excel, "11_SM_2.1_matching", "../data/interim/SM2_1.csv")
+    # process_matching_data("SM2_2", australinen_excel, "12_SM_2.2_matching", "../data/interim/SM2_2.csv")
+
 
     # create_gpt_finetuning_data()
     # create_gpt3_5_finetuning_data()
