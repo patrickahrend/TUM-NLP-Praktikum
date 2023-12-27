@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
-import click
 import logging
 from pathlib import Path
+
+import click
+import pandas as pd
 from dotenv import find_dotenv, load_dotenv
+
+from data_processor import DataProcessor
 
 
 @click.command()
@@ -14,14 +18,83 @@ def main(input_filepath, output_filepath):
     """
     logger = logging.getLogger(__name__)
     logger.info("making final data set from raw data")
+    project_dir = Path(__file__).resolve().parents[2]
+    data_file_path = project_dir / "data/raw/Use_Case_Data(2).xlsx"
+
+    process_to_file = {
+        "Know Your Customer": project_dir
+        / "data/raw/processes/textual_description/know_your_customer.txt",
+        "Hiring Employee": project_dir
+        / "data/raw/processes/textual_description/hiring_employee.txt",
+        "Travel Insurance Claim": project_dir
+        / "data/raw/processes/textual_description/travel_insurance_claim.txt",
+        "GDPR_1": project_dir / "data/raw/processes/textual_description/GDPR_1.txt",
+        "GDPR_2": project_dir / "data/raw/processes/textual_description/GDPR_2.txt",
+        "GDPR_3": project_dir / "data/raw/processes/textual_description/GDPR_3.txt",
+        "GDPR_4": project_dir / "data/raw/processes/textual_description/GDPR_4.txt",
+        "GDPR_5": project_dir / "data/raw/processes/textual_description/GDPR_5.txt",
+        "GDPR_6": project_dir / "data/raw/processes/textual_description/GDPR_6.txt",
+        "GDPR_7": project_dir / "data/raw/processes/textual_description/GDPR_7.txt",
+        "SM2_1": project_dir / "data/raw/processes/textual_description/SM2_1.txt",
+        "SM2_2": project_dir / "data/raw/processes/textual_description/SM2_2.txt",
+        "SM2_3": project_dir / "data/raw/processes/textual_description/SM2_3.txt",
+        "SM2_5": project_dir / "data/raw/processes/textual_description/SM2_5.txt",
+        "SM6_1": project_dir / "data/raw/processes/textual_description/SM6_1.txt",
+        "SM6_3": project_dir / "data/raw/processes/textual_description/SM6_3.txt",
+    }
+    process_sheet_mapping = {
+        "Travel Insurance Claim": "1_matching_reordered",
+        "Know Your Customer": "2_matching_reordered",
+        "Hiring Employee": "3_training_matching",
+        "GDPR_1": "4_GDPR_1_matching",
+        "GDPR_2": "5_GDPR_2_matching",
+        "GDPR_3": "6_GDPR_3_matching",
+        "GDPR_4": "7_GDPR_4_matching",
+        "GDPR_5": "8_GDPR_5_matching",
+        "GDPR_6": "9_GDPR_6_matching",
+        "GDPR_7": "10_GDPR_7_matching",
+        "SM2_1": "11_SM_2.1_matching",
+        "SM2_2": "12_SM_2.2_matching",
+        "SM2_3": "13_SM_2.3_matching",
+        "SM2_5": "14_SM_2.5_matching",
+        "SM6_1": "15_SM_6.1_matching",
+        "SM6_3": "16_SM_6.3_matching",
+    }
+    processor = DataProcessor(data_file_path, process_to_file)
+    all_processed_data = pd.DataFrame()
+
+    for process_name, sheet_name in process_sheet_mapping.items():
+        processed_data = processor.process_matching_data(process_name, sheet_name)
+        all_processed_data = pd.concat([all_processed_data, processed_data])
+
+    all_processed_data.to_excel(
+        project_dir / "data/processed/final_labels_with_description.xlsx", index=False
+    )
+    all_processed_data.to_csv(
+        project_dir / "data/processed/final_labels_with_description.csv", index=False
+    )
+
+    gold_standard_samples = {
+        "Travel Insurance Claim": (10, 88),
+        "Know Your Customer": (7, 55),
+        "Hiring Employee": (2, 12),
+        "GDPR_2": (3, 29),
+        "GDPR_3": (3, 19),
+        "SM2_1": (2, 14),
+        "SM2_2": (3, 19),
+    }
+
+    gold_standard_subset = processor.create_gold_standard_subset(
+        all_processed_data, gold_standard_samples
+    )
+    gold_standard_subset.to_csv(
+        project_dir / "data/evaluation/gold_standard.csv", index=False
+    )
 
 
 if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.INFO, format=log_fmt)
-
-    # not used in this stub but often useful for finding various files
-    project_dir = Path(__file__).resolve().parents[2]
 
     # find .env automagically by walking up directories until it's found, then
     # load up the .env entries as environment variables
