@@ -1,11 +1,21 @@
+import nltk
 import pandas as pd
+import spacy
+from nltk import word_tokenize
+from nltk.corpus import stopwords
+
+nltk.download("punkt")
+nltk.download("stopwords")
+
+stop_words = set(stopwords.words("english"))
 
 
 # This class turns the raw data from Use Case Data(2).xlsx into the dataset used in the project.
 class DataProcessor:
-    def __init__(self, excel_filepath, process_to_file):
+    def __init__(self, excel_filepath, process_to_file, nlp_model="en_core_web_sm"):
         self.excel_file = pd.ExcelFile(excel_filepath)
         self.process_to_file = process_to_file
+        self.nlp = spacy.load(nlp_model)
 
     def process_matching_data(self, process_name: str, sheet_name: str):
         matching_data = self.excel_file.parse(sheet_name)
@@ -40,10 +50,8 @@ class DataProcessor:
 
     def create_gold_standard_subset(self, df, sample_sizes):
         subsets = []
-
         for process_name, (n_positive, n_negative) in sample_sizes.items():
             process_df = df[df["Process"] == process_name]
-            print(process_name)
             positive_samples = process_df[process_df["Label"] == 1].sample(n=n_positive)
             negative_samples = process_df[process_df["Label"] == 0].sample(n=n_negative)
 
@@ -52,3 +60,18 @@ class DataProcessor:
 
         gold_standard_subset = pd.concat(subsets, ignore_index=True)
         return gold_standard_subset
+
+    def preprocess_lemma(self, statements):
+        return statements.fillna("").apply(
+            lambda x: " ".join([token.lemma_.lower() for token in self.nlp(x)])
+        )
+
+    def preprocess_text_nltk(self, text):
+        tokens = word_tokenize(text)
+        punctuation_to_remove = {".", ","}
+        tokens = [word for word in tokens if word not in punctuation_to_remove]
+
+        return " ".join(tokens)
+
+    def preprocess_statements_nltk(self, statements):
+        return statements.fillna("").apply(self.preprocess_text_nltk)

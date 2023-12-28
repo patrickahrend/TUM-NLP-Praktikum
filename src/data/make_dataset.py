@@ -91,6 +91,39 @@ def main(input_filepath, output_filepath):
         project_dir / "data/evaluation/gold_standard.csv", index=False
     )
 
+    ## preprocessing data for word embedding by lemmarization and removing puncts and commas. Stopwords are dealt with on embeddings level
+    all_processed_data["Process_description"] = processor.preprocess_lemma(
+        all_processed_data["Process_description"]
+    )
+    all_processed_data["Text"] = processor.preprocess_lemma(all_processed_data["Text"])
+    all_processed_data["Process_description"] = processor.preprocess_statements_nltk(
+        all_processed_data["Process_description"]
+    )
+    all_processed_data["Text"] = processor.preprocess_statements_nltk(
+        all_processed_data["Text"]
+    )
+
+    gold_standard_subset["Process_description"] = processor.preprocess_lemma(
+        gold_standard_subset["Process_description"]
+    )
+    gold_standard_subset["Text"] = processor.preprocess_lemma(
+        gold_standard_subset["Text"]
+    )
+    gold_standard_subset["Process_description"] = processor.preprocess_statements_nltk(
+        gold_standard_subset["Process_description"]
+    )
+    gold_standard_subset["Text"] = processor.preprocess_statements_nltk(
+        gold_standard_subset["Text"]
+    )
+
+    all_processed_data.to_csv(
+        project_dir / "data/processed/final_labels_with_description_preprocessed.csv",
+        index=False,
+    )
+    gold_standard_subset.to_csv(
+        project_dir / "data/evaluation/gold_standard_preprocessed.csv", index=False
+    )
+
 
 if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
