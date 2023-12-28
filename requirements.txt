@@ -11,3 +11,4 @@ torchaudio
 torchvision
 pickle
 joblib
+gensim
