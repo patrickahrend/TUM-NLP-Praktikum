@@ -9,3 +9,5 @@ nltk~=3.8.1
 torch
 torchaudio
 torchvision
+pickle
+joblib
