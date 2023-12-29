@@ -7,13 +7,14 @@ import openai
 import pandas as pd
 import torch
 from dotenv import find_dotenv, load_dotenv
-from gensim.models import Word2Vec, FastText
+from gensim.models import Word2Vec, FastText, KeyedVectors
+from gensim.scripts.glove2word2vec import glove2word2vec
 from openai import OpenAI
 from sklearn.feature_extraction.text import TfidfVectorizer
 from transformers import BertTokenizer, BertModel
 
 from utils_embedding_functions import (
-    get_sentence_vector,
+    get_sentence_vector_custom,
     get_embeddings_bert,
     get_embeddings_gpt,
 )
@@ -34,6 +35,7 @@ class EmbeddingProcessor:
         self.bert_model.eval()
         self.openai = OpenAI()
         self.fasttext = None
+        self.glove2word2vec = None
 
     def compute_tfidf_embedding(self, train_statements, test_statements):
         tfidf_train = self.tfidf.fit_transform(train_statements).toarray()
@@ -57,13 +59,13 @@ class EmbeddingProcessor:
             window=10,
         )
         w2v_train = pd.Series(tokenized_train_statements).apply(
-            lambda x: get_sentence_vector(x, self.word2vec)
+            lambda x: get_sentence_vector_custom(x, self.word2vec)
         )
         w2v_train = np.array(w2v_train.tolist())
         w2v_train_tensor = torch.tensor(w2v_train, dtype=torch.float)
 
         w2v_test = pd.Series(tokenized_test).apply(
-            lambda x: get_sentence_vector(x, self.word2vec)
+            lambda x: get_sentence_vector_custom(x, self.word2vec)
         )
         w2v_test = np.array(w2v_test.tolist())
         w2v_test_tensor = torch.tensor(w2v_test, dtype=torch.float)
@@ -113,7 +115,33 @@ class EmbeddingProcessor:
         return ft_train, ft_test, ft_train_tensor, ft_test_tensor
 
     def compute_glove_embedding(self, train_statements, test_statements):
-        pass
+        tokenized_train_statements = [
+            statement.split() for statement in train_statements
+        ]
+        tokenized_test = [statement.split() for statement in test_statements]
+
+        project_dir = Path(__file__).resolve().parents[2]
+        glove_input_file = project_dir / "data/external/glove.6B.300d.txt"
+        word2vec_output_file = project_dir / "data/external/glove.6B.300d.word2vec.txt"
+        glove2word2vec(str(glove_input_file), str(word2vec_output_file))
+        self.glove2word2vec = KeyedVectors.load_word2vec_format(
+            str(word2vec_output_file), binary=False
+        )
+
+        glove_train = pd.Series(tokenized_train_statements).apply(
+            lambda x: get_sentence_vector_custom(x, self.glove2word2vec, is_glove=True)
+        )
+        glove_test = pd.Series(tokenized_test).apply(
+            lambda x: get_sentence_vector_custom(x, self.glove2word2vec, is_glove=True)
+        )
+
+        glove_train = np.array(glove_train.tolist())
+        glove_test = np.array(glove_test.tolist())
+
+        glove_train_tensor = torch.tensor(glove_train, dtype=torch.float)
+        glove_test_tensor = torch.tensor(glove_test, dtype=torch.float)
+
+        return glove_train, glove_test, glove_train_tensor, glove_test_tensor
 
     def compute_gpt_embedding(self, train_statements, test_statements):
         gpt_train = train_statements.apply(lambda x: get_embeddings_gpt(x, self.openai))
@@ -244,27 +272,51 @@ def main():
     # )
 
     # FastText
+    # (
+    #     ft_train,
+    #     ft_test,
+    #     ft_train_tensor,
+    #     ft_test_tensor,
+    # ) = embedding_processor.compute_fasttext_embedding(
+    #     df_train["Combined_Text"], df_test["Combined_Text"]
+    # )
+    # embedding_processor.save_embeddings(
+    #     ft_train, project_dir / "data/processed/embeddings/ft_train.pkl"
+    # )
+    # embedding_processor.save_embeddings(
+    #     ft_test, project_dir / "data/processed/embeddings/ft_test.pkl"
+    # )
+    # torch.save(
+    #     ft_train_tensor,
+    #     project_dir / "data/processed/embeddings/ft_train_tensor.pt",
+    # )
+    # torch.save(
+    #     ft_test_tensor,
+    #     project_dir / "data/processed/embeddings/ft_test_tensor.pt",
+    # )
+
+    # Glove
     (
-        ft_train,
-        ft_test,
-        ft_train_tensor,
-        ft_test_tensor,
-    ) = embedding_processor.compute_fasttext_embedding(
+        glove_train,
+        glove_test,
+        glove_train_tensor,
+        glove_test_tensor,
+    ) = embedding_processor.compute_glove_embedding(
         df_train["Combined_Text"], df_test["Combined_Text"]
     )
     embedding_processor.save_embeddings(
-        ft_train, project_dir / "data/processed/embeddings/ft_train.pkl"
+        glove_train, project_dir / "data/processed/embeddings/glove_train.pkl"
     )
     embedding_processor.save_embeddings(
-        ft_test, project_dir / "data/processed/embeddings/ft_test.pkl"
+        glove_test, project_dir / "data/processed/embeddings/glove_test.pkl"
     )
     torch.save(
-        ft_train_tensor,
-        project_dir / "data/processed/embeddings/ft_train_tensor.pt",
+        glove_train_tensor,
+        project_dir / "data/processed/embeddings/glove_train_tensor.pt",
     )
     torch.save(
-        ft_test_tensor,
-        project_dir / "data/processed/embeddings/ft_test_tensor.pt",
+        glove_test_tensor,
+        project_dir / "data/processed/embeddings/glove_test_tensor.pt",
     )
 
 
