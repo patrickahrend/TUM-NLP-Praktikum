@@ -14,3 +14,4 @@ joblib
 gensim~=4.3.2
 transformers~=4.36.2
 numpy~=1.26.2
+openai~=1.6.1

@@ -7,7 +7,7 @@ import openai
 import pandas as pd
 import torch
 from dotenv import find_dotenv, load_dotenv
-from gensim.models import Word2Vec
+from gensim.models import Word2Vec, FastText
 from openai import OpenAI
 from sklearn.feature_extraction.text import TfidfVectorizer
 from transformers import BertTokenizer, BertModel
@@ -33,6 +33,7 @@ class EmbeddingProcessor:
         self.bert_model = BertModel.from_pretrained("bert-base-uncased")
         self.bert_model.eval()
         self.openai = OpenAI()
+        self.fasttext = None
 
     def compute_tfidf_embedding(self, train_statements, test_statements):
         tfidf_train = self.tfidf.fit_transform(train_statements).toarray()
@@ -85,7 +86,31 @@ class EmbeddingProcessor:
         return bert_train, bert_test, bert_train_tensor, bert_test_tensor
 
     def compute_fasttext_embedding(self, train_statements, test_statements):
-        pass
+        tokenized_train_statements = [
+            statement.split() for statement in train_statements
+        ]
+        tokenized_test = [statement.split() for statement in test_statements]
+
+        self.fasttext = FastText(
+            tokenized_train_statements,
+            vector_size=100,
+            window=5,
+            min_count=1,
+            workers=4,
+        )
+        ft_train = pd.Series(tokenized_train_statements).apply(
+            lambda x: self.fasttext.wv.get_sentence_vector(x)
+        )
+        ft_test = pd.Series(tokenized_test).apply(
+            lambda x: self.fasttext.wv.get_sentence_vector(x)
+        )
+        ft_train = np.array(ft_train.tolist())
+        ft_test = np.array(ft_test.tolist())
+
+        ft_train_tensor = torch.tensor(ft_train, dtype=torch.float)
+        ft_test_tensor = torch.tensor(ft_test, dtype=torch.float)
+
+        return ft_train, ft_test, ft_train_tensor, ft_test_tensor
 
     def compute_glove_embedding(self, train_statements, test_statements):
         pass
@@ -195,27 +220,51 @@ def main():
     # )
 
     # GPT ADA
+    # (
+    #     gpt_train,
+    #     gpt_test,
+    #     gpt_train_tensor,
+    #     gpt_test_tensor,
+    # ) = embedding_processor.compute_gpt_embedding(
+    #     df_train["Combined_Text"], df_test["Combined_Text"]
+    # )
+    # embedding_processor.save_embeddings(
+    #     gpt_train, project_dir / "data/processed/embeddings/gpt_train.pkl"
+    # )
+    # embedding_processor.save_embeddings(
+    #     gpt_test, project_dir / "data/processed/embeddings/gpt_test.pkl"
+    # )
+    # torch.save(
+    #     gpt_train_tensor,
+    #     project_dir / "data/processed/embeddings/gpt_train_tensor.pt",
+    # )
+    # torch.save(
+    #     gpt_test_tensor,
+    #     project_dir / "data/processed/embeddings/gpt_test_tensor.pt",
+    # )
+
+    # FastText
     (
-        gpt_train,
-        gpt_test,
-        gpt_train_tensor,
-        gpt_test_tensor,
-    ) = embedding_processor.compute_gpt_embedding(
+        ft_train,
+        ft_test,
+        ft_train_tensor,
+        ft_test_tensor,
+    ) = embedding_processor.compute_fasttext_embedding(
         df_train["Combined_Text"], df_test["Combined_Text"]
     )
     embedding_processor.save_embeddings(
-        gpt_train, project_dir / "data/processed/embeddings/gpt_train.pkl"
+        ft_train, project_dir / "data/processed/embeddings/ft_train.pkl"
     )
     embedding_processor.save_embeddings(
-        gpt_test, project_dir / "data/processed/embeddings/gpt_test.pkl"
+        ft_test, project_dir / "data/processed/embeddings/ft_test.pkl"
     )
     torch.save(
-        gpt_train_tensor,
-        project_dir / "data/processed/embeddings/gpt_train_tensor.pt",
+        ft_train_tensor,
+        project_dir / "data/processed/embeddings/ft_train_tensor.pt",
     )
     torch.save(
-        gpt_test_tensor,
-        project_dir / "data/processed/embeddings/gpt_test_tensor.pt",
+        ft_test_tensor,
+        project_dir / "data/processed/embeddings/ft_test_tensor.pt",
     )
 
 
