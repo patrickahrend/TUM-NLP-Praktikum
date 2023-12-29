@@ -6,9 +6,11 @@ black
 setuptools~=69.0.3
 spacy~=3.7.2
 nltk~=3.8.1
-torch
+torch~=2.1.2
 torchaudio
 torchvision
 pickle
 joblib
-gensim
+gensim~=4.3.2
+transformers~=4.36.2
+numpy~=1.26.2

@@ -1,13 +1,26 @@
+import os
 import pickle
 from pathlib import Path
 
 import numpy as np
+import openai
 import pandas as pd
 import torch
+from dotenv import find_dotenv, load_dotenv
 from gensim.models import Word2Vec
+from openai import OpenAI
 from sklearn.feature_extraction.text import TfidfVectorizer
+from transformers import BertTokenizer, BertModel
 
-from utils_embedding_functions import get_sentence_vector
+from utils_embedding_functions import (
+    get_sentence_vector,
+    get_embeddings_bert,
+    get_embeddings_gpt,
+)
+
+load_dotenv(find_dotenv())
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
 class EmbeddingProcessor:
@@ -16,6 +29,10 @@ class EmbeddingProcessor:
             stop_words="english", ngram_range=(1, 2), max_features=max_features
         )
         self.word2vec = None
+        self.bert_tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+        self.bert_model = BertModel.from_pretrained("bert-base-uncased")
+        self.bert_model.eval()
+        self.openai = OpenAI()
 
     def compute_tfidf_embedding(self, train_statements, test_statements):
         tfidf_train = self.tfidf.fit_transform(train_statements).toarray()
@@ -52,7 +69,20 @@ class EmbeddingProcessor:
         return w2v_train, w2v_test, w2v_train_tensor, w2v_test_tensor
 
     def compute_bert_embedding(self, train_statements, test_statements):
-        pass
+        bert_train = train_statements.apply(
+            lambda x: get_embeddings_bert(x, self.bert_tokenizer, self.bert_model)
+        )
+        bert_test = test_statements.apply(
+            lambda x: get_embeddings_bert(x, self.bert_tokenizer, self.bert_model)
+        )
+
+        bert_train = np.array(bert_train.tolist())
+        bert_test = np.array(bert_test.tolist())
+
+        bert_train_tensor = torch.tensor(bert_train, dtype=torch.float)
+        bert_test_tensor = torch.tensor(bert_test, dtype=torch.float)
+
+        return bert_train, bert_test, bert_train_tensor, bert_test_tensor
 
     def compute_fasttext_embedding(self, train_statements, test_statements):
         pass
@@ -61,7 +91,16 @@ class EmbeddingProcessor:
         pass
 
     def compute_gpt_embedding(self, train_statements, test_statements):
-        pass
+        gpt_train = train_statements.apply(lambda x: get_embeddings_gpt(x, self.openai))
+        gpt_test = test_statements.apply(lambda x: get_embeddings_gpt(x, self.openai))
+
+        gpt_train = np.array(gpt_train.tolist())
+        gpt_test = np.array(gpt_test.tolist())
+
+        gpt_train_tensor = torch.tensor(gpt_train, dtype=torch.float)
+        gpt_test_tensor = torch.tensor(gpt_test, dtype=torch.float)
+
+        return gpt_train, gpt_test, gpt_train_tensor, gpt_test_tensor
 
     def save_embeddings(self, obj, filepath):
         with open(filepath, "wb") as f:
@@ -82,56 +121,102 @@ def main():
     df_train["Combined_Text"] = df_train["Process_description"] + " " + df_train["Text"]
     df_test["Combined_Text"] = df_test["Process_description"] + " " + df_test["Text"]
 
-    # TF-IDF
+    # # TF-IDF
+    # (
+    #     tfidf_train,
+    #     tfidf_test,
+    #     tfidf_train_tensor,
+    #     tfidf_test_tensor,
+    # ) = embedding_processor.compute_tfidf_embedding(
+    #     df_train["Combined_Text"], df_test["Combined_Text"]
+    # )
+    # embedding_processor.save_embeddings(
+    #     tfidf_train, project_dir / "data/processed/embeddings/tfidf_train.pkl"
+    # )
+    # embedding_processor.save_embeddings(
+    #     tfidf_test, project_dir / "data/processed/embeddings/tfidf_test.pkl"
+    # )
+    #
+    # torch.save(
+    #     tfidf_train_tensor,
+    #     project_dir / "data/processed/embeddings/tfidf_train_tensor.pt",
+    # )
+    # torch.save(
+    #     tfidf_test_tensor,
+    #     project_dir / "data/processed/embeddings/tfidf_test_tensor.pt",
+    # )
+    #
+    # # Word2Vec
+    # (
+    #     w2v_train,
+    #     w2v_test,
+    #     w2v_train_tensor,
+    #     w2v_test_tensor,
+    # ) = embedding_processor.compute_word2vec_embedding(
+    #     df_train["Combined_Text"], df_test["Combined_Text"]
+    # )
+    # embedding_processor.save_embeddings(
+    #     w2v_train, project_dir / "data/processed/embeddings/w2v_train.pkl"
+    # )
+    # embedding_processor.save_embeddings(
+    #     w2v_test, project_dir / "data/processed/embeddings/w2v_test.pkl"
+    # )
+    # torch.save(
+    #     w2v_train_tensor,
+    #     project_dir / "data/processed/embeddings/w2v_train_tensor.pt",
+    # )
+    # torch.save(
+    #     w2v_test_tensor,
+    #     project_dir / "data/processed/embeddings/w2v_test_tensor.pt",
+    # )
+    #
+    # # BERT
+    # (
+    #     bert_train,
+    #     bert_test,
+    #     bert_train_tensor,
+    #     bert_test_tensor,
+    # ) = embedding_processor.compute_bert_embedding(
+    #     df_train["Combined_Text"], df_test["Combined_Text"]
+    # )
+    # embedding_processor.save_embeddings(
+    #     bert_train, project_dir / "data/processed/embeddings/bert_train.pkl"
+    # )
+    # embedding_processor.save_embeddings(
+    #     bert_test, project_dir / "data/processed/embeddings/bert_test.pkl"
+    # )
+    # torch.save(
+    #     bert_train_tensor,
+    #     project_dir / "data/processed/embeddings/bert_train_tensor.pt",
+    # )
+    # torch.save(
+    #     bert_test_tensor,
+    #     project_dir / "data/processed/embeddings/bert_test_tensor.pt",
+    # )
+
+    # GPT ADA
     (
-        tfidf_train,
-        tfidf_test,
-        tfidf_train_tensor,
-        tfidf_test_tensor,
-    ) = embedding_processor.compute_tfidf_embedding(
+        gpt_train,
+        gpt_test,
+        gpt_train_tensor,
+        gpt_test_tensor,
+    ) = embedding_processor.compute_gpt_embedding(
         df_train["Combined_Text"], df_test["Combined_Text"]
     )
     embedding_processor.save_embeddings(
-        tfidf_train, project_dir / "data/processed/embeddings/tfidf_train.pkl"
+        gpt_train, project_dir / "data/processed/embeddings/gpt_train.pkl"
     )
     embedding_processor.save_embeddings(
-        tfidf_test, project_dir / "data/processed/embeddings/tfidf_test.pkl"
-    )
-
-    torch.save(
-        tfidf_train_tensor,
-        project_dir / "data/processed/embeddings/tfidf_train_tensor.pt",
+        gpt_test, project_dir / "data/processed/embeddings/gpt_test.pkl"
     )
     torch.save(
-        tfidf_test_tensor,
-        project_dir / "data/processed/embeddings/tfidf_test_tensor.pt",
-    )
-
-    # Word2Vec
-    (
-        w2v_train,
-        w2v_test,
-        w2v_train_tensor,
-        w2v_test_tensor,
-    ) = embedding_processor.compute_word2vec_embedding(
-        df_train["Combined_Text"], df_test["Combined_Text"]
-    )
-    embedding_processor.save_embeddings(
-        w2v_train, project_dir / "data/processed/embeddings/w2v_train.pkl"
-    )
-    embedding_processor.save_embeddings(
-        w2v_test, project_dir / "data/processed/embeddings/w2v_test.pkl"
+        gpt_train_tensor,
+        project_dir / "data/processed/embeddings/gpt_train_tensor.pt",
     )
     torch.save(
-        w2v_train_tensor,
-        project_dir / "data/processed/embeddings/w2v_train_tensor.pt",
+        gpt_test_tensor,
+        project_dir / "data/processed/embeddings/gpt_test_tensor.pt",
     )
-    torch.save(
-        w2v_test_tensor,
-        project_dir / "data/processed/embeddings/w2v_test_tensor.pt",
-    )
-
-    # BERT
 
 
 if __name__ == "__main__":
