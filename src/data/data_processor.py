@@ -50,16 +50,21 @@ class DataProcessor:
 
     def create_gold_standard_subset(self, df, sample_sizes):
         subsets = []
+        gold_standard_indices = []
         for process_name, (n_positive, n_negative) in sample_sizes.items():
             process_df = df[df["Process"] == process_name]
             positive_samples = process_df[process_df["Label"] == 1].sample(n=n_positive)
             negative_samples = process_df[process_df["Label"] == 0].sample(n=n_negative)
 
+            # Store the indices of the sampled rows
+            gold_standard_indices.extend(positive_samples.index.tolist())
+            gold_standard_indices.extend(negative_samples.index.tolist())
+
             subsets.append(positive_samples)
             subsets.append(negative_samples)
 
         gold_standard_subset = pd.concat(subsets, ignore_index=True)
-        return gold_standard_subset
+        return gold_standard_subset, gold_standard_indices
 
     def preprocess_lemma(self, statements):
         return statements.fillna("").apply(

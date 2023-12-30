@@ -74,6 +74,7 @@ def main(input_filepath, output_filepath):
         project_dir / "data/processed/final_labels_with_description.csv", index=False
     )
 
+    # Creating Gold standard for evaluation
     gold_standard_samples = {
         "Travel Insurance Claim": (10, 88),
         "Know Your Customer": (7, 55),
@@ -84,24 +85,29 @@ def main(input_filepath, output_filepath):
         "SM2_2": (3, 19),
     }
 
-    gold_standard_subset = processor.create_gold_standard_subset(
+    gold_standard_subset, gold_standard_indices = processor.create_gold_standard_subset(
         all_processed_data, gold_standard_samples
     )
+
     gold_standard_subset.to_csv(
         project_dir / "data/evaluation/gold_standard.csv", index=False
     )
 
+    # Make sure all_processed_data has unique and continuous indices
+    all_processed_data.reset_index(drop=True, inplace=True)
+
+    # Exclude gold standard samples from all_processed_data
+    train_data = all_processed_data.drop(gold_standard_indices).reset_index(drop=True)
+
     ## preprocessing data for word embedding by lemmarization and removing puncts and commas. Stopwords are dealt with on embeddings level
-    all_processed_data["Process_description"] = processor.preprocess_lemma(
-        all_processed_data["Process_description"]
+    train_data["Process_description"] = processor.preprocess_lemma(
+        train_data["Process_description"]
     )
-    all_processed_data["Text"] = processor.preprocess_lemma(all_processed_data["Text"])
-    all_processed_data["Process_description"] = processor.preprocess_statements_nltk(
-        all_processed_data["Process_description"]
+    train_data["Text"] = processor.preprocess_lemma(train_data["Text"])
+    train_data["Process_description"] = processor.preprocess_statements_nltk(
+        train_data["Process_description"]
     )
-    all_processed_data["Text"] = processor.preprocess_statements_nltk(
-        all_processed_data["Text"]
-    )
+    train_data["Text"] = processor.preprocess_statements_nltk(train_data["Text"])
 
     gold_standard_subset["Process_description"] = processor.preprocess_lemma(
         gold_standard_subset["Process_description"]
@@ -116,13 +122,17 @@ def main(input_filepath, output_filepath):
         gold_standard_subset["Text"]
     )
 
-    all_processed_data.to_csv(
-        project_dir / "data/processed/final_labels_with_description_preprocessed.csv",
+    train_data.to_csv(
+        project_dir / "data/processed/training_data_preprocessed.csv",
         index=False,
     )
     gold_standard_subset.to_csv(
         project_dir / "data/evaluation/gold_standard_preprocessed.csv", index=False
     )
+
+    print(f"Length of all_processed_data: {len(all_processed_data)}")
+    print(f"Length of gold_standard_subset: {len(gold_standard_subset)}")
+    print(f"Length of train_data: {len(train_data)}")
 
 
 if __name__ == "__main__":

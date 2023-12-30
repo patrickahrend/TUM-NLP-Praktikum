@@ -1,4 +1,4 @@
-.PHONY: clean data lint requirements sync_data_to_s3 sync_data_from_s3
+.PHONY: clean data lint requirements
 
 #################################################################################
 # GLOBALS                                                                       #
@@ -19,13 +19,19 @@ endif
 # COMMANDS                                                                      #
 #################################################################################
 
+
 ## Install Python Dependencies
 requirements: test_environment
 	$(PYTHON_INTERPRETER) -m pip install -U pip setuptools wheel
 	$(PYTHON_INTERPRETER) -m pip install -r requirements.txt
 
+## Install spaCy language model for data processing
+install_spacy_model:
+	@echo "Installing spaCy language model..."
+	$(PYTHON_INTERPRETER) -m spacy download en_core_web_sm
+
 ## Make Dataset
-data: requirements
+data: requirements install_spacy_model
 	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw data/processed
 
 ## Delete all compiled Python files
