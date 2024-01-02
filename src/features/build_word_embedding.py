@@ -163,18 +163,19 @@ class EmbeddingProcessor:
 def main():
     project_dir = Path(__file__).resolve().parents[2]
     embedding_processor = EmbeddingProcessor()
-
-    # load data and combine text and process description
-    df_train = pd.read_csv(
-        project_dir / "data/processed/final_labels_with_description_preprocessed.csv"
-    )
-    df_test = pd.read_csv(
-        project_dir / "data/evaluation/gold_standard_preprocessed.csv"
-    )
-    df_train["Combined_Text"] = df_train["Process_description"] + " " + df_train["Text"]
-    df_test["Combined_Text"] = df_test["Process_description"] + " " + df_test["Text"]
-
+    #
+    # # load data and combine text and process description
+    # df_train = pd.read_csv(
+    #     project_dir / "data/processed/training_data_preprocessed.csv"
+    # )
+    # df_test = pd.read_csv(
+    #     project_dir / "data/evaluation/gold_standard_preprocessed.csv"
+    # )
+    # df_train["Combined_Text"] = df_train["Process_description"] + " " + df_train["Text"]
+    # df_test["Combined_Text"] = df_test["Process_description"] + " " + df_test["Text"]
+    #
     # # TF-IDF
+    # print("Computing TF-IDF embeddings...")
     # (
     #     tfidf_train,
     #     tfidf_test,
@@ -200,6 +201,7 @@ def main():
     # )
     #
     # # Word2Vec
+    # print("Computing Word2Vec embeddings...")
     # (
     #     w2v_train,
     #     w2v_test,
@@ -223,7 +225,8 @@ def main():
     #     project_dir / "data/processed/embeddings/w2v_test_tensor.pt",
     # )
     #
-    # # BERT
+    # # # BERT
+    # print("Computing BERT embeddings...")
     # (
     #     bert_train,
     #     bert_test,
@@ -246,8 +249,9 @@ def main():
     #     bert_test_tensor,
     #     project_dir / "data/processed/embeddings/bert_test_tensor.pt",
     # )
-
-    # GPT ADA
+    #
+    # # GPT ADA
+    # print("Computing GPT embeddings...")
     # (
     #     gpt_train,
     #     gpt_test,
@@ -270,8 +274,9 @@ def main():
     #     gpt_test_tensor,
     #     project_dir / "data/processed/embeddings/gpt_test_tensor.pt",
     # )
-
-    # FastText
+    #
+    # # FastText
+    # print("Computing FastText embeddings...")
     # (
     #     ft_train,
     #     ft_test,
@@ -294,30 +299,31 @@ def main():
     #     ft_test_tensor,
     #     project_dir / "data/processed/embeddings/ft_test_tensor.pt",
     # )
-
-    # Glove
-    (
-        glove_train,
-        glove_test,
-        glove_train_tensor,
-        glove_test_tensor,
-    ) = embedding_processor.compute_glove_embedding(
-        df_train["Combined_Text"], df_test["Combined_Text"]
-    )
-    embedding_processor.save_embeddings(
-        glove_train, project_dir / "data/processed/embeddings/glove_train.pkl"
-    )
-    embedding_processor.save_embeddings(
-        glove_test, project_dir / "data/processed/embeddings/glove_test.pkl"
-    )
-    torch.save(
-        glove_train_tensor,
-        project_dir / "data/processed/embeddings/glove_train_tensor.pt",
-    )
-    torch.save(
-        glove_test_tensor,
-        project_dir / "data/processed/embeddings/glove_test_tensor.pt",
-    )
+    #
+    # # Glove
+    # print("Computing GloVe embeddings...")
+    # (
+    #     glove_train,
+    #     glove_test,
+    #     glove_train_tensor,
+    #     glove_test_tensor,
+    # ) = embedding_processor.compute_glove_embedding(
+    #     df_train["Combined_Text"], df_test["Combined_Text"]
+    # )
+    # embedding_processor.save_embeddings(
+    #     glove_train, project_dir / "data/processed/embeddings/glove_train.pkl"
+    # )
+    # embedding_processor.save_embeddings(
+    #     glove_test, project_dir / "data/processed/embeddings/glove_test.pkl"
+    # )
+    # torch.save(
+    #     glove_train_tensor,
+    #     project_dir / "data/processed/embeddings/glove_train_tensor.pt",
+    # )
+    # torch.save(
+    #     glove_test_tensor,
+    #     project_dir / "data/processed/embeddings/glove_test_tensor.pt",
+    # )
 
 
 if __name__ == "__main__":
