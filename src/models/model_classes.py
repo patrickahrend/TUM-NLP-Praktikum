@@ -9,7 +9,7 @@ from model_base import ModelBase
 
 class LogisticRegressionModel(ModelBase):
     def __init__(self):
-        super().__init__("Logistic_Regression", LogisticRegression())
+        super().__init__("Logistic_Regression", LogisticRegression(max_iter=1000))
 
 
 class MultinomialNBModel(ModelBase):
