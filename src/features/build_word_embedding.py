@@ -29,97 +29,183 @@ class EmbeddingProcessor:
         self.tfidf = TfidfVectorizer(
             stop_words="english", ngram_range=(1, 2), max_features=max_features
         )
-        self.word2vec = None
         self.bert_tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         self.bert_model = BertModel.from_pretrained("bert-base-uncased")
         self.bert_model.eval()
         self.openai = OpenAI()
+        self.word2vec = None
         self.fasttext = None
         self.glove2word2vec = None
 
-    def compute_tfidf_embedding(self, train_statements, test_statements):
-        tfidf_train = self.tfidf.fit_transform(train_statements).toarray()
-        tfidf_test = self.tfidf.transform(test_statements).toarray()
-        tfidf_train_tensor = torch.tensor(tfidf_train, dtype=torch.float)
-        tfidf_test_tensor = torch.tensor(tfidf_test, dtype=torch.float)
+    def compute_tfidf_embedding(
+        self, train_proc_desc, train_legal_text, test_proc_desc, test_legal_text
+    ):
+        tfidf_train_proc_desc = self.tfidf.fit_transform(train_proc_desc).toarray()
+        tfidf_train_legal_text = self.tfidf.transform(train_legal_text).toarray()
+        tfidf_test_proc_desc = self.tfidf.transform(test_proc_desc).toarray()
+        tfidf_test_legal_text = self.tfidf.transform(test_legal_text).toarray()
 
-        return tfidf_train, tfidf_test, tfidf_train_tensor, tfidf_test_tensor
+        tfidf_train_proc_desc_tensor = torch.tensor(
+            tfidf_train_proc_desc, dtype=torch.float
+        )
+        tfidf_train_legal_text_tensor = torch.tensor(
+            tfidf_train_legal_text, dtype=torch.float
+        )
+        tfidf_test_proc_desc_tensor = torch.tensor(
+            tfidf_test_proc_desc, dtype=torch.float
+        )
+        tfidf_test_legal_text_tensor = torch.tensor(
+            tfidf_test_legal_text, dtype=torch.float
+        )
 
-    def compute_word2vec_embedding(self, train_statements, test_statements):
-        tokenized_train_statements = [
-            statement.split() for statement in train_statements
+        return (
+            tfidf_train_proc_desc,
+            tfidf_train_legal_text,
+            tfidf_test_proc_desc,
+            tfidf_test_legal_text,
+            tfidf_train_proc_desc_tensor,
+            tfidf_train_legal_text_tensor,
+            tfidf_test_proc_desc_tensor,
+            tfidf_test_legal_text_tensor,
+        )
+
+    def compute_word2vec_embedding(
+        self, train_proc_desc, train_legal_text, test_proc_desc, test_legal_text
+    ):
+        combined_train_statements = train_proc_desc + " " + train_legal_text
+        tokenized_combined_train = [
+            statement.split() for statement in combined_train_statements
         ]
-        tokenized_test = [statement.split() for statement in test_statements]
 
         self.word2vec = Word2Vec(
-            tokenized_train_statements,
+            tokenized_combined_train,
             min_count=1,
             workers=2,
             vector_size=1000,
             window=10,
         )
-        w2v_train = pd.Series(tokenized_train_statements).apply(
-            lambda x: get_sentence_vector_custom(x, self.word2vec)
+
+        def get_embeddings(statements):
+            tokenized_statements = [statement.split() for statement in statements]
+            embeddings = pd.Series(tokenized_statements).apply(
+                lambda x: get_sentence_vector_custom(x, self.word2vec)
+            )
+            return np.array(embeddings.tolist())
+
+        w2v_train_proc_desc = get_embeddings(train_proc_desc)
+        w2v_train_legal_text = get_embeddings(train_legal_text)
+        w2v_test_proc_desc = get_embeddings(test_proc_desc)
+        w2v_test_legal_text = get_embeddings(test_legal_text)
+
+        w2v_train_proc_desc_tensor = torch.tensor(
+            w2v_train_proc_desc, dtype=torch.float
         )
-        w2v_train = np.array(w2v_train.tolist())
-        w2v_train_tensor = torch.tensor(w2v_train, dtype=torch.float)
-
-        w2v_test = pd.Series(tokenized_test).apply(
-            lambda x: get_sentence_vector_custom(x, self.word2vec)
+        w2v_train_legal_text_tensor = torch.tensor(
+            w2v_train_legal_text, dtype=torch.float
         )
-        w2v_test = np.array(w2v_test.tolist())
-        w2v_test_tensor = torch.tensor(w2v_test, dtype=torch.float)
-        return w2v_train, w2v_test, w2v_train_tensor, w2v_test_tensor
-
-    def compute_bert_embedding(self, train_statements, test_statements):
-        bert_train = train_statements.apply(
-            lambda x: get_embeddings_bert(x, self.bert_tokenizer, self.bert_model)
-        )
-        bert_test = test_statements.apply(
-            lambda x: get_embeddings_bert(x, self.bert_tokenizer, self.bert_model)
+        w2v_test_proc_desc_tensor = torch.tensor(w2v_test_proc_desc, dtype=torch.float)
+        w2v_test_legal_text_tensor = torch.tensor(
+            w2v_test_legal_text, dtype=torch.float
         )
 
-        bert_train = np.array(bert_train.tolist())
-        bert_test = np.array(bert_test.tolist())
+        return (
+            w2v_train_proc_desc,
+            w2v_train_legal_text,
+            w2v_test_proc_desc,
+            w2v_test_legal_text,
+            w2v_train_proc_desc_tensor,
+            w2v_train_legal_text_tensor,
+            w2v_test_proc_desc_tensor,
+            w2v_test_legal_text_tensor,
+        )
 
-        bert_train_tensor = torch.tensor(bert_train, dtype=torch.float)
-        bert_test_tensor = torch.tensor(bert_test, dtype=torch.float)
+    def compute_bert_embedding(
+        self, train_proc_desc, train_legal_text, test_proc_desc, test_legal_text
+    ):
+        def get_embeddings(statements):
+            embeddings = statements.apply(
+                lambda x: get_embeddings_bert(x, self.bert_tokenizer, self.bert_model)
+            )
+            return np.array(embeddings.tolist())
 
-        return bert_train, bert_test, bert_train_tensor, bert_test_tensor
+        bert_train_proc_desc = get_embeddings(pd.Series(train_proc_desc))
+        bert_train_legal_text = get_embeddings(pd.Series(train_legal_text))
+        bert_test_proc_desc = get_embeddings(pd.Series(test_proc_desc))
+        bert_test_legal_text = get_embeddings(pd.Series(test_legal_text))
 
-    def compute_fasttext_embedding(self, train_statements, test_statements):
-        tokenized_train_statements = [
-            statement.split() for statement in train_statements
+        bert_train_proc_desc_tensor = torch.tensor(
+            bert_train_proc_desc, dtype=torch.float
+        )
+        bert_train_legal_text_tensor = torch.tensor(
+            bert_train_legal_text, dtype=torch.float
+        )
+        bert_test_proc_desc_tensor = torch.tensor(
+            bert_test_proc_desc, dtype=torch.float
+        )
+        bert_test_legal_text_tensor = torch.tensor(
+            bert_test_legal_text, dtype=torch.float
+        )
+
+        return (
+            bert_train_proc_desc,
+            bert_train_legal_text,
+            bert_test_proc_desc,
+            bert_test_legal_text,
+            bert_train_proc_desc_tensor,
+            bert_train_legal_text_tensor,
+            bert_test_proc_desc_tensor,
+            bert_test_legal_text_tensor,
+        )
+
+    def compute_fasttext_embedding(
+        self, train_proc_desc, train_legal_text, test_proc_desc, test_legal_text
+    ):
+        combined_train_statements = train_proc_desc + train_legal_text
+        tokenized_combined_train = [
+            statement.split() for statement in combined_train_statements
         ]
-        tokenized_test = [statement.split() for statement in test_statements]
 
         self.fasttext = FastText(
-            tokenized_train_statements,
+            tokenized_combined_train,
             vector_size=100,
             window=5,
             min_count=1,
             workers=4,
         )
-        ft_train = pd.Series(tokenized_train_statements).apply(
-            lambda x: self.fasttext.wv.get_sentence_vector(x)
+
+        def get_embeddings(statements):
+            tokenized_statements = [statement.split() for statement in statements]
+            embeddings = pd.Series(tokenized_statements).apply(
+                lambda x: self.fasttext.wv.get_sentence_vector(x)
+            )
+            return np.array(embeddings.tolist())
+
+        ft_train_proc_desc = get_embeddings(train_proc_desc)
+        ft_train_legal_text = get_embeddings(train_legal_text)
+        ft_test_proc_desc = get_embeddings(test_proc_desc)
+        ft_test_legal_text = get_embeddings(test_legal_text)
+
+        ft_train_proc_desc_tensor = torch.tensor(ft_train_proc_desc, dtype=torch.float)
+        ft_train_legal_text_tensor = torch.tensor(
+            ft_train_legal_text, dtype=torch.float
         )
-        ft_test = pd.Series(tokenized_test).apply(
-            lambda x: self.fasttext.wv.get_sentence_vector(x)
+        ft_test_proc_desc_tensor = torch.tensor(ft_test_proc_desc, dtype=torch.float)
+        ft_test_legal_text_tensor = torch.tensor(ft_test_legal_text, dtype=torch.float)
+
+        return (
+            ft_train_proc_desc,
+            ft_train_legal_text,
+            ft_test_proc_desc,
+            ft_test_legal_text,
+            ft_train_proc_desc_tensor,
+            ft_train_legal_text_tensor,
+            ft_test_proc_desc_tensor,
+            ft_test_legal_text_tensor,
         )
-        ft_train = np.array(ft_train.tolist())
-        ft_test = np.array(ft_test.tolist())
 
-        ft_train_tensor = torch.tensor(ft_train, dtype=torch.float)
-        ft_test_tensor = torch.tensor(ft_test, dtype=torch.float)
-
-        return ft_train, ft_test, ft_train_tensor, ft_test_tensor
-
-    def compute_glove_embedding(self, train_statements, test_statements):
-        tokenized_train_statements = [
-            statement.split() for statement in train_statements
-        ]
-        tokenized_test = [statement.split() for statement in test_statements]
-
+    def compute_glove_embedding(
+        self, train_proc_desc, train_legal_text, test_proc_desc, test_legal_text
+    ):
         project_dir = Path(__file__).resolve().parents[2]
         glove_input_file = project_dir / "data/external/glove.6B.300d.txt"
         word2vec_output_file = project_dir / "data/external/glove.6B.300d.word2vec.txt"
@@ -128,32 +214,77 @@ class EmbeddingProcessor:
             str(word2vec_output_file), binary=False
         )
 
-        glove_train = pd.Series(tokenized_train_statements).apply(
-            lambda x: get_sentence_vector_custom(x, self.glove2word2vec, is_glove=True)
+        def get_embeddings(statements):
+            tokenized_statements = [statement.split() for statement in statements]
+            embeddings = pd.Series(tokenized_statements).apply(
+                lambda x: get_sentence_vector_custom(
+                    x, self.glove2word2vec, is_glove=True
+                )
+            )
+            return np.array(embeddings.tolist())
+
+        glove_train_proc_desc = get_embeddings(train_proc_desc)
+        glove_train_legal_text = get_embeddings(train_legal_text)
+        glove_test_proc_desc = get_embeddings(test_proc_desc)
+        glove_test_legal_text = get_embeddings(test_legal_text)
+
+        glove_train_proc_desc_tensor = torch.tensor(
+            glove_train_proc_desc, dtype=torch.float
         )
-        glove_test = pd.Series(tokenized_test).apply(
-            lambda x: get_sentence_vector_custom(x, self.glove2word2vec, is_glove=True)
+        glove_train_legal_text_tensor = torch.tensor(
+            glove_train_legal_text, dtype=torch.float
+        )
+        glove_test_proc_desc_tensor = torch.tensor(
+            glove_test_proc_desc, dtype=torch.float
+        )
+        glove_test_legal_text_tensor = torch.tensor(
+            glove_test_legal_text, dtype=torch.float
         )
 
-        glove_train = np.array(glove_train.tolist())
-        glove_test = np.array(glove_test.tolist())
+        return (
+            glove_train_proc_desc,
+            glove_train_legal_text,
+            glove_test_proc_desc,
+            glove_test_legal_text,
+            glove_train_proc_desc_tensor,
+            glove_train_legal_text_tensor,
+            glove_test_proc_desc_tensor,
+            glove_test_legal_text_tensor,
+        )
 
-        glove_train_tensor = torch.tensor(glove_train, dtype=torch.float)
-        glove_test_tensor = torch.tensor(glove_test, dtype=torch.float)
+    def compute_gpt_embedding(
+        self, train_proc_desc, train_legal_text, test_proc_desc, test_legal_text
+    ):
+        def get_embeddings(statements):
+            embeddings = statements.apply(lambda x: get_embeddings_gpt(x, self.openai))
+            return np.array(embeddings.tolist())
 
-        return glove_train, glove_test, glove_train_tensor, glove_test_tensor
+        gpt_train_proc_desc = get_embeddings(pd.Series(train_proc_desc))
+        gpt_train_legal_text = get_embeddings(pd.Series(train_legal_text))
+        gpt_test_proc_desc = get_embeddings(pd.Series(test_proc_desc))
+        gpt_test_legal_text = get_embeddings(pd.Series(test_legal_text))
 
-    def compute_gpt_embedding(self, train_statements, test_statements):
-        gpt_train = train_statements.apply(lambda x: get_embeddings_gpt(x, self.openai))
-        gpt_test = test_statements.apply(lambda x: get_embeddings_gpt(x, self.openai))
+        gpt_train_proc_desc_tensor = torch.tensor(
+            gpt_train_proc_desc, dtype=torch.float
+        )
+        gpt_train_legal_text_tensor = torch.tensor(
+            gpt_train_legal_text, dtype=torch.float
+        )
+        gpt_test_proc_desc_tensor = torch.tensor(gpt_test_proc_desc, dtype=torch.float)
+        gpt_test_legal_text_tensor = torch.tensor(
+            gpt_test_legal_text, dtype=torch.float
+        )
 
-        gpt_train = np.array(gpt_train.tolist())
-        gpt_test = np.array(gpt_test.tolist())
-
-        gpt_train_tensor = torch.tensor(gpt_train, dtype=torch.float)
-        gpt_test_tensor = torch.tensor(gpt_test, dtype=torch.float)
-
-        return gpt_train, gpt_test, gpt_train_tensor, gpt_test_tensor
+        return (
+            gpt_train_proc_desc,
+            gpt_train_legal_text,
+            gpt_test_proc_desc,
+            gpt_test_legal_text,
+            gpt_train_proc_desc_tensor,
+            gpt_train_legal_text_tensor,
+            gpt_test_proc_desc_tensor,
+            gpt_test_legal_text_tensor,
+        )
 
     def save_embeddings(self, obj, filepath):
         with open(filepath, "wb") as f:
@@ -163,167 +294,323 @@ class EmbeddingProcessor:
 def main():
     project_dir = Path(__file__).resolve().parents[2]
     embedding_processor = EmbeddingProcessor()
-    #
-    # # load data and combine text and process description
-    # df_train = pd.read_csv(
-    #     project_dir / "data/processed/training_data_preprocessed.csv"
-    # )
-    # df_test = pd.read_csv(
-    #     project_dir / "data/evaluation/gold_standard_preprocessed.csv"
-    # )
+
+    # load data and combine text and process description
+    df_train = pd.read_csv(
+        project_dir / "data/processed/training_data_preprocessed.csv"
+    )
+    df_test = pd.read_csv(
+        project_dir / "data/evaluation/gold_standard_preprocessed.csv"
+    )
+
     # df_train["Combined_Text"] = df_train["Process_description"] + " " + df_train["Text"]
     # df_test["Combined_Text"] = df_test["Process_description"] + " " + df_test["Text"]
-    #
-    # # TF-IDF
-    # print("Computing TF-IDF embeddings...")
-    # (
-    #     tfidf_train,
-    #     tfidf_test,
-    #     tfidf_train_tensor,
-    #     tfidf_test_tensor,
-    # ) = embedding_processor.compute_tfidf_embedding(
-    #     df_train["Combined_Text"], df_test["Combined_Text"]
-    # )
-    # embedding_processor.save_embeddings(
-    #     tfidf_train, project_dir / "data/processed/embeddings/tfidf_train.pkl"
-    # )
-    # embedding_processor.save_embeddings(
-    #     tfidf_test, project_dir / "data/processed/embeddings/tfidf_test.pkl"
-    # )
-    #
-    # torch.save(
-    #     tfidf_train_tensor,
-    #     project_dir / "data/processed/embeddings/tfidf_train_tensor.pt",
-    # )
-    # torch.save(
-    #     tfidf_test_tensor,
-    #     project_dir / "data/processed/embeddings/tfidf_test_tensor.pt",
-    # )
-    #
-    # # Word2Vec
-    # print("Computing Word2Vec embeddings...")
-    # (
-    #     w2v_train,
-    #     w2v_test,
-    #     w2v_train_tensor,
-    #     w2v_test_tensor,
-    # ) = embedding_processor.compute_word2vec_embedding(
-    #     df_train["Combined_Text"], df_test["Combined_Text"]
-    # )
-    # embedding_processor.save_embeddings(
-    #     w2v_train, project_dir / "data/processed/embeddings/w2v_train.pkl"
-    # )
-    # embedding_processor.save_embeddings(
-    #     w2v_test, project_dir / "data/processed/embeddings/w2v_test.pkl"
-    # )
-    # torch.save(
-    #     w2v_train_tensor,
-    #     project_dir / "data/processed/embeddings/w2v_train_tensor.pt",
-    # )
-    # torch.save(
-    #     w2v_test_tensor,
-    #     project_dir / "data/processed/embeddings/w2v_test_tensor.pt",
-    # )
-    #
-    # # # BERT
-    # print("Computing BERT embeddings...")
-    # (
-    #     bert_train,
-    #     bert_test,
-    #     bert_train_tensor,
-    #     bert_test_tensor,
-    # ) = embedding_processor.compute_bert_embedding(
-    #     df_train["Combined_Text"], df_test["Combined_Text"]
-    # )
-    # embedding_processor.save_embeddings(
-    #     bert_train, project_dir / "data/processed/embeddings/bert_train.pkl"
-    # )
-    # embedding_processor.save_embeddings(
-    #     bert_test, project_dir / "data/processed/embeddings/bert_test.pkl"
-    # )
-    # torch.save(
-    #     bert_train_tensor,
-    #     project_dir / "data/processed/embeddings/bert_train_tensor.pt",
-    # )
-    # torch.save(
-    #     bert_test_tensor,
-    #     project_dir / "data/processed/embeddings/bert_test_tensor.pt",
-    # )
-    #
-    # # GPT ADA
-    # print("Computing GPT embeddings...")
-    # (
-    #     gpt_train,
-    #     gpt_test,
-    #     gpt_train_tensor,
-    #     gpt_test_tensor,
-    # ) = embedding_processor.compute_gpt_embedding(
-    #     df_train["Combined_Text"], df_test["Combined_Text"]
-    # )
-    # embedding_processor.save_embeddings(
-    #     gpt_train, project_dir / "data/processed/embeddings/gpt_train.pkl"
-    # )
-    # embedding_processor.save_embeddings(
-    #     gpt_test, project_dir / "data/processed/embeddings/gpt_test.pkl"
-    # )
-    # torch.save(
-    #     gpt_train_tensor,
-    #     project_dir / "data/processed/embeddings/gpt_train_tensor.pt",
-    # )
-    # torch.save(
-    #     gpt_test_tensor,
-    #     project_dir / "data/processed/embeddings/gpt_test_tensor.pt",
-    # )
-    #
-    # # FastText
-    # print("Computing FastText embeddings...")
-    # (
-    #     ft_train,
-    #     ft_test,
-    #     ft_train_tensor,
-    #     ft_test_tensor,
-    # ) = embedding_processor.compute_fasttext_embedding(
-    #     df_train["Combined_Text"], df_test["Combined_Text"]
-    # )
-    # embedding_processor.save_embeddings(
-    #     ft_train, project_dir / "data/processed/embeddings/ft_train.pkl"
-    # )
-    # embedding_processor.save_embeddings(
-    #     ft_test, project_dir / "data/processed/embeddings/ft_test.pkl"
-    # )
-    # torch.save(
-    #     ft_train_tensor,
-    #     project_dir / "data/processed/embeddings/ft_train_tensor.pt",
-    # )
-    # torch.save(
-    #     ft_test_tensor,
-    #     project_dir / "data/processed/embeddings/ft_test_tensor.pt",
-    # )
-    #
-    # # Glove
-    # print("Computing GloVe embeddings...")
-    # (
-    #     glove_train,
-    #     glove_test,
-    #     glove_train_tensor,
-    #     glove_test_tensor,
-    # ) = embedding_processor.compute_glove_embedding(
-    #     df_train["Combined_Text"], df_test["Combined_Text"]
-    # )
-    # embedding_processor.save_embeddings(
-    #     glove_train, project_dir / "data/processed/embeddings/glove_train.pkl"
-    # )
-    # embedding_processor.save_embeddings(
-    #     glove_test, project_dir / "data/processed/embeddings/glove_test.pkl"
-    # )
-    # torch.save(
-    #     glove_train_tensor,
-    #     project_dir / "data/processed/embeddings/glove_train_tensor.pt",
-    # )
-    # torch.save(
-    #     glove_test_tensor,
-    #     project_dir / "data/processed/embeddings/glove_test_tensor.pt",
-    # )
+
+    # TF-IDF
+    print("Computing TF-IDF embeddings with separate process description and text ...")
+    (
+        tfidf_train_proc_desc,
+        tfidf_train_legal_text,
+        tfidf_test_proc_desc,
+        tfidf_test_legal_text,
+        tfidf_train_proc_desc_tensor,
+        tfidf_train_legal_text_tensor,
+        tfidf_test_proc_desc_tensor,
+        tfidf_test_legal_text_tensor,
+    ) = embedding_processor.compute_tfidf_embedding(
+        df_train["Process_description"],
+        df_train["Text"],
+        df_test["Process_description"],
+        df_test["Text"],
+    )
+    embedding_processor.save_embeddings(
+        tfidf_train_proc_desc,
+        project_dir / "data/processed/embeddings/tfidf_train_proc_desc.pkl",
+    )
+    embedding_processor.save_embeddings(
+        tfidf_train_legal_text,
+        project_dir / "data/processed/embeddings/tfidf_train_legal_text.pkl",
+    )
+    embedding_processor.save_embeddings(
+        tfidf_test_proc_desc,
+        project_dir / "data/processed/embeddings/tfidf_test_proc_desc.pkl",
+    )
+    embedding_processor.save_embeddings(
+        tfidf_test_legal_text,
+        project_dir / "data/processed/embeddings/tfidf_test_legal_text.pkl",
+    )
+
+    torch.save(
+        tfidf_train_proc_desc_tensor,
+        project_dir / "data/processed/embeddings/tfidf_train_proc_desc_tensor.pt",
+    )
+    torch.save(
+        tfidf_test_proc_desc_tensor,
+        project_dir / "data/processed/embeddings/tfidf_test_proc_desc_tensor.pt",
+    )
+    torch.save(
+        tfidf_test_legal_text_tensor,
+        project_dir / "data/processed/embeddings/tfidf_test_legal_text_tensor.pt",
+    )
+
+    # Word2Vec
+    print(
+        "Computing Word2Vec embeddings with separate process description and text ..."
+    )
+    (
+        w2v_train_proc_desc,
+        w2v_train_legal_text,
+        w2v_test_proc_desc,
+        w2v_test_legal_text,
+        w2v_train_proc_desc_tensor,
+        w2v_train_legal_text_tensor,
+        w2v_test_proc_desc_tensor,
+        w2v_test_legal_text_tensor,
+    ) = embedding_processor.compute_word2vec_embedding(
+        df_train["Process_description"],
+        df_train["Text"],
+        df_test["Process_description"],
+        df_test["Text"],
+    )
+    embedding_processor.save_embeddings(
+        w2v_train_proc_desc,
+        project_dir / "data/processed/embeddings/w2v_train_proc_desc.pkl",
+    )
+    embedding_processor.save_embeddings(
+        w2v_train_legal_text,
+        project_dir / "data/processed/embeddings/w2v_train_legal_text.pkl",
+    )
+    embedding_processor.save_embeddings(
+        w2v_test_proc_desc,
+        project_dir / "data/processed/embeddings/w2v_test_proc_desc.pkl",
+    )
+    embedding_processor.save_embeddings(
+        w2v_test_legal_text,
+        project_dir / "data/processed/embeddings/w2v_test_legal_text.pkl",
+    )
+
+    torch.save(
+        w2v_train_proc_desc_tensor,
+        project_dir / "data/processed/embeddings/w2v_train_proc_desc_tensor.pt",
+    )
+    torch.save(
+        w2v_train_legal_text_tensor,
+        project_dir / "data/processed/embeddings/w2v_train_legal_text_tensor.pt",
+    )
+    torch.save(
+        w2v_test_proc_desc_tensor,
+        project_dir / "data/processed/embeddings/w2v_test_proc_desc_tensor.pt",
+    )
+    torch.save(
+        w2v_test_legal_text_tensor,
+        project_dir / "data/processed/embeddings/w2v_test_legal_text_tensor.pt",
+    )
+
+    # # BERT
+    print("Computing BERT embeddings with separate process description and text ...")
+    (
+        bert_train_proc_desc,
+        bert_train_legal_text,
+        bert_test_proc_desc,
+        bert_test_legal_text,
+        bert_train_proc_desc_tensor,
+        bert_train_legal_text_tensor,
+        bert_test_proc_desc_tensor,
+        bert_test_legal_text_tensor,
+    ) = embedding_processor.compute_bert_embedding(
+        df_train["Process_description"],
+        df_train["Text"],
+        df_test["Process_description"],
+        df_test["Text"],
+    )
+    embedding_processor.save_embeddings(
+        bert_train_proc_desc,
+        project_dir / "data/processed/embeddings/bert_train_proc_desc.pkl",
+    )
+    embedding_processor.save_embeddings(
+        bert_train_legal_text,
+        project_dir / "data/processed/embeddings/bert_train_legal_text.pkl",
+    )
+    embedding_processor.save_embeddings(
+        bert_test_proc_desc,
+        project_dir / "data/processed/embeddings/bert_test_proc_desc.pkl",
+    )
+    embedding_processor.save_embeddings(
+        bert_test_legal_text,
+        project_dir / "data/processed/embeddings/bert_test_legal_text.pkl",
+    )
+
+    torch.save(
+        bert_train_proc_desc_tensor,
+        project_dir / "data/processed/embeddings/bert_train_proc_desc_tensor.pt",
+    )
+    torch.save(
+        bert_train_legal_text_tensor,
+        project_dir / "data/processed/embeddings/bert_train_legal_text_tensor.pt",
+    )
+
+    torch.save(
+        bert_test_proc_desc_tensor,
+        project_dir / "data/processed/embeddings/bert_test_proc_desc_tensor.pt",
+    )
+    torch.save(
+        bert_test_legal_text_tensor,
+        project_dir / "data/processed/embeddings/bert_test_legal_text_tensor.pt",
+    )
+
+    # GPT ADA
+    print("Computing GPT embeddings with separate process description and text ...")
+    (
+        gpt_train_proc_desc,
+        gpt_train_legal_text,
+        gpt_test_proc_desc,
+        gpt_test_legal_text,
+        gpt_train_proc_desc_tensor,
+        gpt_train_legal_text_tensor,
+        gpt_test_proc_desc_tensor,
+        gpt_test_legal_text_tensor,
+    ) = embedding_processor.compute_gpt_embedding(
+        df_train["Process_description"],
+        df_train["Text"],
+        df_test["Process_description"],
+        df_test["Text"],
+    )
+    embedding_processor.save_embeddings(
+        gpt_train_proc_desc,
+        project_dir / "data/processed/embeddings/gpt_train_proc_desc.pkl",
+    )
+    embedding_processor.save_embeddings(
+        gpt_train_legal_text,
+        project_dir / "data/processed/embeddings/gpt_train_legal_text.pkl",
+    )
+    embedding_processor.save_embeddings(
+        gpt_test_proc_desc,
+        project_dir / "data/processed/embeddings/gpt_test_proc_desc.pkl",
+    )
+    embedding_processor.save_embeddings(
+        gpt_test_legal_text,
+        project_dir / "data/processed/embeddings/gpt_test_legal_text.pkl",
+    )
+    torch.save(
+        gpt_train_proc_desc_tensor,
+        project_dir / "data/processed/embeddings/gpt_train_proc_desc_tensor.pt",
+    )
+    torch.save(
+        gpt_train_legal_text_tensor,
+        project_dir / "data/processed/embeddings/gpt_train_legal_text_tensor.pt",
+    )
+    torch.save(
+        gpt_test_proc_desc_tensor,
+        project_dir / "data/processed/embeddings/gpt_test_proc_desc_tensor.pt",
+    )
+    torch.save(
+        gpt_test_legal_text_tensor,
+        project_dir / "data/processed/embeddings/gpt_test_legal_text_tensor.pt",
+    )
+
+    # FastText
+    print(
+        "Computing FastText embeddings with separate process description and text ..."
+    )
+    (
+        ft_train_proc_desc,
+        ft_train_legal_text,
+        ft_test_proc_desc,
+        ft_test_legal_text,
+        ft_train_proc_desc_tensor,
+        ft_train_legal_text_tensor,
+        ft_test_proc_desc_tensor,
+        ft_test_legal_text_tensor,
+    ) = embedding_processor.compute_fasttext_embedding(
+        df_train["Process_description"],
+        df_train["Text"],
+        df_test["Process_description"],
+        df_test["Text"],
+    )
+    embedding_processor.save_embeddings(
+        ft_train_proc_desc,
+        project_dir / "data/processed/embeddings/ft_train_proc_desc.pkl",
+    )
+    embedding_processor.save_embeddings(
+        ft_train_legal_text,
+        project_dir / "data/processed/embeddings/ft_train_legal_text.pkl",
+    )
+    embedding_processor.save_embeddings(
+        ft_test_proc_desc,
+        project_dir / "data/processed/embeddings/ft_test_proc_desc.pkl",
+    )
+    embedding_processor.save_embeddings(
+        ft_test_legal_text,
+        project_dir / "data/processed/embeddings/ft_test_legal_text.pkl",
+    )
+
+    torch.save(
+        ft_train_proc_desc_tensor,
+        project_dir / "data/processed/embeddings/ft_train_proc_desc_tensor.pt",
+    )
+    torch.save(
+        ft_train_legal_text_tensor,
+        project_dir / "data/processed/embeddings/ft_train_legal_text_tensor.pt",
+    )
+    torch.save(
+        ft_test_proc_desc_tensor,
+        project_dir / "data/processed/embeddings/ft_test_proc_desc_tensor.pt",
+    )
+    torch.save(
+        ft_test_legal_text_tensor,
+        project_dir / "data/processed/embeddings/ft_test_legal_text_tensor.pt",
+    )
+
+    # Glove
+    print("Computing GloVe embeddings with separate process description and text ...")
+    (
+        glove_train_proc_desc,
+        glove_train_legal_text,
+        glove_test_proc_desc,
+        glove_test_legal_text,
+        glove_train_proc_desc_tensor,
+        glove_train_legal_text_tensor,
+        glove_test_proc_desc_tensor,
+        glove_test_legal_text_tensor,
+    ) = embedding_processor.compute_glove_embedding(
+        df_train["Process_description"],
+        df_train["Text"],
+        df_test["Process_description"],
+        df_test["Text"],
+    )
+    embedding_processor.save_embeddings(
+        glove_train_proc_desc,
+        project_dir / "data/processed/embeddings/glove_train_proc_desc.pkl",
+    )
+    embedding_processor.save_embeddings(
+        glove_train_legal_text,
+        project_dir / "data/processed/embeddings/glove_train_legal_text.pkl",
+    )
+    embedding_processor.save_embeddings(
+        glove_test_proc_desc,
+        project_dir / "data/processed/embeddings/glove_test_proc_desc.pkl",
+    )
+    embedding_processor.save_embeddings(
+        glove_test_legal_text,
+        project_dir / "data/processed/embeddings/glove_test_legal_text.pkl",
+    )
+
+    torch.save(
+        glove_train_proc_desc_tensor,
+        project_dir / "data/processed/embeddings/glove_train_proc_desc_tensor.pt",
+    )
+    torch.save(
+        glove_train_legal_text_tensor,
+        project_dir / "data/processed/embeddings/glove_train_legal_text_tensor.pt",
+    )
+    torch.save(
+        glove_test_proc_desc_tensor,
+        project_dir / "data/processed/embeddings/glove_test_proc_desc_tensor.pt",
+    )
+    torch.save(
+        glove_test_legal_text_tensor,
+        project_dir / "data/processed/embeddings/glove_test_legal_text_tensor.pt",
+    )
 
 
 if __name__ == "__main__":
