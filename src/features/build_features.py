@@ -1,6 +1,7 @@
 import pickle
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -29,7 +30,11 @@ def compute_word_frequencies(texts, n_most_common=100):
 
 
 def compute_cosine_similarity(embeddings1, embeddings2):
-    return cosine_similarity(embeddings1, embeddings2)
+    similarities = [
+        cosine_similarity([emb1], [emb2])[0][0]
+        for emb1, emb2 in zip(embeddings1, embeddings2)
+    ]
+    return np.array(similarities).reshape(-1, 1)
 
 
 def save_features(features, filepath):
@@ -78,10 +83,22 @@ def main():
         )
 
         df_train, df_test = load_data()
+
         train_proc_desc_freqs = compute_word_frequencies(
             df_train["Process_description"]
         )
         test_proc_desc_freqs = compute_word_frequencies(df_test["Process_description"])
+        train_legal_text_freqs = compute_word_frequencies(df_train["Text"])
+        test_legal_text_freqs = compute_word_frequencies(df_test["Text"])
+
+        save_features(
+            train_legal_text_freqs,
+            project_dir / "data/processed/features/train_legal_text_freqs.pkl",
+        )
+        save_features(
+            test_legal_text_freqs,
+            project_dir / "data/processed/features/test_legal_text_freqs.pkl",
+        )
         save_features(
             train_proc_desc_freqs,
             project_dir / "data/processed/features/train_proc_desc_freqs.pkl",

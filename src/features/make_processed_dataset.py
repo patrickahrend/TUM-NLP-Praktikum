@@ -2,6 +2,7 @@ import pickle
 from pathlib import Path
 
 import numpy as np
+from sklearn.preprocessing import StandardScaler
 
 
 def load_pickle(file_path):
@@ -17,6 +18,12 @@ def save_pickle(obj, file_path):
 def combine_features(embedding, feature_list):
     combined_features = np.hstack([embedding] + feature_list)
     return combined_features
+
+
+def scale_features(features):
+    scaler = StandardScaler()
+    scaled_features = scaler.fit_transform(features)
+    return scaled_features
 
 
 def main():
@@ -45,8 +52,31 @@ def main():
         # Load additional features
         cos_sim_train = load_pickle(features_path / f"cos_sim_{emb_type}_train.pkl")
         cos_sim_test = load_pickle(features_path / f"cos_sim_{emb_type}_test.pkl")
-        freq_train = load_pickle(features_path / f"train_proc_desc_freqs.pkl")
-        freq_test = load_pickle(features_path / f"test_proc_desc_freqs.pkl")
+        freqs_proc_desc_train = load_pickle(
+            features_path / f"train_proc_desc_freqs.pkl"
+        )
+        freqs_proc_desc_test = load_pickle(features_path / f"test_proc_desc_freqs.pkl")
+        freqs_legal_text_train = load_pickle(
+            features_path / f"train_legal_text_freqs.pkl"
+        )
+        freqs_legal_text_test = load_pickle(
+            features_path / f"test_legal_text_freqs.pkl"
+        )
+
+        # Scale additional features
+        cos_sim_train_scaled = scale_features(cos_sim_train.reshape(-1, 1))
+        cos_sim_test_scaled = scale_features(cos_sim_test.reshape(-1, 1))
+        freqs_proc_desc_train_scaled = scale_features(freqs_proc_desc_train)
+        freqs_proc_desc_test_scaled = scale_features(freqs_proc_desc_test)
+        freqs_legal_text_train_scaled = scale_features(freqs_legal_text_train)
+        freqs_legal_text_test_scaled = scale_features(freqs_legal_text_test)
+
+        print("X_train_emb shape:", X_train_emb.shape)
+        print("cos_sim_train_scaled shape:", cos_sim_train_scaled.shape)
+        print("freqs_proc_desc_train_scaled shape:", freqs_proc_desc_train_scaled.shape)
+        print(
+            "freqs_legal_text_train_scaled shape:", freqs_legal_text_train_scaled.shape
+        )
 
         # Dataset 1: Just combined embeddings -> | X_train_emb |
         save_pickle(
@@ -68,10 +98,20 @@ def main():
 
         # Dataset 3: Combined embeddings with additional features -> | X_train_emb | cos_sim_train | freq_train |
         X_train_combined_features = combine_features(
-            X_train_emb, [cos_sim_train, freq_train]
+            X_train_emb,
+            [
+                cos_sim_train_scaled,
+                freqs_proc_desc_train_scaled,
+                freqs_legal_text_train_scaled,
+            ],
         )
         X_test_combined_features = combine_features(
-            X_test_emb, [cos_sim_test, freq_test]
+            X_test_emb,
+            [
+                cos_sim_test_scaled,
+                freqs_proc_desc_test_scaled,
+                freqs_legal_text_test_scaled,
+            ],
         )
         save_pickle(
             X_train_combined_features,
@@ -84,10 +124,22 @@ def main():
 
         # Dataset 4: Separate embeddings with additional features for each -> | X_train_proc | X_train_legal_features | cos_sim_train | freq_train |
         X_train_with_features = np.concatenate(
-            (X_train_separate, cos_sim_train, freq_train), axis=1
+            (
+                X_train_separate,
+                cos_sim_train_scaled,
+                freqs_proc_desc_train_scaled,
+                freqs_legal_text_train_scaled,
+            ),
+            axis=1,
         )
         X_test_with_features = np.concatenate(
-            (X_test_separate, cos_sim_test, freq_test), axis=1
+            (
+                X_test_separate,
+                cos_sim_test_scaled,
+                freqs_proc_desc_test_scaled,
+                freqs_legal_text_test_scaled,
+            ),
+            axis=1,
         )
 
         save_pickle(
