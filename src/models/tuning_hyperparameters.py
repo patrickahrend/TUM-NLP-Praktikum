@@ -72,4 +72,8 @@ def tune_hyperparameters(model, param_grid, X_train, y_train, cv):
     grid_search.fit(X_train, y_train)
     print(f"Best parameters for {type(model).__name__}: {grid_search.best_params_}")
     print(f"Best cross-validation score: {grid_search.best_score_}")
-    return grid_search.best_estimator_
+    return (
+        grid_search.best_estimator_,
+        grid_search.best_params_,
+        grid_search.best_score_,
+    )
