@@ -10,6 +10,7 @@ from sklearn.metrics import (
     precision_score,
 )
 
+# Custom imports
 from model_classes import (
     LogisticRegressionModel,
     RandomForestModel,
@@ -19,7 +20,9 @@ from model_classes import (
     SVCModel,
     SGDClassifierModel,
     BernoulliNBModel,
+    GradientBoostingModel,
 )
+from tuning_hyperparameters import tune_hyperparameters, param_grids
 
 
 class ModelManager:
@@ -33,6 +36,7 @@ class ModelManager:
             SVCModel,
             SGDClassifierModel,
             BernoulliNBModel,
+            GradientBoostingModel,
         ]
 
         self.embeddings = embeddings
@@ -40,6 +44,7 @@ class ModelManager:
         self.models = []
 
     def train_and_save_models(self, save_directory):
+        tuning_results = []
         for embedding_name, (X_train, X_test) in self.embeddings.items():
             y_train, y_test = self.labels
 
@@ -47,10 +52,28 @@ class ModelManager:
                 model = constructor()
                 model_name = model.model_name
                 print(f"Training {model_name} with {embedding_name} embeddings")
-                model.train_model(X_train, y_train)
+
+                # Hyperparameter tuning
+                best_model, best_params, best_score = tune_hyperparameters(
+                    model.model, param_grids[model_name], X_train, y_train, cv=5
+                )
+
+                model.model = best_model
+
                 model_specific_dir = save_directory / embedding_name
                 model_specific_dir.mkdir(exist_ok=True)
-                model.save_model(model_specific_dir)
+                model.save_model(model_specific_dir, tuned=True)
+
+                tuning_results.append(
+                    {
+                        "model": model_name,
+                        "data": embedding_name,
+                        "best_params": best_params,
+                        "best_score": best_score,
+                    }
+                )
+        tuning_results_df = pd.DataFrame(tuning_results)
+        tuning_results_df.to_csv(save_directory / "tuning_results.csv", index=False)
 
     def evaluate_models(self, save_directory):
         columns = [
@@ -143,15 +166,31 @@ def load_labels(labels_path):
     return y_train, y_test
 
 
+def load_pickle(file_path):
+    with open(file_path, "rb") as file:
+        return pickle.load(file)
+
+
 def main():
     project_dir = Path(__file__).resolve().parents[2]
-    embeddings_path = project_dir / "data/processed/embeddings"
+
+    processed_dataset_path = project_dir / "data/processed/datasets"
     labels_path = project_dir / "data/"
 
-    embeddings = load_embeddings(embeddings_path)
-    print(embeddings.keys())
-
+    # Load labels
     y_train, y_test = load_labels(labels_path)
+
+    # Initialize a dictionary to store the datasets
+    embeddings = {}
+
+    # Process each type of embedding for Dataset 2
+    for emb_type in ["gpt", "ft", "w2v", "glove", "bert"]:
+        # Load the dataset for separate process and legal text embeddings
+        X_train = load_pickle(processed_dataset_path / f"{emb_type}_train_separate.pkl")
+        X_test = load_pickle(processed_dataset_path / f"{emb_type}_test_separate.pkl")
+
+        # Add the dataset to the dictionary
+        embeddings[emb_type] = (X_train, X_test)
 
     model_manager = ModelManager(embeddings, (y_train, y_test))
 
@@ -160,7 +199,7 @@ def main():
     model_manager.train_and_save_models(models_directory)
     model_path = project_dir / "models"
     results_df = model_manager.evaluate_models(model_path)
-    timestamp = datetime.now().strftime("%m%d-%H%MM")
+    timestamp = datetime.now().strftime("%m%d-%H%M")
 
     results_filename = f"model_evaluation_results_{timestamp}.csv"
     results_path = project_dir / "references" / results_filename
