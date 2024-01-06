@@ -1,3 +1,4 @@
+import os
 import pickle
 from datetime import datetime
 from pathlib import Path
@@ -202,7 +203,8 @@ def main():
     timestamp = datetime.now().strftime("%m%d-%H%M")
 
     results_filename = f"model_evaluation_results_{timestamp}.csv"
-    results_path = project_dir / "references" / results_filename
+    os.makedirs(project_dir / "references/model results", exist_ok=True)
+    results_path = project_dir / "references/model results" / results_filename
     results_df.to_csv(results_path, index=False)
 
 

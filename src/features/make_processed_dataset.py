@@ -36,7 +36,7 @@ def main():
     test_labels_path = project_dir / "data/evaluation/gold_standard_preprocessed.csv"
 
     # Process each type of embedding
-    for emb_type in ["gpt", "ft", "w2v", "glove", "bert"]:
+    for emb_type in ["gpt", "ft", "w2v", "glove", "bert", "tfidf"]:
         # Load separate embeddings
         X_train_proc = load_pickle(embeddings_path / f"{emb_type}_train_proc_desc.pkl")
         X_train_legal = load_pickle(
