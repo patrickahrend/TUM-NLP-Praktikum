@@ -1,0 +1,6 @@
+embedding_type,orginal_feature_count,n_components,top_feature_indices
+gpt,1536,130,[ 1 23  4  6  0  3  2  5 14  8]
+ft,100,11,[1 0 2 4 9 3 5 8 6 7]
+w2v,1000,8,[0 2 1 7 3 6 4 5 9 8]
+glove,300,61,[12  7  6  8  1  2 26 32  5 33]
+bert,768,103,[88  1  6 11  3  5 45  7 25  9]
