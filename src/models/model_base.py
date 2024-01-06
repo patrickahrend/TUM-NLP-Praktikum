@@ -6,8 +6,11 @@ class ModelBase:
         self.model_name = model_name
         self.model = model_instance
 
-    def save_model(self, directory, tuned=False):
-        filepath = directory / f"{self.model_name}_{tuned}.pkl"
+    def save_model(
+        self,
+        directory,
+    ):
+        filepath = directory / f"{self.model_name}.pkl"
         with open(filepath, "wb") as f:
             pickle.dump(self.model, f)
         print(f"Model saved to {filepath}")
