@@ -7,7 +7,6 @@ param_grids = {
         "solver": ["liblinear"],
         "class_weight": [None, "balanced"],
     },
-    "MultinomialNB": {"alpha": [0.001, 0.01, 0.1, 1]},
     "GaussianNB": {},
     "BernoulliNB": {"alpha": [0.001, 0.01, 0.1, 1]},
     "RandomForestClassifier": {
