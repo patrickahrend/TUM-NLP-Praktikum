@@ -26,9 +26,10 @@ def get_embeddings_bert(statement, tokenizer, model) -> torch.Tensor:
 
     with torch.no_grad():
         output = model(**bert_input)
-    embeddings_vector = output.last_hidden_state.mean(dim=1).squeeze()
 
-    return embeddings_vector
+    ## we are interested in the pooled output, not the hidden states as these are the full sentence embedding
+    pooled_output = output.pooler_output
+    return pooled_output
 
 
 def get_embeddings_gpt(statement, client):
