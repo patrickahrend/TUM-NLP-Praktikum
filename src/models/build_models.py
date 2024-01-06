@@ -1,5 +1,6 @@
 import os
 import pickle
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -23,7 +24,7 @@ from model_classes import (
     BernoulliNBModel,
     GradientBoostingModel,
 )
-from tuning_hyperparameters import tune_hyperparameters, param_grids
+from tune_hyperparameters import param_grids, tune_hyperparameters
 
 
 class ModelManager:
@@ -54,7 +55,7 @@ class ModelManager:
                 model_name = model.model_name
                 print(f"Training {model_name} with {embedding_name} embeddings")
 
-                # Hyperparameter tuning
+                # # Hyperparameter tuning
                 best_model, best_params, best_score = tune_hyperparameters(
                     model.model, param_grids[model_name], X_train, y_train, cv=5
                 )
@@ -63,7 +64,7 @@ class ModelManager:
 
                 model_specific_dir = save_directory / embedding_name
                 model_specific_dir.mkdir(exist_ok=True)
-                model.save_model(model_specific_dir, tuned=True)
+                model.save_model(model_specific_dir)
 
                 tuning_results.append(
                     {
@@ -175,7 +176,7 @@ def load_pickle(file_path):
 def main():
     project_dir = Path(__file__).resolve().parents[2]
 
-    processed_dataset_path = project_dir / "data/processed/datasets"
+    processed_dataset_path = project_dir / "data/processed/datasets/pca"
     labels_path = project_dir / "data/"
 
     # Load labels
@@ -185,10 +186,14 @@ def main():
     embeddings = {}
 
     # Process each type of embedding for Dataset 2
-    for emb_type in ["gpt", "ft", "w2v", "glove", "bert"]:
+    for emb_type in ["gpt", "ft", "w2v", "glove", "bert", "tfidf"]:
         # Load the dataset for separate process and legal text embeddings
-        X_train = load_pickle(processed_dataset_path / f"{emb_type}_train_separate.pkl")
-        X_test = load_pickle(processed_dataset_path / f"{emb_type}_test_separate.pkl")
+        X_train = load_pickle(
+            processed_dataset_path / f"{emb_type}_train_combined_pca.pkl"
+        )
+        X_test = load_pickle(
+            processed_dataset_path / f"{emb_type}_test_combined_pca.pkl"
+        )
 
         # Add the dataset to the dictionary
         embeddings[emb_type] = (X_train, X_test)
@@ -202,7 +207,14 @@ def main():
     results_df = model_manager.evaluate_models(model_path)
     timestamp = datetime.now().strftime("%m%d-%H%M")
 
-    results_filename = f"model_evaluation_results_{timestamp}.csv"
+    if len(sys.argv) > 1:
+        details = "_".join(sys.argv[1:])
+    else:
+        details = input(
+            "Add details of this experiement e.g which dataset, which features: "
+        )
+
+    results_filename = f"model_evaluation_results_{details}_{timestamp}.csv"
     os.makedirs(project_dir / "references/model results", exist_ok=True)
     results_path = project_dir / "references/model results" / results_filename
     results_df.to_csv(results_path, index=False)
