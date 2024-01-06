@@ -111,13 +111,20 @@ def main():
         #     }
         # )
 
-        X_train = load_pickle(processed_dataset_path / f"{emb_type}_train_combined.pkl")
+        X_train = load_pickle(processed_dataset_path / f"{emb_type}_train_separate.pkl")
+
+        X_test = load_pickle(processed_dataset_path / f"{emb_type}_test_separate.pkl")
 
         X_train_pca = ft_processor.fit_transform_pca(X_train)
 
+        X_test_pca = ft_processor.pca.transform(X_test)
+
         # Save the PCA-transformed dataset
-        pca_dataset_filename = f"{emb_type}_train_combined_pca.pkl"
+        pca_dataset_filename = f"{emb_type}_train_separate_pca.pkl"
         save_pickle(X_train_pca, pca_dataset_path / pca_dataset_filename)
+
+        pca_test_filename = f"{emb_type}_test_separate_pca.pkl"
+        save_pickle(X_test_pca, pca_dataset_path / pca_test_filename)
 
     results_df = pd.DataFrame(pca_results)
     os.makedirs(project_dir / "references/feature importance", exist_ok=True)
