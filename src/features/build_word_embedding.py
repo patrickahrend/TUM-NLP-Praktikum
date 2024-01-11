@@ -13,7 +13,7 @@ from openai import OpenAI
 from sklearn.feature_extraction.text import TfidfVectorizer
 from transformers import BertTokenizer, BertModel
 
-from utils_embedding_functions import (
+from .utils_embedding_functions import (
     get_sentence_vector_custom,
     get_embeddings_bert,
     get_embeddings_gpt,
@@ -37,36 +37,13 @@ class EmbeddingProcessor:
         self.fasttext = None
         self.glove2word2vec = None
 
-    def compute_tfidf_embedding(
-        self, train_proc_desc, train_legal_text, test_proc_desc, test_legal_text
-    ):
-        tfidf_train_proc_desc = self.tfidf.fit_transform(train_proc_desc).toarray()
-        tfidf_train_legal_text = self.tfidf.transform(train_legal_text).toarray()
-        tfidf_test_proc_desc = self.tfidf.transform(test_proc_desc).toarray()
-        tfidf_test_legal_text = self.tfidf.transform(test_legal_text).toarray()
-
-        tfidf_train_proc_desc_tensor = torch.tensor(
-            tfidf_train_proc_desc, dtype=torch.float
-        )
-        tfidf_train_legal_text_tensor = torch.tensor(
-            tfidf_train_legal_text, dtype=torch.float
-        )
-        tfidf_test_proc_desc_tensor = torch.tensor(
-            tfidf_test_proc_desc, dtype=torch.float
-        )
-        tfidf_test_legal_text_tensor = torch.tensor(
-            tfidf_test_legal_text, dtype=torch.float
-        )
+    def compute_tfidf_embedding(self, proc_desc, legal_text):
+        tfidf_train_legal_text = self.tfidf.fit_transform(legal_text).toarray()
+        tfidf_train_proc_desc = self.tfidf.transform(proc_desc).toarray()
 
         return (
             tfidf_train_proc_desc,
             tfidf_train_legal_text,
-            tfidf_test_proc_desc,
-            tfidf_test_legal_text,
-            tfidf_train_proc_desc_tensor,
-            tfidf_train_legal_text_tensor,
-            tfidf_test_proc_desc_tensor,
-            tfidf_test_legal_text_tensor,
         )
 
     def compute_word2vec_embedding(
@@ -119,42 +96,19 @@ class EmbeddingProcessor:
             w2v_test_legal_text_tensor,
         )
 
-    def compute_bert_embedding(
-        self, train_proc_desc, train_legal_text, test_proc_desc, test_legal_text
-    ):
+    def compute_bert_embedding(self, proc_desc, legal_text):
         def get_embeddings(statements):
             embeddings = statements.apply(
                 lambda x: get_embeddings_bert(x, self.bert_tokenizer, self.bert_model)
             )
             return np.array(embeddings.tolist())
 
-        bert_train_proc_desc = get_embeddings(pd.Series(train_proc_desc))
-        bert_train_legal_text = get_embeddings(pd.Series(train_legal_text))
-        bert_test_proc_desc = get_embeddings(pd.Series(test_proc_desc))
-        bert_test_legal_text = get_embeddings(pd.Series(test_legal_text))
-
-        bert_train_proc_desc_tensor = torch.tensor(
-            bert_train_proc_desc, dtype=torch.float
-        )
-        bert_train_legal_text_tensor = torch.tensor(
-            bert_train_legal_text, dtype=torch.float
-        )
-        bert_test_proc_desc_tensor = torch.tensor(
-            bert_test_proc_desc, dtype=torch.float
-        )
-        bert_test_legal_text_tensor = torch.tensor(
-            bert_test_legal_text, dtype=torch.float
-        )
+        bert_proc_desc = get_embeddings(pd.Series(proc_desc))
+        bert_legal_text = get_embeddings(pd.Series(legal_text))
 
         return (
-            bert_train_proc_desc,
-            bert_train_legal_text,
-            bert_test_proc_desc,
-            bert_test_legal_text,
-            bert_train_proc_desc_tensor,
-            bert_train_legal_text_tensor,
-            bert_test_proc_desc_tensor,
-            bert_test_legal_text_tensor,
+            bert_proc_desc,
+            bert_legal_text,
         )
 
     def compute_fasttext_embedding(
@@ -253,365 +207,373 @@ class EmbeddingProcessor:
         )
 
     def compute_gpt_embedding(
-        self, train_proc_desc, train_legal_text, test_proc_desc, test_legal_text
+        self,
+        pros_desc,
+        legal_text,
     ):
         def get_embeddings(statements):
             embeddings = statements.apply(lambda x: get_embeddings_gpt(x, self.openai))
             return np.array(embeddings.tolist())
 
-        gpt_train_proc_desc = get_embeddings(pd.Series(train_proc_desc))
-        gpt_train_legal_text = get_embeddings(pd.Series(train_legal_text))
-        gpt_test_proc_desc = get_embeddings(pd.Series(test_proc_desc))
-        gpt_test_legal_text = get_embeddings(pd.Series(test_legal_text))
-
-        gpt_train_proc_desc_tensor = torch.tensor(
-            gpt_train_proc_desc, dtype=torch.float
-        )
-        gpt_train_legal_text_tensor = torch.tensor(
-            gpt_train_legal_text, dtype=torch.float
-        )
-        gpt_test_proc_desc_tensor = torch.tensor(gpt_test_proc_desc, dtype=torch.float)
-        gpt_test_legal_text_tensor = torch.tensor(
-            gpt_test_legal_text, dtype=torch.float
-        )
+        gpt_proc_desc = get_embeddings(pd.Series(pros_desc))
+        gpt_legal_text = get_embeddings(pd.Series(legal_text))
 
         return (
-            gpt_train_proc_desc,
-            gpt_train_legal_text,
-            gpt_test_proc_desc,
-            gpt_test_legal_text,
-            gpt_train_proc_desc_tensor,
-            gpt_train_legal_text_tensor,
-            gpt_test_proc_desc_tensor,
-            gpt_test_legal_text_tensor,
+            gpt_proc_desc,
+            gpt_legal_text,
         )
 
     def save_embeddings(self, obj, filepath):
         with open(filepath, "wb") as f:
             pickle.dump(obj, f)
 
-
-def main():
-    project_dir = Path(__file__).resolve().parents[2]
-    embedding_processor = EmbeddingProcessor()
-
-    # load data and combine text and process description
-    df_train = pd.read_csv(
-        project_dir / "data/processed/training_data_preprocessed.csv"
-    )
-    df_test = pd.read_csv(
-        project_dir / "data/evaluation/gold_standard_preprocessed.csv"
-    )
-
-    # df_train["Combined_Text"] = df_train["Process_description"] + " " + df_train["Text"]
-    # df_test["Combined_Text"] = df_test["Process_description"] + " " + df_test["Text"]
-
-    # TF-IDF
-    print("Computing TF-IDF embeddings with separate process description and text ...")
-    (
-        tfidf_train_proc_desc,
-        tfidf_train_legal_text,
-        tfidf_test_proc_desc,
-        tfidf_test_legal_text,
-        tfidf_train_proc_desc_tensor,
-        tfidf_train_legal_text_tensor,
-        tfidf_test_proc_desc_tensor,
-        tfidf_test_legal_text_tensor,
-    ) = embedding_processor.compute_tfidf_embedding(
-        df_train["Process_description"],
-        df_train["Text"],
-        df_test["Process_description"],
-        df_test["Text"],
-    )
-    embedding_processor.save_embeddings(
-        tfidf_train_proc_desc,
-        project_dir / "data/processed/embeddings/tfidf_train_proc_desc.pkl",
-    )
-    embedding_processor.save_embeddings(
-        tfidf_train_legal_text,
-        project_dir / "data/processed/embeddings/tfidf_train_legal_text.pkl",
-    )
-    embedding_processor.save_embeddings(
-        tfidf_test_proc_desc,
-        project_dir / "data/processed/embeddings/tfidf_test_proc_desc.pkl",
-    )
-    embedding_processor.save_embeddings(
-        tfidf_test_legal_text,
-        project_dir / "data/processed/embeddings/tfidf_test_legal_text.pkl",
-    )
-
-    torch.save(
-        tfidf_train_proc_desc_tensor,
-        project_dir / "data/processed/embeddings/tfidf_train_proc_desc_tensor.pt",
-    )
-    torch.save(
-        tfidf_test_proc_desc_tensor,
-        project_dir / "data/processed/embeddings/tfidf_test_proc_desc_tensor.pt",
-    )
-    torch.save(
-        tfidf_test_legal_text_tensor,
-        project_dir / "data/processed/embeddings/tfidf_test_legal_text_tensor.pt",
-    )
-
-    # Word2Vec
-    print(
-        "Computing Word2Vec embeddings with separate process description and text ..."
-    )
-    (
-        w2v_train_proc_desc,
-        w2v_train_legal_text,
-        w2v_test_proc_desc,
-        w2v_test_legal_text,
-        w2v_train_proc_desc_tensor,
-        w2v_train_legal_text_tensor,
-        w2v_test_proc_desc_tensor,
-        w2v_test_legal_text_tensor,
-    ) = embedding_processor.compute_word2vec_embedding(
-        df_train["Process_description"],
-        df_train["Text"],
-        df_test["Process_description"],
-        df_test["Text"],
-    )
-    embedding_processor.save_embeddings(
-        w2v_train_proc_desc,
-        project_dir / "data/processed/embeddings/w2v_train_proc_desc.pkl",
-    )
-    embedding_processor.save_embeddings(
-        w2v_train_legal_text,
-        project_dir / "data/processed/embeddings/w2v_train_legal_text.pkl",
-    )
-    embedding_processor.save_embeddings(
-        w2v_test_proc_desc,
-        project_dir / "data/processed/embeddings/w2v_test_proc_desc.pkl",
-    )
-    embedding_processor.save_embeddings(
-        w2v_test_legal_text,
-        project_dir / "data/processed/embeddings/w2v_test_legal_text.pkl",
-    )
-
-    torch.save(
-        w2v_train_proc_desc_tensor,
-        project_dir / "data/processed/embeddings/w2v_train_proc_desc_tensor.pt",
-    )
-    torch.save(
-        w2v_train_legal_text_tensor,
-        project_dir / "data/processed/embeddings/w2v_train_legal_text_tensor.pt",
-    )
-    torch.save(
-        w2v_test_proc_desc_tensor,
-        project_dir / "data/processed/embeddings/w2v_test_proc_desc_tensor.pt",
-    )
-    torch.save(
-        w2v_test_legal_text_tensor,
-        project_dir / "data/processed/embeddings/w2v_test_legal_text_tensor.pt",
-    )
-
-    # # BERT
-    print("Computing BERT embeddings with separate process description and text ...")
-    (
-        bert_train_proc_desc,
-        bert_train_legal_text,
-        bert_test_proc_desc,
-        bert_test_legal_text,
-        bert_train_proc_desc_tensor,
-        bert_train_legal_text_tensor,
-        bert_test_proc_desc_tensor,
-        bert_test_legal_text_tensor,
-    ) = embedding_processor.compute_bert_embedding(
-        df_train["Process_description"],
-        df_train["Text"],
-        df_test["Process_description"],
-        df_test["Text"],
-    )
-    embedding_processor.save_embeddings(
-        bert_train_proc_desc,
-        project_dir / "data/processed/embeddings/bert_train_proc_desc.pkl",
-    )
-    embedding_processor.save_embeddings(
-        bert_train_legal_text,
-        project_dir / "data/processed/embeddings/bert_train_legal_text.pkl",
-    )
-    embedding_processor.save_embeddings(
-        bert_test_proc_desc,
-        project_dir / "data/processed/embeddings/bert_test_proc_desc.pkl",
-    )
-    embedding_processor.save_embeddings(
-        bert_test_legal_text,
-        project_dir / "data/processed/embeddings/bert_test_legal_text.pkl",
-    )
-
-    torch.save(
-        bert_train_proc_desc_tensor,
-        project_dir / "data/processed/embeddings/bert_train_proc_desc_tensor.pt",
-    )
-    torch.save(
-        bert_train_legal_text_tensor,
-        project_dir / "data/processed/embeddings/bert_train_legal_text_tensor.pt",
-    )
-
-    torch.save(
-        bert_test_proc_desc_tensor,
-        project_dir / "data/processed/embeddings/bert_test_proc_desc_tensor.pt",
-    )
-    torch.save(
-        bert_test_legal_text_tensor,
-        project_dir / "data/processed/embeddings/bert_test_legal_text_tensor.pt",
-    )
-
-    # GPT ADA
-    print("Computing GPT embeddings with separate process description and text ...")
-    (
-        gpt_train_proc_desc,
-        gpt_train_legal_text,
-        gpt_test_proc_desc,
-        gpt_test_legal_text,
-        gpt_train_proc_desc_tensor,
-        gpt_train_legal_text_tensor,
-        gpt_test_proc_desc_tensor,
-        gpt_test_legal_text_tensor,
-    ) = embedding_processor.compute_gpt_embedding(
-        df_train["Process_description"],
-        df_train["Text"],
-        df_test["Process_description"],
-        df_test["Text"],
-    )
-    embedding_processor.save_embeddings(
-        gpt_train_proc_desc,
-        project_dir / "data/processed/embeddings/gpt_train_proc_desc.pkl",
-    )
-    embedding_processor.save_embeddings(
-        gpt_train_legal_text,
-        project_dir / "data/processed/embeddings/gpt_train_legal_text.pkl",
-    )
-    embedding_processor.save_embeddings(
-        gpt_test_proc_desc,
-        project_dir / "data/processed/embeddings/gpt_test_proc_desc.pkl",
-    )
-    embedding_processor.save_embeddings(
-        gpt_test_legal_text,
-        project_dir / "data/processed/embeddings/gpt_test_legal_text.pkl",
-    )
-    torch.save(
-        gpt_train_proc_desc_tensor,
-        project_dir / "data/processed/embeddings/gpt_train_proc_desc_tensor.pt",
-    )
-    torch.save(
-        gpt_train_legal_text_tensor,
-        project_dir / "data/processed/embeddings/gpt_train_legal_text_tensor.pt",
-    )
-    torch.save(
-        gpt_test_proc_desc_tensor,
-        project_dir / "data/processed/embeddings/gpt_test_proc_desc_tensor.pt",
-    )
-    torch.save(
-        gpt_test_legal_text_tensor,
-        project_dir / "data/processed/embeddings/gpt_test_legal_text_tensor.pt",
-    )
-
-    # FastText
-    print(
-        "Computing FastText embeddings with separate process description and text ..."
-    )
-    (
-        ft_train_proc_desc,
-        ft_train_legal_text,
-        ft_test_proc_desc,
-        ft_test_legal_text,
-        ft_train_proc_desc_tensor,
-        ft_train_legal_text_tensor,
-        ft_test_proc_desc_tensor,
-        ft_test_legal_text_tensor,
-    ) = embedding_processor.compute_fasttext_embedding(
-        df_train["Process_description"],
-        df_train["Text"],
-        df_test["Process_description"],
-        df_test["Text"],
-    )
-    embedding_processor.save_embeddings(
-        ft_train_proc_desc,
-        project_dir / "data/processed/embeddings/ft_train_proc_desc.pkl",
-    )
-    embedding_processor.save_embeddings(
-        ft_train_legal_text,
-        project_dir / "data/processed/embeddings/ft_train_legal_text.pkl",
-    )
-    embedding_processor.save_embeddings(
-        ft_test_proc_desc,
-        project_dir / "data/processed/embeddings/ft_test_proc_desc.pkl",
-    )
-    embedding_processor.save_embeddings(
-        ft_test_legal_text,
-        project_dir / "data/processed/embeddings/ft_test_legal_text.pkl",
-    )
-
-    torch.save(
-        ft_train_proc_desc_tensor,
-        project_dir / "data/processed/embeddings/ft_train_proc_desc_tensor.pt",
-    )
-    torch.save(
-        ft_train_legal_text_tensor,
-        project_dir / "data/processed/embeddings/ft_train_legal_text_tensor.pt",
-    )
-    torch.save(
-        ft_test_proc_desc_tensor,
-        project_dir / "data/processed/embeddings/ft_test_proc_desc_tensor.pt",
-    )
-    torch.save(
-        ft_test_legal_text_tensor,
-        project_dir / "data/processed/embeddings/ft_test_legal_text_tensor.pt",
-    )
-
-    # Glove
-    print("Computing GloVe embeddings with separate process description and text ...")
-    (
-        glove_train_proc_desc,
-        glove_train_legal_text,
-        glove_test_proc_desc,
-        glove_test_legal_text,
-        glove_train_proc_desc_tensor,
-        glove_train_legal_text_tensor,
-        glove_test_proc_desc_tensor,
-        glove_test_legal_text_tensor,
-    ) = embedding_processor.compute_glove_embedding(
-        df_train["Process_description"],
-        df_train["Text"],
-        df_test["Process_description"],
-        df_test["Text"],
-    )
-    embedding_processor.save_embeddings(
-        glove_train_proc_desc,
-        project_dir / "data/processed/embeddings/glove_train_proc_desc.pkl",
-    )
-    embedding_processor.save_embeddings(
-        glove_train_legal_text,
-        project_dir / "data/processed/embeddings/glove_train_legal_text.pkl",
-    )
-    embedding_processor.save_embeddings(
-        glove_test_proc_desc,
-        project_dir / "data/processed/embeddings/glove_test_proc_desc.pkl",
-    )
-    embedding_processor.save_embeddings(
-        glove_test_legal_text,
-        project_dir / "data/processed/embeddings/glove_test_legal_text.pkl",
-    )
-
-    torch.save(
-        glove_train_proc_desc_tensor,
-        project_dir / "data/processed/embeddings/glove_train_proc_desc_tensor.pt",
-    )
-    torch.save(
-        glove_train_legal_text_tensor,
-        project_dir / "data/processed/embeddings/glove_train_legal_text_tensor.pt",
-    )
-    torch.save(
-        glove_test_proc_desc_tensor,
-        project_dir / "data/processed/embeddings/glove_test_proc_desc_tensor.pt",
-    )
-    torch.save(
-        glove_test_legal_text_tensor,
-        project_dir / "data/processed/embeddings/glove_test_legal_text_tensor.pt",
-    )
+    def embed_new_text(self, proc_desc, legal_text, embedding_type):
+        ## edge case weil model auf allem trainiert wird .. einzelen methoden werden dafür noch geschrieben
+        if (
+            embedding_type == "glove"
+            or embedding_type == "fasttext"
+            or embedding_type == "word2vec"
+        ):
+            # Assuming you have a method to convert text to GloVe vectors
+            proc_desc_vector = self.text_to_glove_vector(proc_desc)
+            legal_text_vector = self.text_to_glove_vector(legal_text)
+            combined_vector = np.concatenate((proc_desc_vector, legal_text_vector))
+        # ... handle other embedding types ...
+        else:
+            compute_method = getattr(self, f"compute_{embedding_type}_embedding")
+            # Pass the new text as the train data and disregard the test data
+            embedding_train_proc_desc, embedding_train_legal_text = compute_method(
+                proc_desc, legal_text
+            )
+            return (
+                embedding_train_proc_desc,
+                embedding_train_legal_text,
+            )  # Only return the first element (embedding vectors)
 
 
-if __name__ == "__main__":
-    main()
+#
+#
+# def main():
+#     project_dir = Path(__file__).resolve().parents[2]
+#     embedding_processor = EmbeddingProcessor()
+#
+#     # load data and combine text and process description
+#     df_train = pd.read_csv(
+#         project_dir / "data/processed/training_data_preprocessed.csv"
+#     )
+#     df_test = pd.read_csv(
+#         project_dir / "data/evaluation/gold_standard_preprocessed.csv"
+#     )
+#
+#     # df_train["Combined_Text"] = df_train["Process_description"] + " " + df_train["Text"]
+#     # df_test["Combined_Text"] = df_test["Process_description"] + " " + df_test["Text"]
+#
+#     # TF-IDF
+#     print("Computing TF-IDF embeddings with separate process description and text ...")
+#     (
+#         tfidf_train_proc_desc,
+#         tfidf_train_legal_text,
+#         tfidf_test_proc_desc,
+#         tfidf_test_legal_text,
+#         tfidf_train_proc_desc_tensor,
+#         tfidf_train_legal_text_tensor,
+#         tfidf_test_proc_desc_tensor,
+#         tfidf_test_legal_text_tensor,
+#     ) = embedding_processor.compute_tfidf_embedding(
+#         df_train["Process_description"],
+#         df_train["Text"],
+#         df_test["Process_description"],
+#         df_test["Text"],
+#     )
+#     embedding_processor.save_embeddings(
+#         tfidf_train_proc_desc,
+#         project_dir / "data/processed/embeddings/tfidf_train_proc_desc.pkl",
+#     )
+#     embedding_processor.save_embeddings(
+#         tfidf_train_legal_text,
+#         project_dir / "data/processed/embeddings/tfidf_train_legal_text.pkl",
+#     )
+#     embedding_processor.save_embeddings(
+#         tfidf_test_proc_desc,
+#         project_dir / "data/processed/embeddings/tfidf_test_proc_desc.pkl",
+#     )
+#     embedding_processor.save_embeddings(
+#         tfidf_test_legal_text,
+#         project_dir / "data/processed/embeddings/tfidf_test_legal_text.pkl",
+#     )
+#
+#     torch.save(
+#         tfidf_train_proc_desc_tensor,
+#         project_dir / "data/processed/embeddings/tfidf_train_proc_desc_tensor.pt",
+#     )
+#     torch.save(
+#         tfidf_test_proc_desc_tensor,
+#         project_dir / "data/processed/embeddings/tfidf_test_proc_desc_tensor.pt",
+#     )
+#     torch.save(
+#         tfidf_test_legal_text_tensor,
+#         project_dir / "data/processed/embeddings/tfidf_test_legal_text_tensor.pt",
+#     )
+#
+#     # Word2Vec
+#     print(
+#         "Computing Word2Vec embeddings with separate process description and text ..."
+#     )
+#     (
+#         w2v_train_proc_desc,
+#         w2v_train_legal_text,
+#         w2v_test_proc_desc,
+#         w2v_test_legal_text,
+#         w2v_train_proc_desc_tensor,
+#         w2v_train_legal_text_tensor,
+#         w2v_test_proc_desc_tensor,
+#         w2v_test_legal_text_tensor,
+#     ) = embedding_processor.compute_word2vec_embedding(
+#         df_train["Process_description"],
+#         df_train["Text"],
+#         df_test["Process_description"],
+#         df_test["Text"],
+#     )
+#     embedding_processor.save_embeddings(
+#         w2v_train_proc_desc,
+#         project_dir / "data/processed/embeddings/w2v_train_proc_desc.pkl",
+#     )
+#     embedding_processor.save_embeddings(
+#         w2v_train_legal_text,
+#         project_dir / "data/processed/embeddings/w2v_train_legal_text.pkl",
+#     )
+#     embedding_processor.save_embeddings(
+#         w2v_test_proc_desc,
+#         project_dir / "data/processed/embeddings/w2v_test_proc_desc.pkl",
+#     )
+#     embedding_processor.save_embeddings(
+#         w2v_test_legal_text,
+#         project_dir / "data/processed/embeddings/w2v_test_legal_text.pkl",
+#     )
+#
+#     torch.save(
+#         w2v_train_proc_desc_tensor,
+#         project_dir / "data/processed/embeddings/w2v_train_proc_desc_tensor.pt",
+#     )
+#     torch.save(
+#         w2v_train_legal_text_tensor,
+#         project_dir / "data/processed/embeddings/w2v_train_legal_text_tensor.pt",
+#     )
+#     torch.save(
+#         w2v_test_proc_desc_tensor,
+#         project_dir / "data/processed/embeddings/w2v_test_proc_desc_tensor.pt",
+#     )
+#     torch.save(
+#         w2v_test_legal_text_tensor,
+#         project_dir / "data/processed/embeddings/w2v_test_legal_text_tensor.pt",
+#     )
+#
+#     # # BERT
+#     print("Computing BERT embeddings with separate process description and text ...")
+#     (
+#         bert_train_proc_desc,
+#         bert_train_legal_text,
+#         bert_test_proc_desc,
+#         bert_test_legal_text,
+#         bert_train_proc_desc_tensor,
+#         bert_train_legal_text_tensor,
+#         bert_test_proc_desc_tensor,
+#         bert_test_legal_text_tensor,
+#     ) = embedding_processor.compute_bert_embedding(
+#         df_train["Process_description"],
+#         df_train["Text"],
+#         df_test["Process_description"],
+#         df_test["Text"],
+#     )
+#     embedding_processor.save_embeddings(
+#         bert_train_proc_desc,
+#         project_dir / "data/processed/embeddings/bert_train_proc_desc.pkl",
+#     )
+#     embedding_processor.save_embeddings(
+#         bert_train_legal_text,
+#         project_dir / "data/processed/embeddings/bert_train_legal_text.pkl",
+#     )
+#     embedding_processor.save_embeddings(
+#         bert_test_proc_desc,
+#         project_dir / "data/processed/embeddings/bert_test_proc_desc.pkl",
+#     )
+#     embedding_processor.save_embeddings(
+#         bert_test_legal_text,
+#         project_dir / "data/processed/embeddings/bert_test_legal_text.pkl",
+#     )
+#
+#     torch.save(
+#         bert_train_proc_desc_tensor,
+#         project_dir / "data/processed/embeddings/bert_train_proc_desc_tensor.pt",
+#     )
+#     torch.save(
+#         bert_train_legal_text_tensor,
+#         project_dir / "data/processed/embeddings/bert_train_legal_text_tensor.pt",
+#     )
+#
+#     torch.save(
+#         bert_test_proc_desc_tensor,
+#         project_dir / "data/processed/embeddings/bert_test_proc_desc_tensor.pt",
+#     )
+#     torch.save(
+#         bert_test_legal_text_tensor,
+#         project_dir / "data/processed/embeddings/bert_test_legal_text_tensor.pt",
+#     )
+#
+#     # GPT ADA
+#     print("Computing GPT embeddings with separate process description and text ...")
+#     (
+#         gpt_train_proc_desc,
+#         gpt_train_legal_text,
+#         gpt_test_proc_desc,
+#         gpt_test_legal_text,
+#         gpt_train_proc_desc_tensor,
+#         gpt_train_legal_text_tensor,
+#         gpt_test_proc_desc_tensor,
+#         gpt_test_legal_text_tensor,
+#     ) = embedding_processor.compute_gpt_embedding(
+#         df_train["Process_description"],
+#         df_train["Text"],
+#         df_test["Process_description"],
+#         df_test["Text"],
+#     )
+#     embedding_processor.save_embeddings(
+#         gpt_train_proc_desc,
+#         project_dir / "data/processed/embeddings/gpt_train_proc_desc.pkl",
+#     )
+#     embedding_processor.save_embeddings(
+#         gpt_train_legal_text,
+#         project_dir / "data/processed/embeddings/gpt_train_legal_text.pkl",
+#     )
+#     embedding_processor.save_embeddings(
+#         gpt_test_proc_desc,
+#         project_dir / "data/processed/embeddings/gpt_test_proc_desc.pkl",
+#     )
+#     embedding_processor.save_embeddings(
+#         gpt_test_legal_text,
+#         project_dir / "data/processed/embeddings/gpt_test_legal_text.pkl",
+#     )
+#     torch.save(
+#         gpt_train_proc_desc_tensor,
+#         project_dir / "data/processed/embeddings/gpt_train_proc_desc_tensor.pt",
+#     )
+#     torch.save(
+#         gpt_train_legal_text_tensor,
+#         project_dir / "data/processed/embeddings/gpt_train_legal_text_tensor.pt",
+#     )
+#     torch.save(
+#         gpt_test_proc_desc_tensor,
+#         project_dir / "data/processed/embeddings/gpt_test_proc_desc_tensor.pt",
+#     )
+#     torch.save(
+#         gpt_test_legal_text_tensor,
+#         project_dir / "data/processed/embeddings/gpt_test_legal_text_tensor.pt",
+#     )
+#
+#     # FastText
+#     print(
+#         "Computing FastText embeddings with separate process description and text ..."
+#     )
+#     (
+#         ft_train_proc_desc,
+#         ft_train_legal_text,
+#         ft_test_proc_desc,
+#         ft_test_legal_text,
+#         ft_train_proc_desc_tensor,
+#         ft_train_legal_text_tensor,
+#         ft_test_proc_desc_tensor,
+#         ft_test_legal_text_tensor,
+#     ) = embedding_processor.compute_fasttext_embedding(
+#         df_train["Process_description"],
+#         df_train["Text"],
+#         df_test["Process_description"],
+#         df_test["Text"],
+#     )
+#     embedding_processor.save_embeddings(
+#         ft_train_proc_desc,
+#         project_dir / "data/processed/embeddings/ft_train_proc_desc.pkl",
+#     )
+#     embedding_processor.save_embeddings(
+#         ft_train_legal_text,
+#         project_dir / "data/processed/embeddings/ft_train_legal_text.pkl",
+#     )
+#     embedding_processor.save_embeddings(
+#         ft_test_proc_desc,
+#         project_dir / "data/processed/embeddings/ft_test_proc_desc.pkl",
+#     )
+#     embedding_processor.save_embeddings(
+#         ft_test_legal_text,
+#         project_dir / "data/processed/embeddings/ft_test_legal_text.pkl",
+#     )
+#
+#     torch.save(
+#         ft_train_proc_desc_tensor,
+#         project_dir / "data/processed/embeddings/ft_train_proc_desc_tensor.pt",
+#     )
+#     torch.save(
+#         ft_train_legal_text_tensor,
+#         project_dir / "data/processed/embeddings/ft_train_legal_text_tensor.pt",
+#     )
+#     torch.save(
+#         ft_test_proc_desc_tensor,
+#         project_dir / "data/processed/embeddings/ft_test_proc_desc_tensor.pt",
+#     )
+#     torch.save(
+#         ft_test_legal_text_tensor,
+#         project_dir / "data/processed/embeddings/ft_test_legal_text_tensor.pt",
+#     )
+#
+#     # Glove
+#     print("Computing GloVe embeddings with separate process description and text ...")
+#     (
+#         glove_train_proc_desc,
+#         glove_train_legal_text,
+#         glove_test_proc_desc,
+#         glove_test_legal_text,
+#         glove_train_proc_desc_tensor,
+#         glove_train_legal_text_tensor,
+#         glove_test_proc_desc_tensor,
+#         glove_test_legal_text_tensor,
+#     ) = embedding_processor.compute_glove_embedding(
+#         df_train["Process_description"],
+#         df_train["Text"],
+#         df_test["Process_description"],
+#         df_test["Text"],
+#     )
+#     embedding_processor.save_embeddings(
+#         glove_train_proc_desc,
+#         project_dir / "data/processed/embeddings/glove_train_proc_desc.pkl",
+#     )
+#     embedding_processor.save_embeddings(
+#         glove_train_legal_text,
+#         project_dir / "data/processed/embeddings/glove_train_legal_text.pkl",
+#     )
+#     embedding_processor.save_embeddings(
+#         glove_test_proc_desc,
+#         project_dir / "data/processed/embeddings/glove_test_proc_desc.pkl",
+#     )
+#     embedding_processor.save_embeddings(
+#         glove_test_legal_text,
+#         project_dir / "data/processed/embeddings/glove_test_legal_text.pkl",
+#     )
+#
+#     torch.save(
+#         glove_train_proc_desc_tensor,
+#         project_dir / "data/processed/embeddings/glove_train_proc_desc_tensor.pt",
+#     )
+#     torch.save(
+#         glove_train_legal_text_tensor,
+#         project_dir / "data/processed/embeddings/glove_train_legal_text_tensor.pt",
+#     )
+#     torch.save(
+#         glove_test_proc_desc_tensor,
+#         project_dir / "data/processed/embeddings/glove_test_proc_desc_tensor.pt",
+#     )
+#     torch.save(
+#         glove_test_legal_text_tensor,
+#         project_dir / "data/processed/embeddings/glove_test_legal_text_tensor.pt",
+#     )
+#
+#
+# if __name__ == "__main__":
+#     main()

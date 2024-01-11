@@ -1,4 +1,4 @@
-.PHONY: clean data lint requirements
+.PHONY: clean data lint requirements run-api
 
 #################################################################################
 # GLOBALS                                                                       #
@@ -18,6 +18,11 @@ endif
 #################################################################################
 # COMMANDS                                                                      #
 #################################################################################
+
+
+run-api:
+	@echo "Starting FastAPI application..."
+	cd src && poetry run uvicorn api.api:app --host 0.0.0.0 --port 8000
 
 
 ## Install Python Dependencies
@@ -61,6 +66,7 @@ else
 	@bash -c "source `which virtualenvwrapper.sh`;mkvirtualenv $(PROJECT_NAME) --python=$(PYTHON_INTERPRETER)"
 	@echo ">>> New virtualenv created. Activate with:\nworkon $(PROJECT_NAME)"
 endif
+
 
 ## Test python environment is setup correctly
 test_environment:
