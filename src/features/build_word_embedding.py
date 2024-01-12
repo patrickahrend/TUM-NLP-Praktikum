@@ -2,6 +2,7 @@ import os
 import pickle
 from pathlib import Path
 
+import gensim
 import numpy as np
 import openai
 import pandas as pd
@@ -35,7 +36,7 @@ class EmbeddingProcessor:
         self.openai = OpenAI()
         self.word2vec = None
         self.fasttext = None
-        self.glove2word2vec = None
+        self.glove = None
 
     def compute_tfidf_embedding(self, proc_desc, legal_text):
         tfidf_train_legal_text = self.tfidf.fit_transform(legal_text).toarray()
@@ -96,20 +97,16 @@ class EmbeddingProcessor:
             w2v_test_legal_text_tensor,
         )
 
-    def compute_bert_embedding(self, proc_desc, legal_text):
+    def compute_bert_embedding(self, text):
         def get_embeddings(statements):
             embeddings = statements.apply(
                 lambda x: get_embeddings_bert(x, self.bert_tokenizer, self.bert_model)
             )
             return np.array(embeddings.tolist())
 
-        bert_proc_desc = get_embeddings(pd.Series(proc_desc))
-        bert_legal_text = get_embeddings(pd.Series(legal_text))
+        bert_text = get_embeddings(pd.Series(text))
 
-        return (
-            bert_proc_desc,
-            bert_legal_text,
-        )
+        return bert_text
 
     def compute_fasttext_embedding(
         self, train_proc_desc, train_legal_text, test_proc_desc, test_legal_text
@@ -164,16 +161,14 @@ class EmbeddingProcessor:
         glove_input_file = project_dir / "data/external/glove.6B.300d.txt"
         word2vec_output_file = project_dir / "data/external/glove.6B.300d.word2vec.txt"
         glove2word2vec(str(glove_input_file), str(word2vec_output_file))
-        self.glove2word2vec = KeyedVectors.load_word2vec_format(
+        self.glove = KeyedVectors.load_word2vec_format(
             str(word2vec_output_file), binary=False
         )
 
         def get_embeddings(statements):
             tokenized_statements = [statement.split() for statement in statements]
             embeddings = pd.Series(tokenized_statements).apply(
-                lambda x: get_sentence_vector_custom(
-                    x, self.glove2word2vec, is_glove=True
-                )
+                lambda x: get_sentence_vector_custom(x, self.glove, is_glove=True)
             )
             return np.array(embeddings.tolist())
 
@@ -208,47 +203,126 @@ class EmbeddingProcessor:
 
     def compute_gpt_embedding(
         self,
-        pros_desc,
-        legal_text,
+        text,
     ):
         def get_embeddings(statements):
             embeddings = statements.apply(lambda x: get_embeddings_gpt(x, self.openai))
             return np.array(embeddings.tolist())
 
-        gpt_proc_desc = get_embeddings(pd.Series(pros_desc))
-        gpt_legal_text = get_embeddings(pd.Series(legal_text))
+        gpt_text = get_embeddings(pd.Series(text))
 
-        return (
-            gpt_proc_desc,
-            gpt_legal_text,
-        )
+        return gpt_text
 
     def save_embeddings(self, obj, filepath):
         with open(filepath, "wb") as f:
             pickle.dump(obj, f)
 
-    def embed_new_text(self, proc_desc, legal_text, embedding_type):
-        ## edge case weil model auf allem trainiert wird .. einzelen methoden werden dafür noch geschrieben
-        if (
-            embedding_type == "glove"
-            or embedding_type == "fasttext"
-            or embedding_type == "word2vec"
-        ):
-            # Assuming you have a method to convert text to GloVe vectors
-            proc_desc_vector = self.text_to_glove_vector(proc_desc)
-            legal_text_vector = self.text_to_glove_vector(legal_text)
-            combined_vector = np.concatenate((proc_desc_vector, legal_text_vector))
-        # ... handle other embedding types ...
+    def train_model(self, embedding_type):
+        # Load the data needed for training the model
+        training_data = self.load_training_data()
+
+        # Train the model and save it to the instance for later use
+        if embedding_type == "word2vec":
+            self.word2vec = self.train_word2vec(training_data)
+        elif embedding_type == "glove":
+            self.glove = self.train_glove()
+        elif embedding_type == "fasttext":
+            self.fasttext = self.train_fasttext(training_data)
         else:
-            compute_method = getattr(self, f"compute_{embedding_type}_embedding")
-            # Pass the new text as the train data and disregard the test data
-            embedding_train_proc_desc, embedding_train_legal_text = compute_method(
-                proc_desc, legal_text
+            raise ValueError(f"Unknown model type for training: {embedding_type}")
+
+    def train_word2vec(self, sentences):
+        """
+        Train a Word2Vec model on the given sentences.
+        """
+        self.word2vec = Word2Vec(
+            sentences, vector_size=100, window=5, min_count=1, workers=4
+        )
+        return self.word2vec
+
+    def train_glove(self):
+        """
+        Load the GloVe model from the given path.
+        """
+        project_dir = Path(__file__).resolve().parents[2]
+        glove_input_file = project_dir / "data/external/glove.6B.300d.txt"
+        word2vec_output_file = project_dir / "data/external/glove.6B.300d.word2vec.txt"
+        glove2word2vec(str(glove_input_file), str(word2vec_output_file))
+        self.glove = KeyedVectors.load_word2vec_format(
+            str(word2vec_output_file), binary=False
+        )
+
+        return self.glove
+
+    def train_fasttext(self, sentences):
+        """
+        Train a FastText model on the given sentences.
+        """
+        self.fasttext = FastText(
+            sentences, vector_size=100, window=5, min_count=1, workers=4
+        )
+        return self.fasttext
+
+    def load_training_data(self):
+        # Load the training data needed for models like Word2Vec, GloVe, and FastText
+        project_dir = Path(__file__).resolve().parents[2]
+        training_data_path = (
+            project_dir / "data/processed/training_data_preprocessed.csv"
+        )
+        training_data = pd.read_csv(training_data_path)
+        sentences = training_data["Text"].apply(gensim.utils.simple_preprocess)
+        return sentences
+
+    def fit_tfidf(self, training_data):
+        """
+        Fit the TfidfVectorizer on the training data to learn vocabulary and idf values.
+        """
+        self.tfidf.fit(training_data)
+
+    def transform_tfidf(self, new_text):
+        """
+        Transform new text using the fitted TfidfVectorizer.
+        """
+        return self.tfidf.transform([new_text]).toarray()
+
+    def embed_new_text(self, proc_desc, legal_text, embedding_type, dataset_type):
+        if dataset_type == "separate":
+            proc_desc_vector = self.get_embedding(proc_desc, embedding_type)
+            legal_text_vector = self.get_embedding(legal_text, embedding_type)
+            combined_vector = np.concatenate(
+                (proc_desc_vector, legal_text_vector), axis=1
             )
-            return (
-                embedding_train_proc_desc,
-                embedding_train_legal_text,
-            )  # Only return the first element (embedding vectors)
+        elif dataset_type == "combined":
+            combined_text = proc_desc + " " + legal_text
+            combined_vector = self.get_embedding(combined_text, embedding_type)
+        else:
+            raise ValueError(f"Unknown dataset type: {dataset_type}")
+
+        return combined_vector.reshape(1, -1)
+
+    def get_embedding(self, text, embedding_type):
+        if embedding_type in ["glove", "fasttext", "word2vec"]:
+            # Check if the model is already trained and available
+            # If not, you need to train the model first and then use it
+            if not hasattr(self, f"{embedding_type}_model"):
+                self.train_model(embedding_type)
+
+            glove_true = embedding_type == "glove"
+            embedding_model = getattr(self, f"{embedding_type}")
+            embedding_vector = get_sentence_vector_custom(
+                text.split(), embedding_model, glove_true
+            )
+
+        elif embedding_type == "tfidf":
+            embedding_vector = self.transform_tfidf(text)
+
+        elif embedding_type in ["bert", "gpt"]:
+            embedding_method = getattr(self, f"compute_{embedding_type}_embedding")
+            embedding_vector = embedding_method(text)
+        else:
+            raise ValueError(f"Unknown embedding type: {embedding_type}")
+
+        return embedding_vector
 
 
 #

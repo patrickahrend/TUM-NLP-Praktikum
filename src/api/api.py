@@ -3,11 +3,8 @@ import logging
 import pickle
 from pathlib import Path
 
-import numpy as np
-
 # Server import
 import uvicorn
-
 # API imports
 from fastapi import FastAPI, HTTPException
 from features.build_word_embedding import EmbeddingProcessor
@@ -24,6 +21,9 @@ class ClassificationRequest(BaseModel):
     process_description: str
     model_name: str
     embedding_name: str
+    dataset_type: str
+    is_tuned: bool
+    is_pca: bool
 
 
 class ModelAPI:
@@ -31,8 +31,24 @@ class ModelAPI:
         self.model_path = model_path
         self.embedding_processor = EmbeddingProcessor()
 
-    def load_model(self, model_name, embedding_name):
-        model_file = self.model_path / embedding_name / f"{model_name}.pkl"
+    def load_model(
+        self,
+        model_name,
+        embedding_name,
+        is_tuned,
+        is_pca,
+        dataset_type,
+    ):
+        dataset_dir = "pca" if is_pca else "normal"
+        tuned_dir = "tuned" if is_tuned else "no_tuning"
+        model_file = (
+            self.model_path
+            / dataset_dir
+            / dataset_type
+            / tuned_dir
+            / embedding_name
+            / f"{model_name}.pkl"
+        )
         if model_file.exists():
             with model_file.open("rb") as file:
                 model = pickle.load(file)
@@ -42,25 +58,32 @@ class ModelAPI:
             logger.error(f"Model file {model_name}.pkl not found.")
             raise FileNotFoundError(f"Model file {model_name}.pkl not found.")
 
-    def classify(self, model, process_description, text_passage, embedding_type):
-        embedding_processor = EmbeddingProcessor()
+    def classify(
+        self,
+        model,
+        process_description,
+        text_passage,
+        embedding_type,
+        dataset_type,
+    ):
+        legal_passages = text_passage.split("\n\n")
+        classification_results = []
+        for passage in legal_passages:
+            if dataset_type == "separate":
+                combined_embedding_vector = self.embedding_processor.embed_new_text(
+                    process_description, passage, embedding_type, dataset_type
+                )
+            else:  # combined
+                combined_text = process_description + " " + passage
+                combined_embedding_vector = self.embedding_processor.embed_new_text(
+                    combined_text, "", embedding_type, dataset_type
+                )
 
-        embeddings = embedding_processor.embed_new_text(
-            process_description, text_passage, embedding_type
-        )
-        embedding_vector_1 = np.squeeze(embeddings[0])
-        embedding_vector_2 = np.squeeze(embeddings[1])
-        logger.info("Embeddings created", embeddings)
-        logger.info(embeddings[0].shape)
-        logger.info(embeddings[1].shape)
-        logger.info(len(embeddings))
-        combined_embedding_vector = np.concatenate(
-            (embedding_vector_1, embedding_vector_2)
-        ).reshape(1, -1)
+            prediction = model.predict(combined_embedding_vector)
+            ## conversion to int is necessary for the frontend
+            classification_results.append(int(prediction[0]))
 
-        result = model.predict(combined_embedding_vector)
-
-        return result
+        return classification_results
 
 
 # Instantiate the FastAPI app
@@ -69,23 +92,34 @@ app = FastAPI()
 project_dir = Path(__file__).resolve().parents[2]
 model_path = project_dir / "models"
 model_api = ModelAPI(model_path)
+model_api.embedding_processor = EmbeddingProcessor()
 
 
 @app.post("/classify/")
 async def classify(request: ClassificationRequest):
     logger.info(f"Received request: {request}")
     try:
-        model = model_api.load_model(request.model_name, request.embedding_name)
-        print(model.__repr__() + " loaded")
-        result = model_api.classify(
+        model = model_api.load_model(
+            request.model_name,
+            request.embedding_name,
+            request.is_tuned,
+            request.is_pca,
+            request.dataset_type,
+        )
+        logger.info(model.__repr__() + " loaded")
+        classification_results = model_api.classify(
             model,
             request.process_description,
             request.text_passage,
             request.embedding_name,
+            request.dataset_type,
         )
 
-        print(result + " classified")
-        return {"classification": result}
+        logger.info("Classification completed.")
+        classification_results = [int(result) for result in classification_results]
+
+        return {"classification": classification_results}
+
     except Exception as e:
         logger.exception("Error during classification")
         raise HTTPException(status_code=500, detail=str(e))

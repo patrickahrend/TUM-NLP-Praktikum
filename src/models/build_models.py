@@ -196,7 +196,6 @@ def main():
     use_pca_variant = False  # or True
     dataset_dir = "pca" if use_pca_variant else "normal"
     tuned_dir = "tuned" if is_tuned else "no_tuning"
-    experiment_name = f"experiment_2_{dataset_variant}_{use_pca_variant}_{is_tuned}"
 
     labels_path = project_dir / "data/"
 
@@ -220,14 +219,7 @@ def main():
 
     model_manager = ModelManager(embeddings, (y_train, y_test))
 
-    models_path = (
-        project_dir
-        / "models"
-        / experiment_name
-        / dataset_dir
-        / dataset_variant
-        / tuned_dir
-    )
+    models_path = project_dir / "models" / dataset_dir / dataset_variant / tuned_dir
 
     model_manager.train_and_save_models(
         models_path,
