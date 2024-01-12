@@ -45,9 +45,18 @@ class ModelManager:
         self.labels = labels
         self.models = []
 
-    def train_and_save_models(self, save_directory):
+    def train_and_save_models(
+        self,
+        save_directory,
+        tune,
+    ):
+        save_directory.mkdir(parents=True, exist_ok=True)
+
         tuning_results = []
         for embedding_name, (X_train, X_test) in self.embeddings.items():
+            embedding_save_dir = save_directory / embedding_name
+            embedding_save_dir.mkdir(exist_ok=True)
+
             y_train, y_test = self.labels
 
             for constructor in self.model_constructor:
@@ -56,26 +65,32 @@ class ModelManager:
                 print(f"Training {model_name} with {embedding_name} embeddings")
 
                 # # Hyperparameter tuning
-                best_model, best_params, best_score = tune_hyperparameters(
-                    model.model, param_grids[model_name], X_train, y_train, cv=5
-                )
+                if tune:
+                    best_model, best_params, best_score = tune_hyperparameters(
+                        model.model, param_grids[model_name], X_train, y_train, cv=5
+                    )
 
-                model.model = best_model
+                    model.model = best_model
 
-                model_specific_dir = save_directory / embedding_name
-                model_specific_dir.mkdir(exist_ok=True)
-                model.save_model(model_specific_dir)
+                    tuning_results.append(
+                        {
+                            "model": model_name,
+                            "data": embedding_name,
+                            "best_params": best_params,
+                            "best_score": best_score,
+                        }
+                    )
+                else:
+                    model.model.fit(X_train, y_train)
 
-                tuning_results.append(
-                    {
-                        "model": model_name,
-                        "data": embedding_name,
-                        "best_params": best_params,
-                        "best_score": best_score,
-                    }
-                )
-        tuning_results_df = pd.DataFrame(tuning_results)
-        tuning_results_df.to_csv(save_directory / "tuning_results.csv", index=False)
+                model.save_model(embedding_save_dir)
+
+        if tune:
+            tuning_results_df = pd.DataFrame(tuning_results)
+            tuning_results_df.to_csv(
+                save_directory / f"tuning_results.csv",
+                index=False,
+            )
 
     def evaluate_models(self, save_directory):
         columns = [
@@ -176,7 +191,13 @@ def load_pickle(file_path):
 def main():
     project_dir = Path(__file__).resolve().parents[2]
 
-    processed_dataset_path = project_dir / "data/processed/datasets/pca"
+    is_tuned = False
+    dataset_variant = "separate"  # or "combined"
+    use_pca_variant = False  # or True
+    dataset_dir = "pca" if use_pca_variant else "normal"
+    tuned_dir = "tuned" if is_tuned else "no_tuning"
+    experiment_name = f"experiment_2_{dataset_variant}_{use_pca_variant}_{is_tuned}"
+
     labels_path = project_dir / "data/"
 
     # Load labels
@@ -185,26 +206,35 @@ def main():
     # Initialize a dictionary to store the datasets
     embeddings = {}
 
+    embedding_path = (
+        project_dir / f"data/processed/datasets/{dataset_dir}/{dataset_variant}"
+    )
     # Process each type of embedding for Dataset 2
     for emb_type in ["gpt", "ft", "w2v", "glove", "bert", "tfidf"]:
         # Load the dataset for separate process and legal text embeddings
-        X_train = load_pickle(
-            processed_dataset_path / f"{emb_type}_train_combined_pca.pkl"
-        )
-        X_test = load_pickle(
-            processed_dataset_path / f"{emb_type}_test_combined_pca.pkl"
-        )
+        X_train = load_pickle(embedding_path / f"{emb_type}_train.pkl")
+        X_test = load_pickle(embedding_path / f"{emb_type}_test.pkl")
 
         # Add the dataset to the dictionary
         embeddings[emb_type] = (X_train, X_test)
 
     model_manager = ModelManager(embeddings, (y_train, y_test))
 
-    models_directory = project_dir / "models"
+    models_path = (
+        project_dir
+        / "models"
+        / experiment_name
+        / dataset_dir
+        / dataset_variant
+        / tuned_dir
+    )
 
-    model_manager.train_and_save_models(models_directory)
-    model_path = project_dir / "models"
-    results_df = model_manager.evaluate_models(model_path)
+    model_manager.train_and_save_models(
+        models_path,
+        is_tuned,
+    )
+
+    results_df = model_manager.evaluate_models(models_path)
     timestamp = datetime.now().strftime("%m%d-%H%M")
 
     if len(sys.argv) > 1:

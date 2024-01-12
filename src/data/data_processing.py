@@ -127,8 +127,6 @@ def main():
     # create_gpt_fine_tuning_data()
     # create_gpt3_5_fine_tuning_data()
 
-    create_gold_standard_data()
-
 
 if __name__ == "__main__":
     main()

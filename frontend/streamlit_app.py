@@ -14,7 +14,9 @@ class UserInterface:
         self.model_options = None
         self.selected_embedding = None
         self.process_description = None
-        self.result_path = "results.csv"
+        self.result_path = None
+        self.test_data = None
+        self.processes = None
 
     def initialize_app(self):
         st.set_page_config(
@@ -52,19 +54,26 @@ class UserInterface:
                 "Select an embedding", embedding_options
             )
 
-            self.text_input = st.text_area("Enter the text passage here:")
+            test_set = st.toggle("Use Test Set", value=False)
 
-            self.process_description = st.text_area(
-                "Enter the process description here:"
-            )
+            if test_set:
+                self.load_test_data()
+                self.display_all_test_data_points()
 
-            if st.button("Classify"):
-                self.classify_text(
-                    self.text_input,
-                    self.process_description,
-                    self.selected_model,
-                    self.selected_embedding,
+            else:
+                self.text_input = st.text_area("Enter the text passage here:")
+
+                self.process_description = st.text_area(
+                    "Enter the process description here:"
                 )
+
+            # if st.button("Classify"):
+            #     self.classify_text(
+            #         self.text_input,
+            #         self.process_description,
+            #         self.selected_model,
+            #         self.selected_embedding,
+            #     )
 
         with tab2:
             ### here show hyperparamter tuning results
@@ -74,6 +83,37 @@ class UserInterface:
         ## here show model evaluation results
         with tab3:
             self.display_results()
+
+    def load_test_data(self):
+        base_path = Path(__file__).resolve().parents[1]
+        test_data_path = base_path / "data/evaluation/gold_standard.csv"
+        self.test_data = pd.read_csv(test_data_path)
+        self.processes = self.test_data["Process"].unique().tolist()
+
+    def display_all_test_data_points(self):
+        selected_process = st.selectbox("Select a Process", self.processes)
+        filtered_data = self.test_data[self.test_data["Process"] == selected_process]
+
+        if not filtered_data.empty:
+            process_description = filtered_data["Process_description"].iloc[0]
+            st.text_area(
+                "Process Description",
+                value=process_description,
+                height=300,
+                disabled=True,
+            )
+
+            # Concatenate all the texts related to the process into one document
+            concatenated_texts = "\n\n".join(filtered_data["Text"])
+            correct_labels = filtered_data["Label"].tolist()
+            st.text_area(
+                "All Texts", value=concatenated_texts, height=600, disabled=True
+            )
+
+            if st.button("Classify"):
+                self.display_classification_result(concatenated_texts, correct_labels)
+        else:
+            st.write("No data available for the selected process.")
 
     def display_results(self):
         # Use Path for more robust path handling
@@ -137,14 +177,27 @@ class UserInterface:
         # Send request to FastAPI server
         response = requests.post(f"{self.api_url}/classify/", json=request_data)
         if response.status_code == 200:
-            st.write(
-                f'The classification result is: {response.json()["classification"]}'
-            )
+            return response.json()["classification"]
         else:
             st.error("Error in classification")
+            return None
 
-    def display_result(self):
-        pass
+    def display_classification_result(self, concatenated_texts, correct_labels):
+        classification_result = self.classify_text(
+            concatenated_texts,
+            self.process_description,
+            self.selected_model,
+            self.selected_embedding,
+        )
+
+        if classification_result:
+            correct = classification_result == correct_labels
+            color = "green" if correct else "red"
+            # red if incorrect, green if correct
+            st.markdown(
+                f'<span style="color:{color};text-decoration:underline;">{concatenated_texts}</span>',
+                unsafe_allow_html=True,
+            )
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ from src.models.model_classes import BERTForClassification, RnnTextClassifier
 bert_tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
 
-def bert_tokenize_and_embed(process_descriptions, legal_texts):
+def bert_tokenize_and_embed(bert_model, process_descriptions, legal_texts):
     embeddings = []
     for description, text in zip(process_descriptions, legal_texts):
         encoded_input = bert_tokenizer.encode_plus(
@@ -76,20 +76,20 @@ def main():
     )
 
     ## BERT Classification
+
+    model = BERTForClassification(num_classes=2)
     train_embeddings = bert_tokenize_and_embed(
-        trainings_data["Process_description"], trainings_data["Text"]
+        model, trainings_data["Process_description"], trainings_data["Text"]
     )
     train_dataset = ProcessLegalTextDataset(train_embeddings, trainings_data["Label"])
 
     test_embeddings = bert_tokenize_and_embed(
-        test_data["Process_description"], test_data["Text"]
+        model, test_data["Process_description"], test_data["Text"]
     )
     test_dataset = ProcessLegalTextDataset(test_embeddings, test_data["Label"])
 
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
-
-    model = BERTForClassification(num_classes=2)
 
     optimizer = AdamW(model.parameters(), lr=1e-5)
     loss_function = CrossEntropyLoss()
@@ -110,7 +110,7 @@ def main():
     test_accuracy = evaluate_model(model, test_loader)
     print(f"Test Accuracy: {test_accuracy}")
 
-    ## RNN
+    ## RNN Classification
     embedding_path = project_dir / "data/processed/embeddings"
     embeddings = load_embeddings(embedding_path)
     dataset = ProcessLegalTextDataset(embeddings, trainings_data["Label"])

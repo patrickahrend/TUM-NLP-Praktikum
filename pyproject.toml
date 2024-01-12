@@ -23,8 +23,10 @@ transformers = "^4.36.2"
 openai = "^1.6.1"
 lightgbm = "^4.2.0"
 lazypredict = "^0.2.12"
-
-
+fastapi = "^0.108.0"
+requests = "^2.31.0"
+uvicorn = "^0.25.0"
+streamlit = "^1.29.0"
 
 [build-system]
 requires = ["poetry-core"]
