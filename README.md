@@ -49,6 +49,12 @@ Submission of Patrick Ahrend. I am working on Case A with an ML Approach.
 
 ## How to run the project
 
+To run the frontend of the project, you need to run the following commands in the terminal:
+
+```bash
+poetry run streamlit run frontend/streamlit_app.py
+```
+
 ---
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. </small></p>
