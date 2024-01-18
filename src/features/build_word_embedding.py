@@ -219,17 +219,17 @@ class EmbeddingProcessor:
 
     def train_model(self, embedding_type):
         # Load the data needed for training the model
-        training_data = self.load_training_data()
+        tokenized_sentences, raw_sentences = self.load_training_data()
 
         # Train the model and save it to the instance for later use
         if embedding_type == "word2vec":
-            self.word2vec = self.train_word2vec(training_data)
+            self.word2vec = self.train_word2vec(tokenized_sentences)
         elif embedding_type == "glove":
             self.glove = self.train_glove()
         elif embedding_type == "fasttext":
-            self.fasttext = self.train_fasttext(training_data)
+            self.fasttext = self.train_fasttext(tokenized_sentences)
         elif embedding_type == "tfidf":
-            self.tfidf.fit_transform(training_data).toarray()
+            self.tfidf.fit_transform(raw_sentences).toarray()
         else:
             raise ValueError(f"Unknown model type for training: {embedding_type}")
 
@@ -272,8 +272,18 @@ class EmbeddingProcessor:
             project_dir / "data/processed/training_data_preprocessed.csv"
         )
         training_data = pd.read_csv(training_data_path)
-        sentences = training_data["Text"].apply(gensim.utils.simple_preprocess)
-        return sentences
+
+        # Tokinzed Sentences for Word2Vec and FastText
+        tokenized_sentences = training_data["Text"].apply(
+            gensim.utils.simple_preprocess
+        )
+
+        # Raw sentences for TF-IDF
+        raw_sentences = training_data["Text"].apply(
+            lambda x: " ".join(gensim.utils.simple_preprocess(x))
+        )
+
+        return tokenized_sentences, raw_sentences
 
     def transform_tfidf(self, new_text):
         """
