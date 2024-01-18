@@ -7,14 +7,14 @@ def get_sentence_vector_custom(statement, model, is_glove=False) -> np.ndarray:
         # For GloVe, the model doesn't have a `wv` property
         words = [word for word in statement if word in model.key_to_index]
         if len(words) >= 1:
-            return np.mean(model[words], axis=0)
+            return np.mean(model[words], axis=0).reshape(1, -1)
         else:
             return np.zeros(model.vector_size)
     else:
         # For Word2Vec
         words = [word for word in statement if word in model.wv.key_to_index]
         if len(words) >= 1:
-            return np.mean(model.wv[words], axis=0)
+            return np.mean(model.wv[words], axis=0).reshape(1, -1)
         else:
             return np.zeros(model.vector_size)
 

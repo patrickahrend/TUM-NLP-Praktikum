@@ -228,6 +228,8 @@ class EmbeddingProcessor:
             self.glove = self.train_glove()
         elif embedding_type == "fasttext":
             self.fasttext = self.train_fasttext(training_data)
+        elif embedding_type == "tfidf":
+            self.tfidf.fit_transform(training_data).toarray()
         else:
             raise ValueError(f"Unknown model type for training: {embedding_type}")
 
@@ -273,12 +275,6 @@ class EmbeddingProcessor:
         sentences = training_data["Text"].apply(gensim.utils.simple_preprocess)
         return sentences
 
-    def fit_tfidf(self, training_data):
-        """
-        Fit the TfidfVectorizer on the training data to learn vocabulary and idf values.
-        """
-        self.tfidf.fit(training_data)
-
     def transform_tfidf(self, new_text):
         """
         Transform new text using the fitted TfidfVectorizer.
@@ -314,7 +310,8 @@ class EmbeddingProcessor:
             )
 
         elif embedding_type == "tfidf":
-            embedding_vector = self.transform_tfidf(text)
+            self.train_model(embedding_type)
+            embedding_vector = self.tfidf.transform([text]).toarray()
 
         elif embedding_type in ["bert", "gpt"]:
             embedding_method = getattr(self, f"compute_{embedding_type}_embedding")

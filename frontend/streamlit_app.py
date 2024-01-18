@@ -145,6 +145,7 @@ class UserInterface:
                             resize: none;
                             box-shadow: inset 0 1px 2px rgba(0,0,0,.075);
                             margin-bottom: 10px;
+                            overflow: auto;
                         }}
                         .text_area:focus {{
                             border-color: #80bdff;
@@ -152,14 +153,13 @@ class UserInterface:
                             box-shadow: inset 0 1px 2px rgba(0,0,0,.075), 0 0 5px rgba(128,189,255,.5);
                         }}
                         </style>
-                        <textarea readonly class="text_area" style="width: 100%; min-height: 100px;">{original_text}</textarea>
+                        <textarea readonly class="text_area" style="width: 100%; min-height: 100px; overflow: auto;">{original_text}</textarea>
                         <div style="color: {color}; font-size: 0.9em; margin-top: 5px;">
                             <strong>Model predicted:</strong> {predicted_label}, <strong>Ground truth:</strong> {correct_label}
                         </div>
                         """,
                         unsafe_allow_html=True,
                     )
-
         else:
             st.write("No data available for the selected process.")
 

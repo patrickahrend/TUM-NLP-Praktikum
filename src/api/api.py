@@ -5,6 +5,7 @@ from pathlib import Path
 
 # Server import
 import uvicorn
+
 # API imports
 from fastapi import FastAPI, HTTPException
 from features.build_word_embedding import EmbeddingProcessor
@@ -41,12 +42,20 @@ class ModelAPI:
     ):
         dataset_dir = "pca" if is_pca else "normal"
         tuned_dir = "tuned" if is_tuned else "no_tuning"
+        embedding_mapping = {
+            "word2vec": "w2v",
+            "glove": "glove",
+            "bert": "bert",
+            "gpt": "gpt",
+            "fasttext": "ft",
+            "tfidf": "tfidf",
+        }
         model_file = (
             self.model_path
             / dataset_dir
             / dataset_type
             / tuned_dir
-            / embedding_name
+            / embedding_mapping[embedding_name]
             / f"{model_name}.pkl"
         )
         if model_file.exists():
