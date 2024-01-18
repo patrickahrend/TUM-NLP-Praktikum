@@ -14,7 +14,10 @@ Submission of Patrick Ahrend. I am working on Case A with an ML Approach.
     │   ├── processed      <- The final data sets for modeling.
     │   └── raw            <- The original, immutable data from the other repository which I decided to use.
     │
-    │
+    ├── deliverables
+    │   ├── presentation     <- Intermediate and Final presentation of the project.
+    │   ├── report
+    │   │   └── graphics     <- Graphics used in the report.
     ├── models             <- Trained and serialized models, model predictions, or model summaries
     │
     ├── notebooks          <- Jupyter notebooks. Contains for instance the fine-tuning of GPT for labeling notebooks.
