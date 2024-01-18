@@ -1,4 +1,4 @@
-# tum-NLP-Praktikum
+# TUM-NLP-Praktikum
 
 NLP Project for text classification based on relevance for several processes.
 Submission of Patrick Ahrend. I am working on Case A with an ML Approach.
@@ -47,6 +47,8 @@ Submission of Patrick Ahrend. I am working on Case A with an ML Approach.
     │       └── visualize.py
     └
 
+## How to run the project
+
 ---
 
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. </small></p>
