@@ -1,24 +1,27 @@
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import pandas as pd
+import plotly.express as px
 import umap
 import umap.plot
 
 from utils import load_pickle
 
 
-def create_umap(embeddings, labels):
-    embedding_umap = umap.UMAP(metric="euclidean").fit(embeddings)
+def create_umap(embeddings, labels, emb_type, file_path):
+    embedding_umap = umap.UMAP(metric="euclidean").fit_transform(embeddings)
 
-    fig, ax = plt.subplots()  # Create a Figure and Axes
-    umap.plot.points(embedding_umap, labels=labels, ax=ax)
-    return fig
+    fig = px.scatter(
+        x=embedding_umap[:, 0],
+        y=embedding_umap[:, 1],
+        color=labels,
+        labels={"x": "UMAP Dimension 1", "y": "UMAP Dimension 2"},
+        title=f"UMAP Visualization of {emb_type} Embeddings",
+    )
 
+    fig.update_layout(legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
 
-def save_visualization(plot, base_path, emb_type):
-    file_path = base_path / f"references/umap/{emb_type}_umap.png"
-    plot.savefig(file_path)
+    fig.write_html(str(file_path.with_suffix(".html")))
 
 
 def main():
@@ -29,8 +32,8 @@ def main():
         embedding = load_pickle(
             base_path / f"data/processed/embeddings/{emb_type}_train.pkl"
         )
-        fig = create_umap(embedding, df_train["Process"])
-        save_visualization(fig, base_path, emb_type)
+        file_path = base_path / f"references/umap/{emb_type}_umap.png"
+        create_umap(embedding, df_train["Process"], emb_type, file_path)
 
 
 if __name__ == "__main__":
