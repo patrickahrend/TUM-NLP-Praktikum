@@ -91,11 +91,21 @@ class UserInterface:
         self.processes = self.test_data["Process"].unique().tolist()
 
     def display_all_test_data_points(self):
-        selected_process = st.selectbox("Select a Process", self.processes)
-        filtered_data = self.test_data[self.test_data["Process"] == selected_process]
+        process_options = ["All Processes"] + self.processes
+        selected_process = st.selectbox("Select a Process", process_options)
+
+        filtered_data = (
+            self.test_data
+            if selected_process == "All Processes"
+            else self.test_data[self.test_data["Process"] == selected_process]
+        )
 
         if not filtered_data.empty:
-            self.process_description = filtered_data["Process_description"].iloc[0]
+            self.process_description = (
+                filtered_data["Process_description"].iloc[0]
+                if selected_process != "All Processes"
+                else None
+            )
             st.text_area(
                 "Process Description",
                 value=self.process_description,
