@@ -25,8 +25,21 @@ load_dotenv(find_dotenv())
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
+def load_model_if_exists(filepath):
+    if os.path.exists(filepath):
+        with open(filepath, "rb") as f:
+            return pickle.load(f)
+    return None
+
+
+def save_pickle(obj, filepath):
+    with open(filepath, "wb") as f:
+        pickle.dump(obj, f)
+
+
 class EmbeddingProcessor:
     def __init__(self, max_features=1000):
+        project_dir = Path(__file__).resolve().parents[2]
         self.tfidf = TfidfVectorizer(
             stop_words="english", ngram_range=(1, 2), max_features=max_features
         )
@@ -35,8 +48,11 @@ class EmbeddingProcessor:
         self.bert_model.eval()
         self.openai = OpenAI()
         self.word2vec = None
-        self.fasttext = None
-        self.glove = None
+
+        self.fasttext = load_model_if_exists(
+            project_dir / "models/embeddings/fasttext.pkl"
+        )
+        self.glove = load_model_if_exists(project_dir / "models/embeddings/glove.pkl")
 
     def compute_tfidf_embedding(self, proc_desc, legal_text):
         tfidf_train_legal_text = self.tfidf.fit_transform(legal_text).toarray()
@@ -213,10 +229,6 @@ class EmbeddingProcessor:
 
         return gpt_text
 
-    def save_embeddings(self, obj, filepath):
-        with open(filepath, "wb") as f:
-            pickle.dump(obj, f)
-
     def train_model(self, embedding_type):
         # Load the data needed for training the model
         tokenized_sentences, raw_sentences = self.load_training_data()
@@ -253,6 +265,7 @@ class EmbeddingProcessor:
         self.glove = KeyedVectors.load_word2vec_format(
             str(word2vec_output_file), binary=False
         )
+        save_pickle(self.glove, project_dir / "models/embeddings/glove.pkl")
 
         return self.glove
 
@@ -263,6 +276,8 @@ class EmbeddingProcessor:
         self.fasttext = FastText(
             sentences, vector_size=100, window=5, min_count=1, workers=4
         )
+        project_dir = Path(__file__).resolve().parents[2]
+        save_pickle(self.fasttext, project_dir / "models/embeddings/fasttext.pkl")
         return self.fasttext
 
     def load_training_data(self):
@@ -310,7 +325,7 @@ class EmbeddingProcessor:
         if embedding_type in ["glove", "fasttext", "word2vec"]:
             # Check if the model is already trained and available
             # If not, you need to train the model first and then use it
-            if not hasattr(self, f"{embedding_type}_model"):
+            if not hasattr(self, f"{embedding_type}"):
                 self.train_model(embedding_type)
 
             glove_true = embedding_type == "glove"
