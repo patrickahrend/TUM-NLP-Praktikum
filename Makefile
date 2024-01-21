@@ -35,6 +35,11 @@ install_spacy_model:
 	@echo "Installing spaCy language model..."
 	$(PYTHON_INTERPRETER) -m spacy download en_core_web_sm
 
+## Make Embeddings
+embeddings:
+	@echo "Creating embeddings..."
+	$(PYTHON_INTERPRETER) src/data/make_embeddings.py
+
 ## Make Dataset
 data: requirements install_spacy_model
 	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw data/processed
