@@ -2,6 +2,7 @@ import torch
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression, Perceptron, SGDClassifier
 from sklearn.naive_bayes import GaussianNB, BernoulliNB
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from torch import nn
@@ -9,10 +10,16 @@ from transformers import BertModel
 
 from model_base import ModelBase
 
+## class weights to not overfit on the majority class, as the data is imbalanced (9:1), we do the inverse here
+class_weights = {0: 1, 1: 9}
+
 
 class LogisticRegressionModel(ModelBase):
     def __init__(self):
-        super().__init__("Logistic_Regression", LogisticRegression(max_iter=1000))
+        super().__init__(
+            "Logistic_Regression",
+            LogisticRegression(max_iter=1000, class_weight=class_weights),
+        )
 
 
 class GaussianNBModel(ModelBase):
@@ -27,7 +34,10 @@ class BernoulliNBModel(ModelBase):
 
 class RandomForestModel(ModelBase):
     def __init__(self):
-        super().__init__("RandomForestClassifier", RandomForestClassifier())
+        super().__init__(
+            "RandomForestClassifier",
+            RandomForestClassifier(class_weights=class_weights),
+        )
 
 
 class GradientBoostingModel(ModelBase):
@@ -42,7 +52,7 @@ class DecisionTreeModel(ModelBase):
 
 class SVCModel(ModelBase):
     def __init__(self):
-        super().__init__("SVC", SVC())
+        super().__init__("SVC", SVC(class_weights=class_weights))
 
 
 class PerceptronModel(ModelBase):
@@ -53,6 +63,11 @@ class PerceptronModel(ModelBase):
 class SGDClassifierModel(ModelBase):
     def __init__(self):
         super().__init__("SGDClassifier", SGDClassifier())
+
+
+class KNNClassifierModel(ModelBase):
+    def __init__(self):
+        super().__init__("KNeighborsClassifier", KNeighborsClassifier())
 
 
 class BERTForClassification(nn.Module):
