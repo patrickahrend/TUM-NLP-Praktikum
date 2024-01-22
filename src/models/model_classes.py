@@ -36,7 +36,7 @@ class RandomForestModel(ModelBase):
     def __init__(self):
         super().__init__(
             "RandomForestClassifier",
-            RandomForestClassifier(class_weights=class_weights),
+            RandomForestClassifier(class_weight=class_weights),
         )
 
 
@@ -52,7 +52,7 @@ class DecisionTreeModel(ModelBase):
 
 class SVCModel(ModelBase):
     def __init__(self):
-        super().__init__("SVC", SVC(class_weights=class_weights))
+        super().__init__("SVC", SVC(class_weight=class_weights))
 
 
 class PerceptronModel(ModelBase):
