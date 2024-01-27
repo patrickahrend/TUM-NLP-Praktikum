@@ -91,5 +91,9 @@ target/
 # Mypy cache
 .mypy_cache/
 
+/models/embeddings/tfidf.pkl
+/models/embeddings/glove.pkl
+/models/embeddings/word2vec.pkl
+/models/embeddings/fasttext.pkl
 
 poetry.lock
