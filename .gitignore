@@ -75,11 +75,8 @@ target/
 # Jupyter NB Checkpoints
 .ipynb_checkpoints/
 
-# Included evaluation data from source control for grading 
 
-/data/interim/
-/data/external/
-/data/leftover
+
 
 # Mac OS-specific storage files
 .DS_Store
@@ -90,6 +87,11 @@ target/
 
 # Mypy cache
 .mypy_cache/
+
+
+# Custom files
+/data/interim/
+/data/leftover
 
 /models/embeddings/tfidf.pkl
 /models/embeddings/glove.pkl
