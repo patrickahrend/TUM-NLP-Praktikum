@@ -8,6 +8,8 @@ PROJECT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 PROFILE = default
 PROJECT_NAME = tum-nlp-praktikum
 PYTHON_INTERPRETER = python3
+GLOVE_6G300_URL=https://nlp.stanford.edu/data/glove.6B.zip
+GLOVE_DIR = ./data/external
 
 ifeq (,$(shell which conda))
 HAS_CONDA=False
@@ -19,17 +21,6 @@ endif
 # COMMANDS                                                                      #
 #################################################################################
 
-## Start the API
-run-api:
-	@echo "Starting FastAPI application..."
-	cd src && poetry run uvicorn api.api:app --host 0.0.0.0 --port 8000
-
-### Start the Streamlit frontend
-start-frontend:
-	echo "Starting Streamlit frontend..."
-	poetry run streamlit run frontend/streamlit_app.py
-
-
 ## Install Python Dependencies
 requirements: test_environment
 	$(PYTHON_INTERPRETER) -m pip install -U pip setuptools wheel
@@ -40,21 +31,44 @@ install_spacy_model:
 	@echo "Installing spaCy language model..."
 	$(PYTHON_INTERPRETER) -m spacy download en_core_web_sm
 
-## Make Embeddings
-embeddings:
-	@echo "Creating embeddings..."
-	$(PYTHON_INTERPRETER) src/features/make_embeddings.py
-
 ## Make Dataset
 data: requirements install_spacy_model
 	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw data/processed
+
+## Download GloVe Embeddings and save to external data folder
+download-glove:
+	@echo "Downloading GloVe embeddings..."
+	mkdir -p $(GLOVE_DIR)
+	wget -c $(GLOVE_6G300_URL) -O $(GLOVE_DIR)/glove.6B.300d.zip
+	unzip -n $(GLOVE_DIR)/glove.6B.300d.zip -d $(GLOVE_DIR)
+	rm $(GLOVE_DIR)/glove.6B.300d.zip
+
+## Make Embeddings
+embeddings: requirements download-glove
+	@echo "Creating embeddings..."
+	$(PYTHON_INTERPRETER) src/features/make_embeddings.py
+
+## Make predictions
+models: requirements
+	@echo "Building models and making predictions..."
+	$(PYTHON_INTERPRETER) src/models/make_models.py
+
+## Start the API
+run-api:
+	@echo "Starting FastAPI application..."
+	cd src && poetry run uvicorn api.api:app --host 0.0.0.0 --port 8000
+
+### Start the Streamlit frontend
+start-frontend:
+	echo "Starting Streamlit frontend..."
+	poetry run streamlit run frontend/streamlit_app.py
 
 ## Delete all compiled Python files
 clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
 
-## Lint using flake8
+## Lint using black
 lint:
 	black src
 
@@ -81,11 +95,6 @@ endif
 ## Test python environment is setup correctly
 test_environment:
 	$(PYTHON_INTERPRETER) test_environment.py
-
-#################################################################################
-# PROJECT RULES                                                                 #
-#################################################################################
-
 
 
 #################################################################################

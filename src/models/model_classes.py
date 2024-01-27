@@ -76,6 +76,10 @@ class SGDClassifierModel(ModelBase):
         )
 
 
+
+#################################################################################
+# Only used in the notebook, but wanted to include here as well for comparison. #
+#################################################################################
 class BERTForClassification(nn.Module):
     def __init__(self):
         super(BERTForClassification, self).__init__()
@@ -89,24 +93,27 @@ class BERTForClassification(nn.Module):
 
 
 class RnnTextClassifier(nn.Module):
-    def __init__(self, input_size, output_size, hidden_size, num_layers, dropout=0):
+    def __init__(self, input_size, hidden_size, num_layers, dropout = 0,device= 'cpu'):
         super(RnnTextClassifier, self).__init__()
 
-        self.rnn = nn.RNN(
-            input_size,
-            hidden_size,
-            num_layers,
-            batch_first=True,
-            dropout=dropout if num_layers > 1 else 0,
-        )
-        self.fc = nn.Linear(hidden_size, output_size)
+        # model params
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+
+        # layers
+        self.rnn = nn.RNN(input_size, hidden_size, num_layers, batch_first = True, dropout = dropout)
         self.dropout = nn.Dropout(dropout)
+        self.fc = nn.Linear(hidden_size, 1)
 
     def forward(self, x):
-        h0 = torch.zeros(self.rnn.num_layers, x.size(0), self.rnn.hidden_size)
+        # reshape input
+        x = x.unsqueeze(1).to(self.device)
 
-        out, _ = self.rnn(x, h0)
+        # initialize hidden state
+        hidden = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(self.device)
 
+        # get RNN output
+        out, hidden = self.rnn(x, hidden)
         out = self.dropout(out)
         out = self.fc(out[:, -1, :])
 
