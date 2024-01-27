@@ -1,4 +1,9 @@
+import os
+import pickle
+from pathlib import Path
+
 import numpy as np
+import pandas as pd
 import torch
 
 
@@ -45,3 +50,34 @@ def get_embeddings_gpt(statement, client):
     except Exception as e:
         print(e)
         return None
+
+def load_model_if_exists(filepath):
+    if os.path.exists(filepath):
+        with open(filepath, "rb") as f:
+            return pickle.load(f)
+    return None
+
+
+def save_pickle(obj, filepath):
+    directory = os.path.dirname(filepath)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    with open(filepath, "wb") as f:
+        pickle.dump(obj, f)
+
+def load_training_data():
+    # Load the training data needed for models like Word2Vec, GloVe, and FastText
+    project_dir = Path(__file__).resolve().parents[2]
+    training_data_path = project_dir / "data/processed/training_data_preprocessed.csv"
+    training_data = pd.read_csv(training_data_path)
+
+    # combine process description and legal text to train embeddings on whole corpus
+    text = training_data["Process_description"] + " " + training_data["Text"]
+
+    # Tokenize sentences for fasttext and w2v
+    tokenized_sentences = [statement.split() for statement in text]
+
+    # Raw sentences for TF-IDF
+    raw_sentences = text.tolist()
+
+    return tokenized_sentences, raw_sentences
