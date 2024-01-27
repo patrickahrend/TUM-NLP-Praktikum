@@ -32,7 +32,7 @@ matplotlib = "^3.3.4"
 datashader = "^0.12.1"
 bokeh = "^2.3.2"
 holoviews = "^1.14.3"
-scikit-image = "0.22.0"
+scikit-image = "0.18.3"
 colorcet = "^2.0.6"
 numba = "^0.58.1"
 

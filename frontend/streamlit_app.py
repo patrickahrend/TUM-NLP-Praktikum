@@ -1,6 +1,6 @@
 import pickle
 from pathlib import Path
-
+import os
 import pandas as pd
 import requests
 import streamlit as st
@@ -17,43 +17,7 @@ def load_pickle(file_path):
         return pickle.load(file)
 
 
-def display_results():
-    model_results_dir = self.base_path / "references" / "model results"
-    feature_importance_dir = self.base_path / "references" / "feature importance"
 
-    model_results_files = list(model_results_dir.glob("*.csv"))
-    feature_importance_files = list(feature_importance_dir.glob("*.csv"))
-
-    selected_model_file = st.selectbox(
-        "Select a model result file", model_results_files
-    )
-    if selected_model_file:
-        df_model_results = pd.read_csv(selected_model_file)
-
-        selected_columns = st.multiselect(
-            "Select columns to display",
-            df_model_results.columns.tolist(),
-            default=df_model_results.columns.tolist(),
-        )
-        df_model_results = df_model_results[selected_columns]
-        st.dataframe(
-            df_model_results.sort_values(by=selected_columns[0], ascending=True)
-        )
-
-    selected_feature_file = st.selectbox(
-        "Select a feature importance file", feature_importance_files
-    )
-    if selected_feature_file:
-        df_feature_importance = pd.read_csv(selected_feature_file)
-        selected_columns = st.multiselect(
-            "Select columns to display",
-            df_feature_importance.columns.tolist(),
-            default=df_feature_importance.columns.tolist(),
-        )
-        df_feature_importance = df_feature_importance[selected_columns]
-        st.dataframe(
-            df_feature_importance.sort_values(by=selected_columns[0], ascending=True)
-        )
 
 
 class UserInterface:
@@ -147,15 +111,19 @@ class UserInterface:
                 self.display_all_test_data_points()
 
             else:
+                ## Mocked of how user input could look like
                 self.text_input = st.text_area("Enter the text passage here:")
 
                 self.process_description = st.text_area(
                     "Enter the process description here:"
                 )
+                st.button("Classify", key="classify_mock")
+
+
 
         ## here show model evaluation results
         with tab2:
-            display_results()
+            self.display_results()
 
     def load_data(self, embedding_type, dataset_type):
         embedding_path = self.base_path / "data/processed/embeddings"
@@ -174,7 +142,6 @@ class UserInterface:
         self.processes = embedding["Process"].unique().tolist()
         self.test_data = embedding
 
-    # TODO add hyperparamter tuned results of RNN and datatype criteria to display proper results
     def load_model_results(self):
         model_results_path = (
             self.base_path
@@ -368,16 +335,7 @@ class UserInterface:
                                 st.error("Wrongly Predicted")
                     st.divider()
 
-                # TODO for new text
-                # classification_result = self.classify_text(
-                #     self.text_input,
-                #     self.process_description,
-                #     self.selected_model,
-                #     self.selected_embedding,
-                #     self.dataset_type,
-                #     self.is_tuned,
 
-                # )
 
         else:
             st.write("No data available for the selected process.")
@@ -404,7 +362,7 @@ class UserInterface:
             st.error(f"Error in classification: {response.status_code}")
             return None
 
-    # method for new text
+    # Method for New text to classify
     def classify_new_text(
         self,
         text_input,
@@ -432,7 +390,51 @@ class UserInterface:
             st.error("Error in classification")
             return None
 
+    def display_results(self):
+        model_results_dir = self.base_path / "references" / "model results"
+        feature_importance_dir = self.base_path / "references" / "feature importance"
+
+        model_results_files = list(model_results_dir.glob("*.csv"))
+        feature_importance_files = list(feature_importance_dir.glob("*.csv"))
+
+        selected_model_file = st.selectbox(
+            "Select a model result file", model_results_files
+        )
+        if selected_model_file:
+            df_model_results = pd.read_csv(selected_model_file)
+
+            selected_columns = st.multiselect(
+                "Select columns to display",
+                df_model_results.columns.tolist(),
+                default=df_model_results.columns.tolist(),
+            )
+            df_model_results = df_model_results[selected_columns]
+            st.dataframe(
+                df_model_results.sort_values(by=selected_columns[0], ascending=True)
+            )
+
+        selected_feature_file = st.selectbox(
+            "Select a feature importance file", feature_importance_files
+        )
+        if selected_feature_file:
+            df_feature_importance = pd.read_csv(selected_feature_file)
+            selected_columns = st.multiselect(
+                "Select columns to display",
+                df_feature_importance.columns.tolist(),
+                default=df_feature_importance.columns.tolist(),
+            )
+            df_feature_importance = df_feature_importance[selected_columns]
+            st.dataframe(
+                df_feature_importance.sort_values(by=selected_columns[0], ascending=True)
+            )
+
 if __name__ == "__main__":
-    backend_env_url = os.getenv('BACKEND_URL') or "http://localhost:8000"
-    base_path = Path(os.getenv('BASE_PATH')) or Path(__file__).resolve().parents[1]
+    backend_env_url = os.getenv('BACKEND_URL', "http://localhost:8000")
+    base_path_env = os.getenv('BASE_PATH')
+
+    if base_path_env is not None:
+        base_path = Path(base_path_env)
+    else:
+        base_path = Path(__file__).resolve().parents[1]
+
     app = UserInterface(backend_env_url, base_path)

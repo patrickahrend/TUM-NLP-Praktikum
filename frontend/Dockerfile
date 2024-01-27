@@ -5,7 +5,9 @@ WORKDIR /app
 
 COPY frontend/requirements.txt /app
 COPY frontend/streamlit_app.py /app
-COPY data/ /app/data
+COPY data/evaluation /app/data/evaluation
+COPY data/processed /app/data/processed
+COPY references/ /app/references
 
 RUN pip install -r requirements.txt
 

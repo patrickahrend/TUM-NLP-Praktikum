@@ -12,7 +12,7 @@ import uvicorn
 # API imports
 from fastapi import FastAPI, HTTPException
 
-# from features.build_word_embedding import EmbeddingProcessor
+from src.features.build_word_embedding import EmbeddingProcessor
 from pydantic import BaseModel, ValidationError
 
 # Logging
@@ -34,7 +34,7 @@ class ClassificationRequest(BaseModel):
 class ModelAPI:
     def __init__(self, model_path: Path):
         self.model_path = model_path
-        # self.embedding_processor = EmbeddingProcessor()
+        self.embedding_processor = EmbeddingProcessor()
 
     def load_model(
         self,

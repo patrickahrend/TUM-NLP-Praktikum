@@ -56,7 +56,7 @@ The "advanced approaches" are in the notebook folder, but I trained them in Goog
 them. Lastly I also put the outlook approaches GPT and Rule-based in a Colab notebook for consistency. If you like to run them you can find the links for each method belo, the share link should give you write access
 [Recurrent Neural Network](https://colab.research.google.com/drive/14nG_QaApOO6xSQNUHlBLPSqf_d_S3f4K?usp=sharing,) [BERTForClassification](https://colab.research.google.com/drive/1PXwm66FjTnwStpD-z0NKN8N9KqVxMsmd?usp=sharing), [Rule-based Approach](https://colab.research.google.com/drive/1UiXaIc9w0MBA2ZIIjqw9vVsIwon5yJWL?usp=sharing),
 [GPT Fine-Tuning](https://colab.research.google.com/drive/1gwmay8KdfZieLmVLeNWrVJwavoktwt8J?usp=sharing). 
-You will also need a folder caleld nlp, which the same content as in this [folder](https://drive.google.com/drive/folders/1qHmHNIZax_q-aFVHHMODvWGpqElVAhiF?usp=sharing). 
+You will also need a folder callend nlp, which the same content as in this [folder](https://drive.google.com/drive/folders/1qHmHNIZax_q-aFVHHMODvWGpqElVAhiF?usp=sharing). 
 ---
 
 ## How to run the project
@@ -65,8 +65,9 @@ So there is a frontend with streamlit which displays the predictions of the diff
 to get predictions for new text. The backend is a fast api which loads the models and returns the predictions.
 
 I included the manual as well as the docker way to run the project. This was due to me using torch for the m1 chip, which 
-is different from the versions for windows and linux. I did not know how to handle it other than using docker.
-
+is different from the versions for windows and linux. As the version is just specified in the requirements.txt, it should
+be resolved by this, but I developed quite a long time on this project and wanted to make 100% that it works for you.
+Thus is used cross compling with Docker. 
 ### Manual
 The requirements.txt file is in the root folder for the backend and frontend, as it also installs the streamlit package.
 ```bash
@@ -78,6 +79,12 @@ For the frontend:
 ```bash
 make start-frontend
 ```
+For the embeddings of GPT an API-Key is needed, download the [.env](https://drive.google.com/file/d/1h3TMa5V326YKW5ZlirlouZkp2nuG2MfY/view?usp=sharing) from the following link and put it into the 
+root folder. Creating the embeddings are less than 10 cents, so it is fine for me to include it.
+It only contains this line:
+```bash
+OPENAI_API_KEY= <API_Key>
+```
 
 ### Docker
 I included a requirements.txt file in the frontend folder, as it only needs 3 packages and builds faster this way.
@@ -87,6 +94,10 @@ docker-compose up
 Under localhost:8501 you can see the frontend. 
 
 In the backend docker you can run the make file with the different steps of the pipeline as well.
+
+
+
+
 
 ---
 
@@ -99,6 +110,10 @@ product.
   models' folder.
   However, Only the results are displayed on the frontend. There are already the endpoints to create to embedd complete
   new text, but it only works with the sklearn models, but the advanced approaches.
+- Letting the user enter text and process description freely and then predict the relevance. I started with this by implementing 
+  a case distinction in the api to check if this is new text and implementing the embed_new_text function in the 
+  embedding class to embed new text. I also mocked how this could look like in the frontend. However, as I saw how time-intensive
+  this became, I moved the focus to more relevant topcis for the project. 
 
 ---
 
