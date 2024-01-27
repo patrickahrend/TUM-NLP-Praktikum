@@ -1,4 +1,4 @@
-.PHONY: clean data lint requirements run-api
+.PHONY: clean data lint requirements run-api start-frontend
 
 #################################################################################
 # GLOBALS                                                                       #
@@ -19,10 +19,15 @@ endif
 # COMMANDS                                                                      #
 #################################################################################
 
-
+## Start the API
 run-api:
 	@echo "Starting FastAPI application..."
 	cd src && poetry run uvicorn api.api:app --host 0.0.0.0 --port 8000
+
+### Start the Streamlit frontend
+start-frontend:
+	echo "Starting Streamlit frontend..."
+	poetry run streamlit run frontend/streamlit_app.py
 
 
 ## Install Python Dependencies
