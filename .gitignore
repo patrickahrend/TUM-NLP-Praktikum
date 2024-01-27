@@ -78,7 +78,6 @@ target/
 # Included evaluation data from source control for grading 
 /data/processed/embeddings
 /data/interim/
-/data/raw/
 /data/external/
 /data/leftover
 
