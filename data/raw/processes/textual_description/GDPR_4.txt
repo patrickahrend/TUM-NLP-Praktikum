@@ -1,0 +1,4 @@
+The process involves the General Data Protection Regulation Right of Portability, which involves the individual's personal data being transferred from one service provider to another third-party provider.
+Upon receiving a portability request from the data subject, the service provider retrieves the data subject's details from a secure data repository. This step ensures that all relevant personal data pertaining to the data subject is collected for the transfer.
+Concurrently, the second action undertaken is the retrieval of elaborations. This refers to processing any analyses, interpretations, or complex calculations previously conducted on the data subject's information.
+Once both sets of data—the raw personal details and the elaborations—are retrieved, they are compiled into comprehensive lists. These lists constitute the total information package that will be communicated to the third party, which then communicates  it to the individual.

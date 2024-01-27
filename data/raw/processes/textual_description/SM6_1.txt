@@ -1,0 +1,1 @@
+This process involves a Load Switch device, which serves as a possible replacement for a ripple control device or timer. The service interface and central system receive an order to overload a relay, which is forwarded to the load switch devices. The load switch device simultaneously creates a log entry and sends an Event. The event is received by the central system.

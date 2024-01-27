@@ -1,0 +1,6 @@
+The process is about the consent requirements of the General Data Protection Regulation concerning the use of an individual's data. It begins with verifying the data subject's agreement. Without verified consent, the process must first secure approval.
+Once consent is confirmed, data handling begins. The data is retrieved, then transformed, validated, and enriched, ensuring privacy through anonymization or pseudonymization and verifying data quality for accuracy and reliability.
+Next, a decision point assesses if additional processing is necessary. If so, the data is refined further in an iterative manner until it meets quality and processing standards.
+The data then moves to its application phase for analysis, reporting, or decision-making, while an audit trail records each processing step for compliance and integrity.
+Periodic checks for data relevance lead to secure disposal if the data is outdated, in line with retention policies.
+The process ends with a review of the data's application against objectives, concluding with all data processed and evaluated, ensuring alignment with the data subject's consent and organizational standards.
