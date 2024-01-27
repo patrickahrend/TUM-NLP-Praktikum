@@ -55,6 +55,8 @@ To run the frontend of the project, you need to run the following commands in th
 poetry run streamlit run frontend/streamlit_app.py
 ```
 
+Minor changes in ...
+
 ---
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. </small></p>
