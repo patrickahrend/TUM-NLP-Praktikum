@@ -74,7 +74,7 @@ def main(input_filepath, output_filepath):
         project_dir / "data/processed/final_labels_with_description.csv", index=False
     )
 
-    # Creating Gold standard for evaluation
+    # Creating Gold standard for evaluation which specifc samples to use for evaluation
     gold_standard_samples = {
         "Travel Insurance Claim": (10, 88),
         "Know Your Customer": (7, 55),

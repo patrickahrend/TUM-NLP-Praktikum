@@ -12,7 +12,7 @@ from openai import OpenAI
 from sklearn.feature_extraction.text import TfidfVectorizer
 from transformers import BertTokenizer, BertModel
 
-from utils_embedding_functions import (
+from .utils_embedding_functions import (
     get_sentence_vector_custom,
     get_embeddings_bert,
     get_embeddings_gpt,
@@ -33,6 +33,24 @@ def load_model_if_exists(filepath):
 def save_pickle(obj, filepath):
     with open(filepath, "wb") as f:
         pickle.dump(obj, f)
+
+
+def load_training_data():
+    # Load the training data needed for models like Word2Vec, GloVe, and FastText
+    project_dir = Path(__file__).resolve().parents[2]
+    training_data_path = project_dir / "data/processed/training_data_preprocessed.csv"
+    training_data = pd.read_csv(training_data_path)
+
+    # combine process description and legal text to train embeddings on whole corpus
+    text = training_data["Process_description"] + " " + training_data["Text"]
+
+    ## Tokenize sentences for fasttext and w2v
+    tokenized_sentences = [statement.split() for statement in text]
+
+    # Raw sentences for TF-IDF
+    raw_sentences = text.tolist()
+
+    return tokenized_sentences, raw_sentences
 
 
 class EmbeddingProcessor:
@@ -120,28 +138,9 @@ class EmbeddingProcessor:
 
         return gpt_text
 
-    def load_training_data(self):
-        # Load the training data needed for models like Word2Vec, GloVe, and FastText
-        project_dir = Path(__file__).resolve().parents[2]
-        training_data_path = (
-            project_dir / "data/processed/training_data_preprocessed.csv"
-        )
-        training_data = pd.read_csv(training_data_path)
-
-        # combine process description and legal text to train embeddings on whole corpus
-        text = training_data["Process_description"] + " " + training_data["Text"]
-
-        ## Tokenize sentences for fasttext and w2v
-        tokenized_sentences = [statement.split() for statement in text]
-
-        # Raw sentences for TF-IDF
-        raw_sentences = text.tolist()
-
-        return tokenized_sentences, raw_sentences
-
     def train_model(self, embedding_type):
         # Load the data needed for training the model
-        tokenized_sentences, raw_sentences = self.load_training_data()
+        tokenized_sentences, raw_sentences = load_training_data()
 
         # Train the model and save it to the instance for later use
         if embedding_type == "word2vec":
@@ -161,7 +160,7 @@ class EmbeddingProcessor:
         """
         project_dir = Path(__file__).resolve().parents[2]
         self.word2vec = Word2Vec(
-            sentences, vector_size=100, window=5, min_count=1, workers=4
+            sentences, vector_size=300, window=5, min_count=1, workers=4
         )
         print("Word2Vec model loaded.")
         save_pickle(self.word2vec, project_dir / "models/embeddings/word2vec.pkl")
@@ -188,7 +187,7 @@ class EmbeddingProcessor:
         Train a FastText model on the given sentences.
         """
         self.fasttext = FastText(
-            sentences, vector_size=100, window=5, min_count=1, workers=4
+            sentences, vector_size=300, window=5, min_count=1, workers=4
         )
         project_dir = Path(__file__).resolve().parents[2]
         print("FastText model loaded.")
@@ -200,7 +199,7 @@ class EmbeddingProcessor:
         Train a TF-IDF model on the given sentences.
         """
         self.tfidf = TfidfVectorizer(
-            stop_words="english", ngram_range=(1, 2), max_features=1000
+            stop_words="english", ngram_range=(1, 2), max_features=1300
         )
         self.tfidf.fit_transform(sentences).toarray()
         project_dir = Path(__file__).resolve().parents[2]
@@ -256,29 +255,3 @@ class EmbeddingProcessor:
             raise ValueError(f"Unknown embedding type: {embedding_type}")
 
         return embedding_vector
-
-
-def main():
-    project_dir = Path(__file__).resolve().parents[2]
-    embedding_processor = EmbeddingProcessor()
-
-    # load data and combine text and process description
-    df_train = pd.read_csv(
-        project_dir / "data/processed/training_data_preprocessed.csv"
-    )
-
-    df_train["Combined_Text"] = df_train["Process_description"] + " " + df_train["Text"]
-    print(df_train.shape)
-
-    bart_embeddings = embedding_processor.compute_bert_embedding(
-        df_train["Combined_Text"]
-    )
-
-    print(bart_embeddings.shape)
-    save_pickle(
-        bart_embeddings, project_dir / "data/processed/embeddings/bert_train_pooled.pkl"
-    )
-
-
-if __name__ == "__main__":
-    main()

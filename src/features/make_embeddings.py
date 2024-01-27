@@ -13,10 +13,14 @@ def save_df_with_embeddings(original_df, embeddings, embedding_type, filename):
         embeddings = np.squeeze(embeddings, axis=1)
 
     num_dimensions = embeddings.shape[1]
-    embedding_df = pd.DataFrame(
-        embeddings,
-        columns=[f"{embedding_type}_{i}" for i in range(embeddings.shape[1])],
-    )
+    # needed as for the seperate approach the embeddings are already a dataframe, which otherwise introduces null values in the final dataframe
+    if not isinstance(embeddings, pd.DataFrame):
+        embedding_df = pd.DataFrame(
+            embeddings,
+            columns=[f"{embedding_type}_{i}" for i in range(num_dimensions)],
+        )
+    else:
+        embedding_df = embeddings
 
     final_df = pd.concat([original_df.reset_index(drop=True), embedding_df], axis=1)
 
@@ -93,6 +97,7 @@ def process_and_save_embeddings(
         f"{embedding_type}_proc_desc",
         f"{embedding_type}_legal_text",
     )
+
     save_df_with_embeddings(
         df_train,
         train_separate_df,
@@ -136,15 +141,14 @@ def main():
     df_train["Combined_Text"] = df_train["Process_description"] + " " + df_train["Text"]
     df_test["Combined_Text"] = df_test["Process_description"] + " " + df_test["Text"]
 
-    # here run through the whole functions for train and test with combined and seperate approach
-
     # training embeddings models
     embedding_processor.train_model("tfidf")
     embedding_processor.train_model("word2vec")
     embedding_processor.train_model("glove")
     embedding_processor.train_model("fasttext")
 
-    for embedding_type in ["tfidf", "word2vec", "glove", "fasttext", "bert", "gpt"]:
+    # Loop through each embedding type and create/save the embeddings
+    for embedding_type in ["word2vec", "glove", "fasttext", "tfidf", "bert", "gpt"]:
         process_and_save_embeddings(
             embedding_processor, df_train, df_test, embedding_type, project_dir
         )
