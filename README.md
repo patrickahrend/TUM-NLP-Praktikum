@@ -52,11 +52,13 @@ I worked on Case A with an ML Approach.
     │   └── visualization  <- Scripts to create exploratory and results-oriented visualizations as well as visualizations of the word embeddings
     │       └── visualize.py
     └
+
 The "advanced approaches" are in the notebook folder, but I trained them in GoogleColab as I need computation resources to fine-tune and hyperparameter tune
 them. Lastly I also put the outlook approaches GPT and Rule-based in a Colab notebook for consistency. If you like to run them you can find the links for each method belo, the share link should give you write access
 [Recurrent Neural Network](https://colab.research.google.com/drive/14nG_QaApOO6xSQNUHlBLPSqf_d_S3f4K?usp=sharing,) [BERTForClassification](https://colab.research.google.com/drive/1PXwm66FjTnwStpD-z0NKN8N9KqVxMsmd?usp=sharing), [Rule-based Approach](https://colab.research.google.com/drive/1UiXaIc9w0MBA2ZIIjqw9vVsIwon5yJWL?usp=sharing),
 [GPT Fine-Tuning](https://colab.research.google.com/drive/1gwmay8KdfZieLmVLeNWrVJwavoktwt8J?usp=sharing). 
 You will also need a folder callend nlp, which the same content as in this [folder](https://drive.google.com/drive/folders/1qHmHNIZax_q-aFVHHMODvWGpqElVAhiF?usp=sharing). 
+
 ---
 
 ## How to run the project
@@ -94,8 +96,6 @@ docker-compose up
 Under localhost:8501 you can see the frontend. 
 
 In the backend docker you can run the make file with the different steps of the pipeline as well.
-
-
 
 
 
