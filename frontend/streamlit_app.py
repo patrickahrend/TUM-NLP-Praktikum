@@ -1,27 +1,76 @@
-import os
+import pickle
 from pathlib import Path
 
 import pandas as pd
 import requests
 import streamlit as st
+from sklearn.metrics import (
+    accuracy_score,
+    recall_score,
+    f1_score,
+    precision_score,
+)
+
+
+def load_pickle(file_path):
+    with open(file_path, "rb") as file:
+        return pickle.load(file)
+
+
+def display_results():
+    model_results_dir = self.base_path / "references" / "model results"
+    feature_importance_dir = self.base_path / "references" / "feature importance"
+
+    model_results_files = list(model_results_dir.glob("*.csv"))
+    feature_importance_files = list(feature_importance_dir.glob("*.csv"))
+
+    selected_model_file = st.selectbox(
+        "Select a model result file", model_results_files
+    )
+    if selected_model_file:
+        df_model_results = pd.read_csv(selected_model_file)
+
+        selected_columns = st.multiselect(
+            "Select columns to display",
+            df_model_results.columns.tolist(),
+            default=df_model_results.columns.tolist(),
+        )
+        df_model_results = df_model_results[selected_columns]
+        st.dataframe(
+            df_model_results.sort_values(by=selected_columns[0], ascending=True)
+        )
+
+    selected_feature_file = st.selectbox(
+        "Select a feature importance file", feature_importance_files
+    )
+    if selected_feature_file:
+        df_feature_importance = pd.read_csv(selected_feature_file)
+        selected_columns = st.multiselect(
+            "Select columns to display",
+            df_feature_importance.columns.tolist(),
+            default=df_feature_importance.columns.tolist(),
+        )
+        df_feature_importance = df_feature_importance[selected_columns]
+        st.dataframe(
+            df_feature_importance.sort_values(by=selected_columns[0], ascending=True)
+        )
 
 
 class UserInterface:
     def __init__(self, api_url, base_path):
         self.api_url = api_url
-        self.base_path= base_path
+        self.base_path = base_path
         self.initialize_app()
         self.text_input = None
         self.selected_model = None
-        self.model_options = None
         self.selected_embedding = None
         self.process_description = None
         self.result_path = None
         self.test_data = None
         self.processes = None
         self.dataset_type = None
-        self.is_pca = None
         self.is_tuned = None
+        self.model_options = []
 
     def initialize_app(self):
         st.set_page_config(
@@ -29,9 +78,10 @@ class UserInterface:
         )
         st.title("Legal Text Classifier")
 
-        tab1, tab2, tab3 = st.tabs(
-            ["Classify", "Hyperparameter Tuning", "Model Evaluation"]
-        )
+        (
+            tab1,
+            tab2,
+        ) = st.tabs(["Classify", "Model Evaluation"])
 
         with tab1:
             self.model_options = [
@@ -43,6 +93,13 @@ class UserInterface:
                 "GaussianNB",
                 "Perceptron",
                 "SGDClassifier",
+                "KNeighborsClassifier",
+                "BertForClassification-Base",
+                "BertForClassification-Large",
+                "GPT3.5",
+                "Recurrent Neural Network",
+                "Rule-Based Mean Centroid",
+                "Rule-Based Cosine Similarity",
             ]
             self.selected_model = st.selectbox("Select a model", self.model_options)
 
@@ -55,6 +112,15 @@ class UserInterface:
                 "glove",
             ]
 
+            # only allow bert for bert models
+            if self.selected_model in [
+                "BertForClassification-Base",
+                "BertForClassification-Large",
+            ]:
+                embedding_options = ["bert"]
+            # only allow gpt for gpt models
+            elif self.selected_model == "GPT3.5":
+                embedding_options = ["gpt"]
             self.selected_embedding = st.selectbox(
                 "Select an embedding", embedding_options
             )
@@ -66,8 +132,18 @@ class UserInterface:
                     "Select dataset type", ("separate", "combined")
                 )
                 self.is_tuned = st.toggle("Hyperparameter Tuned", value=False)
-                self.is_pca = st.toggle("PCA Applied", value=False)
-                self.load_test_data()
+                if self.selected_model in [
+                    "Recurrent Neural Network",
+                    "BertForClassification-Base",
+                    "BertForClassification-Large",
+                    "GPT3.5",
+                    "Rule-Based Mean Centroid",
+                    "Rule-Based Cosine Similarity",
+                ]:
+                    self.load_model_results()
+                else:
+                    self.load_data(self.selected_embedding, self.dataset_type)
+
                 self.display_all_test_data_points()
 
             else:
@@ -77,24 +153,43 @@ class UserInterface:
                     "Enter the process description here:"
                 )
 
-        with tab2:
-            ### here show hyperparamter tuning results
-            st.write("Showing the results of the classification here")
-            pass
-
         ## here show model evaluation results
-        with tab3:
-            self.display_results()
+        with tab2:
+            display_results()
 
-    def load_test_data(self):
-        test_data_path = self.base_path / "data/evaluation/gold_standard.csv"
-        self.test_data = pd.read_csv(test_data_path)
+    def load_data(self, embedding_type, dataset_type):
+        embedding_path = self.base_path / "data/processed/embeddings"
+        all_embeddings = list(embedding_path.glob("*.pkl"))
+        filtered_files = [
+            f
+            for f in all_embeddings
+            if f"test_{dataset_type}" in str(f)
+            and str(f).startswith(str(embedding_path / embedding_type))
+        ]
+        if not filtered_files:
+            raise FileNotFoundError(
+                f"No embeddings found for type {embedding_type} and dataset {dataset_type}"
+            )
+        embedding = load_pickle(filtered_files[0])
+        self.processes = embedding["Process"].unique().tolist()
+        self.test_data = embedding
+
+    # TODO add hyperparamter tuned results of RNN and datatype criteria to display proper results
+    def load_model_results(self):
+        model_results_path = (
+            self.base_path
+            / "references"
+            / "model results"
+            / "test_data_with_advanced_predictions.csv"
+        )
+        self.test_data = pd.read_csv(model_results_path)
         self.processes = self.test_data["Process"].unique().tolist()
 
     def display_all_test_data_points(self):
         process_options = ["All Processes"] + self.processes
         selected_process = st.selectbox("Select a Process", process_options)
 
+        # filter data based on the selected process
         filtered_data = (
             self.test_data
             if selected_process == "All Processes"
@@ -116,105 +211,201 @@ class UserInterface:
 
             # Concatenate all the texts related to the process into one document
             concatenated_texts = "\n\n".join(filtered_data["Text"])
-            correct_labels = filtered_data["Label"].tolist()
+
             st.text_area(
                 "All Texts", value=concatenated_texts, height=600, disabled=True
             )
             self.text_input = concatenated_texts
 
             if st.button("Classify"):
-                classification_result = self.classify_text(
-                    self.text_input,
-                    self.process_description,
-                    self.selected_model,
-                    self.selected_embedding,
-                    self.dataset_type,
-                    self.is_tuned,
-                    self.is_pca,
+                results = []
+                # on test set
+                for index, row in filtered_data.iterrows():
+                    if self.selected_model == "BertForClassification-Base":
+                        results.append(
+                            (
+                                index,
+                                row["Text"],
+                                int(row["Bert_Base_Prediction"]),
+                                row["Label"],
+                            )
+                        )
+                    elif self.selected_model == "BertForClassification-Large":
+                        results.append(
+                            (
+                                index,
+                                row["Text"],
+                                int(row["Bert_Large_Prediction"]),
+                                row["Label"],
+                            )
+                        )
+                    elif self.selected_model == "GPT3.5":
+                        results.append(
+                            (
+                                index,
+                                row["Text"],
+                                int(row["GPT_Prediction"]),
+                                row["Label"],
+                            )
+                        )
+                    elif self.selected_model == "Recurrent Neural Network":
+                        prediction_column = (
+                            f"{self.selected_embedding}_RNN_Prediction_Tuned"
+                            if self.is_tuned
+                            else f"{self.selected_embedding}_RNN_Prediction"
+                        )
+                        results.append(
+                            (
+                                index,
+                                row["Text"],
+                                int(row[prediction_column]),
+                                row["Label"],
+                            )
+                        )
+                    elif self.selected_model == "Rule-Based Mean Centroid":
+                        results.append(
+                            (
+                                index,
+                                row["Text"],
+                                int(
+                                    row[
+                                        f"{self.selected_embedding}_Mean_Centroid_Prediction"
+                                    ]
+                                ),
+                                row["Label"],
+                            )
+                        )
+                    elif self.selected_model == "Rule-Based Cosine Similarity":
+                        results.append(
+                            (
+                                index,
+                                row["Text"],
+                                int(
+                                    row[
+                                        f"{self.selected_embedding}_Cosine_Similarity_Prediction"
+                                    ]
+                                ),
+                                row["Label"],
+                            )
+                        )
+                    else:
+                        embeddings = row[5:].values.tolist()
+                        predicted_label = self.classify_text_with_embeddings(
+                            embeddings=embeddings,
+                        )
+                        # Store the results along with the correct label for display later
+                        results.append(
+                            (index, row["Text"], predicted_label, row["Label"])
+                        )
+
+                # Quantitative evaluation
+                true_labels = [label for _, _, _, label in results]
+                predicted_labels = [pred for _, _, pred, _ in results]
+
+                accuracy = accuracy_score(true_labels, predicted_labels)
+                precision = precision_score(
+                    true_labels, predicted_labels, average="weighted"
                 )
+                recall = recall_score(true_labels, predicted_labels, average="weighted")
+                f1 = f1_score(true_labels, predicted_labels, average="weighted")
+                correct_predictions = sum(
+                    t == p for t, p in zip(true_labels, predicted_labels)
+                )
+                incorrect_predictions = len(true_labels) - correct_predictions
 
-                for original_text, predicted_label, correct_label in zip(
-                    filtered_data["Text"], classification_result, correct_labels
-                ):
-                    is_correct = predicted_label == correct_label
-                    color = "green" if is_correct else "red"
+                st.subheader("Classification Metrics")
+                with st.container():
+                    col1, col2, col3, col4, col5, col6 = st.columns([1, 1, 1, 1, 1, 1])
+                    with col1:
+                        st.metric(label="Accuracy", value=round(accuracy, 2))
+                    with col2:
+                        st.metric(
+                            label="Precision (Weighted)", value=round(precision, 2)
+                        )
+                    with col3:
+                        st.metric(label="Recall (Weighted)", value=round(recall, 2))
+                    with col4:
+                        st.metric(label="F1 Score (Weighted)", value=round(f1, 2))
+                    with col5:
+                        st.metric(
+                            label="Correct Predictions", value=correct_predictions
+                        )
+                    with col6:
+                        st.metric(
+                            label="Incorrect Predictions", value=incorrect_predictions
+                        )
 
-                    st.markdown(
-                        f"""
-                        <style>
-                        .reportview-container .markdown-text-container {{
-                            font-family: sans-serif;
-                        }}
-                        .text_area {{
-                            border: 1px solid #ced4da;
-                            padding: 10px 15px;
-                            font-size: 16px;
-                            line-height: 1.5;
-                            color: #495057;
-                            background-color: #fff;
-                            border-radius: 4px;
-                            resize: none;
-                            box-shadow: inset 0 1px 2px rgba(0,0,0,.075);
-                            margin-bottom: 10px;
-                            overflow: auto;
-                        }}
-                        .text_area:focus {{
-                            border-color: #80bdff;
-                            outline: 0;
-                            box-shadow: inset 0 1px 2px rgba(0,0,0,.075), 0 0 5px rgba(128,189,255,.5);
-                        }}
-                        </style>
-                        <textarea readonly class="text_area" style="width: 100%; min-height: 100px; overflow: auto;">{original_text}</textarea>
-                        <div style="color: {color}; font-size: 0.9em; margin-top: 5px;">
-                            <strong>Model predicted:</strong> {predicted_label}, <strong>Ground truth:</strong> {correct_label}
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
+                # Sort the results to show the wrongly predicted results first
+                sorted_results = sorted(results, key=lambda x: x[2] == x[3])
+
+                # Qualitative evaluation
+                st.subheader("Classification Results")
+                for (
+                    index,
+                    original_text,
+                    predicted_label,
+                    correct_label,
+                ) in sorted_results:
+                    with st.container():
+                        col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
+                        with col1:
+                            st.text_area(
+                                "Text",
+                                value=original_text,
+                                height=75,
+                                key=f"text_{index}",
+                            )
+                        with col2:
+                            # Remove the brackets from the label for display
+                            st.metric(label="Predicted", value=predicted_label)
+                        with col3:
+                            st.metric(label="Actual", value=correct_label)
+                        with col4:
+                            st.caption("Status")
+                            if predicted_label == correct_label:
+                                st.success("Correctly Predicted")
+                            else:
+                                st.error("Wrongly Predicted")
+                    st.divider()
+
+                # TODO for new text
+                # classification_result = self.classify_text(
+                #     self.text_input,
+                #     self.process_description,
+                #     self.selected_model,
+                #     self.selected_embedding,
+                #     self.dataset_type,
+                #     self.is_tuned,
+
+                # )
+
         else:
             st.write("No data available for the selected process.")
 
-    def display_results(self):
-        model_results_dir = self.base_path / "references" / "model results"
-        feature_importance_dir = self.base_path / "references" / "feature importance"
+    def classify_text_with_embeddings(
+        self,
+        embeddings,
+    ):
+        request_data = {
+            "model_name": self.selected_model,
+            "embedding_name": self.selected_embedding,
+            "dataset_type": self.dataset_type,
+            "is_tuned": self.is_tuned,
+            "embeddings": embeddings,
+        }
 
-        model_results_files = list(model_results_dir.glob("*.csv"))
-        feature_importance_files = list(feature_importance_dir.glob("*.csv"))
+        print("Sending the following data to /classify/ endpoint:", request_data)
 
-        selected_model_file = st.selectbox(
-            "Select a model result file", model_results_files
-        )
-        if selected_model_file:
-            df_model_results = pd.read_csv(selected_model_file)
+        # Send request to FastAPI server
+        response = requests.post(f"{self.api_url}/classify/", json=request_data)
+        if response.status_code == 200:
+            return response.json()["classification"]
+        else:
+            st.error(f"Error in classification: {response.status_code}")
+            return None
 
-            selected_columns = st.multiselect(
-                "Select columns to display",
-                df_model_results.columns.tolist(),
-                default=df_model_results.columns.tolist(),
-            )
-            df_model_results = df_model_results[selected_columns]
-            st.dataframe(
-                df_model_results.sort_values(by=selected_columns[0], ascending=True)
-            )
-
-        selected_feature_file = st.selectbox(
-            "Select a feature importance file", feature_importance_files
-        )
-        if selected_feature_file:
-            df_feature_importance = pd.read_csv(selected_feature_file)
-            selected_columns = st.multiselect(
-                "Select columns to display",
-                df_feature_importance.columns.tolist(),
-                default=df_feature_importance.columns.tolist(),
-            )
-            df_feature_importance = df_feature_importance[selected_columns]
-            st.dataframe(
-                df_feature_importance.sort_values(
-                    by=selected_columns[0], ascending=True
-                )
-            )
-
-    def classify_text(
+    # method for new text
+    def classify_new_text(
         self,
         text_input,
         process_description,
@@ -222,7 +413,6 @@ class UserInterface:
         selected_embedding,
         dataset_type,
         is_tuned,
-        is_pca,
     ):
         request_data = {
             "text_passage": text_input,
@@ -231,7 +421,6 @@ class UserInterface:
             "embedding_name": selected_embedding,
             "dataset_type": dataset_type,
             "is_tuned": is_tuned,
-            "is_pca": is_pca,
         }
         print(request_data)
 
@@ -242,9 +431,6 @@ class UserInterface:
         else:
             st.error("Error in classification")
             return None
-
-
-
 
 if __name__ == "__main__":
     backend_env_url = os.getenv('BACKEND_URL') or "http://localhost:8000"

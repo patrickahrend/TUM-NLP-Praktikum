@@ -2,14 +2,18 @@
 import logging
 import pickle
 from pathlib import Path
+from typing import Optional, List
+
+import numpy as np
 
 # Server import
 import uvicorn
 
 # API imports
 from fastapi import FastAPI, HTTPException
-from features.build_word_embedding import EmbeddingProcessor
-from pydantic import BaseModel
+
+# from features.build_word_embedding import EmbeddingProcessor
+from pydantic import BaseModel, ValidationError
 
 # Logging
 logging.basicConfig(level=logging.INFO)
@@ -18,44 +22,34 @@ logger = logging.getLogger(__name__)
 
 # Request Model
 class ClassificationRequest(BaseModel):
-    text_passage: str
-    process_description: str
+    text_passage: Optional[str] = None
+    process_description: Optional[str] = None
     model_name: str
     embedding_name: str
     dataset_type: str
     is_tuned: bool
-    is_pca: bool
+    embeddings: Optional[List[float]] = None
 
 
 class ModelAPI:
     def __init__(self, model_path: Path):
         self.model_path = model_path
-        self.embedding_processor = EmbeddingProcessor()
+        # self.embedding_processor = EmbeddingProcessor()
 
     def load_model(
         self,
         model_name,
         embedding_name,
         is_tuned,
-        is_pca,
         dataset_type,
     ):
-        dataset_dir = "pca" if is_pca else "normal"
         tuned_dir = "tuned" if is_tuned else "no_tuning"
-        embedding_mapping = {
-            "word2vec": "w2v",
-            "glove": "glove",
-            "bert": "bert",
-            "gpt": "gpt",
-            "fasttext": "ft",
-            "tfidf": "tfidf",
-        }
         model_file = (
             self.model_path
-            / dataset_dir
+            / "trained_models"
             / dataset_type
             / tuned_dir
-            / embedding_mapping[embedding_name]
+            / embedding_name
             / f"{model_name}.pkl"
         )
         if model_file.exists():
@@ -101,34 +95,45 @@ app = FastAPI()
 project_dir = Path(__file__).resolve().parents[2]
 model_path = project_dir / "models"
 model_api = ModelAPI(model_path)
-model_api.embedding_processor = EmbeddingProcessor()
+# model_api.embedding_processor = EmbeddingProcessor()
 
 
 @app.post("/classify/")
 async def classify(request: ClassificationRequest):
-    logger.info(f"Received request: {request}")
+    logger.info(f"Received request with body: {request}")
     try:
+        request_object = ClassificationRequest.parse_obj(request)
+
         model = model_api.load_model(
             request.model_name,
             request.embedding_name,
             request.is_tuned,
-            request.is_pca,
             request.dataset_type,
         )
         logger.info(model.__repr__() + " loaded")
-        classification_results = model_api.classify(
-            model,
-            request.process_description,
-            request.text_passage,
-            request.embedding_name,
-            request.dataset_type,
-        )
+        if request.embeddings:
+            logger.info("Classification started.")
+            # reshae to 2d array
+            embeddings_2d = np.array(request.embeddings).reshape(1, -1)
+            prediction = model.predict(embeddings_2d)
+            classification_results = int(prediction[0])
 
-        logger.info("Classification completed.")
-        classification_results = [int(result) for result in classification_results]
+        # for new text
+        else:
+            classification_results = model_api.classify(
+                model,
+                request.process_description,
+                request.text_passage,
+                request.embedding_name,
+                request.dataset_type,
+            )
+
+            logger.info("Classification completed.")
+            classification_results = [int(result) for result in classification_results]
 
         return {"classification": classification_results}
-
+    except ValidationError as e:
+        print(e.json())
     except Exception as e:
         logger.exception("Error during classification")
         raise HTTPException(status_code=500, detail=str(e))
