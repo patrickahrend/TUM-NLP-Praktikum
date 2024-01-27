@@ -1,0 +1,374 @@
+{
+  "gpt": {
+    "Logistic_Regression": {
+      "C": 100,
+      "class_weight": {
+        "0": 1,
+        "1": 9
+      },
+      "penalty": "l1",
+      "solver": "liblinear"
+    },
+    "RandomForestClassifier": {
+      "bootstrap": true,
+      "class_weight": {
+        "0": 1,
+        "1": 9
+      },
+      "max_depth": null,
+      "max_features": "log2",
+      "min_samples_leaf": 1,
+      "min_samples_split": 10,
+      "n_estimators": 100
+    },
+    "GaussianNB": {},
+    "DecisionTreeClassifier": {
+      "max_depth": 10,
+      "min_samples_leaf": 4,
+      "min_samples_split": 10
+    },
+    "Perceptron": {
+      "alpha": 0.1,
+      "fit_intercept": true,
+      "max_iter": 1000,
+      "penalty": "l2"
+    },
+    "SVC": {
+      "C": 0.1,
+      "class_weight": {
+        "0": 1,
+        "1": 9
+      },
+      "degree": 5,
+      "gamma": "auto",
+      "kernel": "poly"
+    },
+    "SGDClassifier": {
+      "alpha": 0.1,
+      "fit_intercept": true,
+      "loss": "modified_huber",
+      "max_iter": 1500,
+      "penalty": "l2"
+    },
+    "BernoulliNB": {
+      "alpha": 0.001
+    },
+    "GradientBoostingClassifier": {
+      "learning_rate": 0.01,
+      "max_depth": 3,
+      "min_samples_leaf": 1,
+      "min_samples_split": 5,
+      "n_estimators": 100
+    }
+  },
+  "ft": {
+    "Logistic_Regression": {
+      "C": 0.01,
+      "class_weight": {
+        "0": 1,
+        "1": 9
+      },
+      "penalty": "l1",
+      "solver": "liblinear"
+    },
+    "RandomForestClassifier": {
+      "bootstrap": true,
+      "class_weight": {
+        "0": 1,
+        "1": 9
+      },
+      "max_depth": null,
+      "max_features": "sqrt",
+      "min_samples_leaf": 4,
+      "min_samples_split": 5,
+      "n_estimators": 300
+    },
+    "GaussianNB": {},
+    "DecisionTreeClassifier": {
+      "max_depth": 10,
+      "min_samples_leaf": 2,
+      "min_samples_split": 2
+    },
+    "Perceptron": {
+      "alpha": 0.1,
+      "fit_intercept": true,
+      "max_iter": 1000,
+      "penalty": "l2"
+    },
+    "SVC": {
+      "C": 0.1,
+      "class_weight": {
+        "0": 1,
+        "1": 9
+      },
+      "degree": 3,
+      "gamma": "scale",
+      "kernel": "poly"
+    },
+    "SGDClassifier": {
+      "alpha": 0.1,
+      "fit_intercept": true,
+      "loss": "hinge",
+      "max_iter": 1000,
+      "penalty": "l1"
+    },
+    "BernoulliNB": {
+      "alpha": 0.001
+    },
+    "GradientBoostingClassifier": {
+      "learning_rate": 0.01,
+      "max_depth": 3,
+      "min_samples_leaf": 1,
+      "min_samples_split": 5,
+      "n_estimators": 100
+    }
+  },
+  "w2v": {
+    "Logistic_Regression": {
+      "C": 100,
+      "class_weight": {
+        "0": 1,
+        "1": 9
+      },
+      "penalty": "l1",
+      "solver": "liblinear"
+    },
+    "RandomForestClassifier": {
+      "bootstrap": true,
+      "class_weight": {
+        "0": 1,
+        "1": 9
+      },
+      "max_depth": null,
+      "max_features": "sqrt",
+      "min_samples_leaf": 4,
+      "min_samples_split": 10,
+      "n_estimators": 100
+    },
+    "GaussianNB": {},
+    "DecisionTreeClassifier": {
+      "max_depth": null,
+      "min_samples_leaf": 4,
+      "min_samples_split": 5
+    },
+    "Perceptron": {
+      "alpha": 0.1,
+      "fit_intercept": true,
+      "max_iter": 1000,
+      "penalty": "elasticnet"
+    },
+    "SVC": {
+      "C": 0.1,
+      "class_weight": {
+        "0": 1,
+        "1": 9
+      },
+      "degree": 3,
+      "gamma": "scale",
+      "kernel": "rbf"
+    },
+    "SGDClassifier": {
+      "alpha": 0.0001,
+      "fit_intercept": true,
+      "loss": "modified_huber",
+      "max_iter": 1000,
+      "penalty": "l1"
+    },
+    "BernoulliNB": {
+      "alpha": 0.001
+    },
+    "GradientBoostingClassifier": {
+      "learning_rate": 0.01,
+      "max_depth": 3,
+      "min_samples_leaf": 1,
+      "min_samples_split": 2,
+      "n_estimators": 100
+    }
+  },
+  "glove": {
+    "Logistic_Regression": {
+      "C": 100,
+      "class_weight": {
+        "0": 1,
+        "1": 9
+      },
+      "penalty": "l1",
+      "solver": "liblinear"
+    },
+    "RandomForestClassifier": {
+      "bootstrap": true,
+      "class_weight": {
+        "0": 1,
+        "1": 9
+      },
+      "max_depth": 20,
+      "max_features": "sqrt",
+      "min_samples_leaf": 1,
+      "min_samples_split": 10,
+      "n_estimators": 100
+    },
+    "GaussianNB": {},
+    "DecisionTreeClassifier": {
+      "max_depth": 10,
+      "min_samples_leaf": 2,
+      "min_samples_split": 10
+    },
+    "Perceptron": {
+      "alpha": 0.1,
+      "fit_intercept": true,
+      "max_iter": 1000,
+      "penalty": "l2"
+    },
+    "SVC": {
+      "C": 0.1,
+      "class_weight": {
+        "0": 1,
+        "1": 9
+      },
+      "degree": 3,
+      "gamma": "scale",
+      "kernel": "rbf"
+    },
+    "SGDClassifier": {
+      "alpha": 0.1,
+      "fit_intercept": true,
+      "loss": "hinge",
+      "max_iter": 1500,
+      "penalty": "elasticnet"
+    },
+    "BernoulliNB": {
+      "alpha": 0.001
+    },
+    "GradientBoostingClassifier": {
+      "learning_rate": 0.01,
+      "max_depth": 3,
+      "min_samples_leaf": 1,
+      "min_samples_split": 5,
+      "n_estimators": 100
+    }
+  },
+  "bert": {
+    "Logistic_Regression": {
+      "C": 10,
+      "class_weight": {
+        "0": 1,
+        "1": 9
+      },
+      "penalty": "l1",
+      "solver": "liblinear"
+    },
+    "RandomForestClassifier": {
+      "bootstrap": true,
+      "class_weight": {
+        "0": 1,
+        "1": 9
+      },
+      "max_depth": null,
+      "max_features": "sqrt",
+      "min_samples_leaf": 1,
+      "min_samples_split": 2,
+      "n_estimators": 300
+    },
+    "GaussianNB": {},
+    "DecisionTreeClassifier": {
+      "max_depth": 10,
+      "min_samples_leaf": 2,
+      "min_samples_split": 2
+    },
+    "Perceptron": {
+      "alpha": 0.1,
+      "fit_intercept": true,
+      "max_iter": 1000,
+      "penalty": "l1"
+    },
+    "SVC": {
+      "C": 0.1,
+      "class_weight": {
+        "0": 1,
+        "1": 9
+      },
+      "degree": 3,
+      "gamma": "scale",
+      "kernel": "rbf"
+    },
+    "SGDClassifier": {
+      "alpha": 0.1,
+      "fit_intercept": true,
+      "loss": "modified_huber",
+      "max_iter": 1000,
+      "penalty": "l2"
+    },
+    "BernoulliNB": {
+      "alpha": 1
+    },
+    "GradientBoostingClassifier": {
+      "learning_rate": 0.01,
+      "max_depth": 3,
+      "min_samples_leaf": 1,
+      "min_samples_split": 2,
+      "n_estimators": 100
+    }
+  },
+  "tfidf": {
+    "Logistic_Regression": {
+      "C": 100,
+      "class_weight": {
+        "0": 1,
+        "1": 9
+      },
+      "penalty": "l1",
+      "solver": "liblinear"
+    },
+    "RandomForestClassifier": {
+      "bootstrap": true,
+      "class_weight": {
+        "0": 1,
+        "1": 9
+      },
+      "max_depth": null,
+      "max_features": "log2",
+      "min_samples_leaf": 4,
+      "min_samples_split": 5,
+      "n_estimators": 200
+    },
+    "GaussianNB": {},
+    "DecisionTreeClassifier": {
+      "max_depth": 10,
+      "min_samples_leaf": 2,
+      "min_samples_split": 10
+    },
+    "Perceptron": {
+      "alpha": 0.1,
+      "fit_intercept": true,
+      "max_iter": 1000,
+      "penalty": "l1"
+    },
+    "SVC": {
+      "C": 0.1,
+      "class_weight": {
+        "0": 1,
+        "1": 9
+      },
+      "degree": 3,
+      "gamma": "scale",
+      "kernel": "rbf"
+    },
+    "SGDClassifier": {
+      "alpha": 0.1,
+      "fit_intercept": true,
+      "loss": "modified_huber",
+      "max_iter": 1000,
+      "penalty": "l2"
+    },
+    "BernoulliNB": {
+      "alpha": 1
+    },
+    "GradientBoostingClassifier": {
+      "learning_rate": 0.01,
+      "max_depth": 3,
+      "min_samples_leaf": 4,
+      "min_samples_split": 2,
+      "n_estimators": 100
+    }
+  }
+}

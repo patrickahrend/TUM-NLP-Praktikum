@@ -1,0 +1,55 @@
+model,data,best_params,best_score
+Logistic_Regression,gpt,"{'C': 100, 'class_weight': 'balanced', 'penalty': 'l1', 'solver': 'liblinear'}",0.3421463379547212
+RandomForestClassifier,gpt,"{'bootstrap': True, 'class_weight': None, 'max_depth': None, 'max_features': 'log2', 'min_samples_leaf': 1, 'min_samples_split': 10, 'n_estimators': 100}",0.9113250975526425
+GaussianNB,gpt,{},0.6981154807502112
+DecisionTreeClassifier,gpt,"{'max_depth': 10, 'min_samples_leaf': 4, 'min_samples_split': 10}",0.8129650608692524
+Perceptron,gpt,"{'alpha': 0.1, 'fit_intercept': True, 'max_iter': 1000, 'penalty': 'l2'}",0.9059358759957563
+SVC,gpt,"{'C': 0.1, 'class_weight': None, 'degree': 5, 'gamma': 'auto', 'kernel': 'poly'}",0.9149179119238999
+SGDClassifier,gpt,"{'alpha': 0.1, 'fit_intercept': True, 'loss': 'modified_huber', 'max_iter': 1500, 'penalty': 'l2'}",0.8981532430634227
+BernoulliNB,gpt,{'alpha': 0.001},0.8963496430562298
+GradientBoostingClassifier,gpt,"{'learning_rate': 0.01, 'max_depth': 3, 'min_samples_leaf': 1, 'min_samples_split': 5, 'n_estimators': 100}",0.9005466544388699
+Logistic_Regression,ft,"{'C': 0.01, 'class_weight': None, 'penalty': 'l1', 'solver': 'liblinear'}",0.9119256981532431
+RandomForestClassifier,ft,"{'bootstrap': True, 'class_weight': None, 'max_depth': None, 'max_features': 'sqrt', 'min_samples_leaf': 4, 'min_samples_split': 5, 'n_estimators': 300}",0.9113250975526425
+GaussianNB,ft,{},0.867610724496952
+DecisionTreeClassifier,ft,"{'max_depth': 10, 'min_samples_leaf': 2, 'min_samples_split': 2}",0.7615795436154718
+Perceptron,ft,"{'alpha': 0.1, 'fit_intercept': True, 'max_iter': 1000, 'penalty': 'l2'}",0.8574292855729981
+SVC,ft,"{'C': 0.1, 'class_weight': None, 'degree': 3, 'gamma': 'scale', 'kernel': 'poly'}",0.9119256981532431
+SGDClassifier,ft,"{'alpha': 0.1, 'fit_intercept': True, 'loss': 'hinge', 'max_iter': 1000, 'penalty': 'l1'}",0.9119238999478521
+BernoulliNB,ft,{'alpha': 0.001},0.9107262951574329
+GradientBoostingClassifier,ft,"{'learning_rate': 0.01, 'max_depth': 3, 'min_samples_leaf': 1, 'min_samples_split': 5, 'n_estimators': 100}",0.9107262951574329
+Logistic_Regression,w2v,"{'C': 100, 'class_weight': None, 'penalty': 'l1', 'solver': 'liblinear'}",0.7879502256747765
+RandomForestClassifier,w2v,"{'bootstrap': True, 'class_weight': None, 'max_depth': None, 'max_features': 'sqrt', 'min_samples_leaf': 4, 'min_samples_split': 10, 'n_estimators': 100}",0.9131251011490533
+GaussianNB,w2v,{},0.8514142885400371
+DecisionTreeClassifier,w2v,"{'max_depth': None, 'min_samples_leaf': 4, 'min_samples_split': 5}",0.8004549459639281
+Perceptron,w2v,"{'alpha': 0.1, 'fit_intercept': True, 'max_iter': 1000, 'penalty': 'elasticnet'}",0.8879718041394687
+SVC,w2v,"{'C': 0.1, 'class_weight': None, 'degree': 3, 'gamma': 'scale', 'kernel': 'rbf'}",0.9113250975526425
+SGDClassifier,w2v,"{'alpha': 0.0001, 'fit_intercept': True, 'loss': 'modified_huber', 'max_iter': 1000, 'penalty': 'l1'}",0.8957562352771934
+BernoulliNB,w2v,{'alpha': 0.001},0.9095286903670138
+GradientBoostingClassifier,w2v,"{'learning_rate': 0.01, 'max_depth': 3, 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 100}",0.9101256945568323
+Logistic_Regression,glove,"{'C': 100, 'class_weight': None, 'penalty': 'l1', 'solver': 'liblinear'}",0.4493805182427937
+RandomForestClassifier,glove,"{'bootstrap': True, 'class_weight': None, 'max_depth': 20, 'max_features': 'sqrt', 'min_samples_leaf': 1, 'min_samples_split': 10, 'n_estimators': 100}",0.9119256981532431
+GaussianNB,glove,{},0.8309597022171872
+DecisionTreeClassifier,glove,"{'max_depth': 10, 'min_samples_leaf': 2, 'min_samples_split': 10}",0.775341209472946
+Perceptron,glove,"{'alpha': 0.1, 'fit_intercept': True, 'max_iter': 1000, 'penalty': 'l2'}",0.8484328640017262
+SVC,glove,"{'C': 0.1, 'class_weight': None, 'degree': 3, 'gamma': 'scale', 'kernel': 'rbf'}",0.9113250975526425
+SGDClassifier,glove,"{'alpha': 0.1, 'fit_intercept': True, 'loss': 'hinge', 'max_iter': 1500, 'penalty': 'elasticnet'}",0.9119238999478521
+BernoulliNB,glove,{'alpha': 0.001},0.8921490352628076
+GradientBoostingClassifier,glove,"{'learning_rate': 0.01, 'max_depth': 3, 'min_samples_leaf': 1, 'min_samples_split': 5, 'n_estimators': 100}",0.8975508442574311
+Logistic_Regression,bert,"{'C': 10, 'class_weight': None, 'penalty': 'l1', 'solver': 'liblinear'}",0.45249321177464885
+RandomForestClassifier,bert,"{'bootstrap': True, 'class_weight': None, 'max_depth': None, 'max_features': 'sqrt', 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 300}",0.9113250975526425
+GaussianNB,bert,{},0.7417381453309597
+DecisionTreeClassifier,bert,"{'max_depth': 10, 'min_samples_leaf': 2, 'min_samples_split': 2}",0.7567621513729297
+Perceptron,bert,"{'alpha': 0.1, 'fit_intercept': True, 'max_iter': 1000, 'penalty': 'l1'}",0.903540666414918
+SVC,bert,"{'C': 0.1, 'class_weight': None, 'degree': 3, 'gamma': 'scale', 'kernel': 'rbf'}",0.9113250975526425
+SGDClassifier,bert,"{'alpha': 0.1, 'fit_intercept': True, 'loss': 'modified_huber', 'max_iter': 1000, 'penalty': 'l2'}",0.9071334807861755
+BernoulliNB,bert,{'alpha': 1},0.8897700095304885
+GradientBoostingClassifier,bert,"{'learning_rate': 0.01, 'max_depth': 3, 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 100}",0.8993490496484509
+Logistic_Regression,tfidf,"{'C': 100, 'class_weight': None, 'penalty': 'l1', 'solver': 'liblinear'}",0.4595907284530039
+RandomForestClassifier,tfidf,"{'bootstrap': True, 'class_weight': None, 'max_depth': None, 'max_features': 'log2', 'min_samples_leaf': 4, 'min_samples_split': 5, 'n_estimators': 200}",0.9107262951574329
+GaussianNB,tfidf,{},0.5653198108287929
+DecisionTreeClassifier,tfidf,"{'max_depth': 10, 'min_samples_leaf': 2, 'min_samples_split': 10}",0.7327561094028159
+Perceptron,tfidf,"{'alpha': 0.1, 'fit_intercept': True, 'max_iter': 1000, 'penalty': 'l1'}",0.907732283181385
+SVC,tfidf,"{'C': 0.1, 'class_weight': None, 'degree': 3, 'gamma': 'scale', 'kernel': 'rbf'}",0.9113250975526425
+SGDClassifier,tfidf,"{'alpha': 0.1, 'fit_intercept': True, 'loss': 'modified_huber', 'max_iter': 1000, 'penalty': 'l2'}",0.9095286903670138
+BernoulliNB,tfidf,{'alpha': 1},0.8508280735825646
+GradientBoostingClassifier,tfidf,"{'learning_rate': 0.01, 'max_depth': 3, 'min_samples_leaf': 4, 'min_samples_split': 2, 'n_estimators': 100}",0.8885724047400693
