@@ -94,9 +94,19 @@ I included a requirements.txt file in the frontend folder, as it only needs 3 pa
 docker-compose up
 ```
 Under localhost:8501 you can see the frontend. 
+With the following command you go into the docker to run the make file in there as well:
+```bash
+docker exec -it <container-id> /bin/bash
+```
+The container id can be found with docker container ls.
 
-In the backend docker you can run the make file with the different steps of the pipeline as well.
 
+### Make File
+The following commands have to be run to reproduce the pipeline.
+Turn raw data into preprocessed data:
+```bash
+make data
+```
 
 
 ---

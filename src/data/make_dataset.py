@@ -14,10 +14,11 @@ from data_processor import DataProcessor
 @click.argument("output_filepath", type=click.Path())
 def main(input_filepath, output_filepath):
     """Runs data processing scripts to turn raw data from (../raw) into
-    cleaned data ready to be analyzed (saved in ../processed).
+    cleaned data ready to be analyzed (saved in ../processed andin ../evaluation ) under the names training_data_preposssed.csv,
+    final_labels_with_descriptions.xlsx and gold_standard_preprocessed.csv .
     """
     logger = logging.getLogger(__name__)
-    logger.info("making final data set from raw data")
+    logger.info("Making final data set from raw data")
     project_dir = Path(__file__).resolve().parents[2]
     data_file_path = project_dir / "data/raw/Use_Case_Data(2).xlsx"
 
@@ -130,17 +131,13 @@ def main(input_filepath, output_filepath):
         project_dir / "data/evaluation/gold_standard_preprocessed.csv", index=False
     )
 
-    print(f"Length of all_processed_data: {len(all_processed_data)}")
-    print(f"Length of gold_standard_subset: {len(gold_standard_subset)}")
-    print(f"Length of train_data: {len(train_data)}")
+    logger.info(f"Length of all_processed_data: {len(all_processed_data)}")
+    logger.info(f"Length of gold_standard_subset: {len(gold_standard_subset)}")
+    logger.info(f"Length of train_data: {len(train_data)}")
 
 
 if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.INFO, format=log_fmt)
-
-    # find .env automagically by walking up directories until it's found, then
-    # load up the .env entries as environment variables
     load_dotenv(find_dotenv())
-
     main()
