@@ -20,7 +20,7 @@ def main(input_filepath, output_filepath):
     logger = logging.getLogger(__name__)
     logger.info("Making final data set from raw data")
     project_dir = Path(__file__).resolve().parents[2]
-    data_file_path = project_dir / "data/raw/Use_Case_Data(2).xlsx"
+    data_file_path = project_dir / "data/raw/Use_Case_Data_With_All_Proccesses.xlsx"
 
     process_to_file = {
         "Know Your Customer": project_dir
