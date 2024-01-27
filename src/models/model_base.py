@@ -21,3 +21,6 @@ class ModelBase:
 
     def predict(self, X):
         return self.model.predict(X)
+
+    def set_params(self, **params):
+        self.model.set_params(**params)

@@ -1,3 +1,4 @@
+import json
 import os
 import pickle
 import sys
@@ -24,7 +25,7 @@ from model_classes import (
     BernoulliNBModel,
     GradientBoostingModel,
 )
-from tune_hyperparameters import param_grids, tune_hyperparameters
+from src.models.tune_hyperparameters import param_grids, tune_hyperparameters
 
 
 class ModelManager:
@@ -49,8 +50,10 @@ class ModelManager:
         self,
         save_directory,
         tune,
+        hyperparamater_path,
     ):
         save_directory.mkdir(parents=True, exist_ok=True)
+        hyperparameters_file = hyperparamater_path / "hyperparameters.json"
 
         tuning_results = []
         for embedding_name, (X_train, X_test) in self.embeddings.items():
@@ -59,38 +62,80 @@ class ModelManager:
 
             y_train, y_test = self.labels
 
-            for constructor in self.model_constructor:
-                model = constructor()
-                model_name = model.model_name
-                print(f"Training {model_name} with {embedding_name} embeddings")
+            if tune:
+                # Case actually doing hyperparameter tuning
+                if hyperparamater_path.exists() and not (
+                    hyperparameters_file.is_file()
+                ):
+                    for constructor in self.model_constructor:
+                        model = constructor()
+                        model_name = model.model_name
+                        print(f"Training {model_name} with {embedding_name} embeddings")
 
-                # # Hyperparameter tuning
-                if tune:
-                    best_model, best_params, best_score = tune_hyperparameters(
-                        model.model, param_grids[model_name], X_train, y_train, cv=5
+                        # Hyperparameter tuning
+                        best_model, best_params, best_score = tune_hyperparameters(
+                            model.model, param_grids[model_name], X_train, y_train, cv=5
+                        )
+
+                        model.model = best_model
+
+                        tuning_results.append(
+                            {
+                                "model": model_name,
+                                "data": embedding_name,
+                                "best_params": best_params,
+                                "best_score": best_score,
+                            }
+                        )
+
+                # Case for loading pre-tuned hyperparameters
+                elif hyperparameters_file.is_file():
+                    with open(hyperparameters_file, "r") as f:
+                        hyperparameters = json.load(f)
+
+                    for constructor in self.model_constructor:
+                        model = constructor()
+                        model_name = model.model_name
+                        print(
+                            f"Training {model_name} with {embedding_name} embeddings using pre-tuned hyperparameters"
+                        )
+
+                        # Load pre-tuned hyperparameters
+                        if model_name in hyperparameters.get(embedding_name, {}):
+                            model_params = hyperparameters[embedding_name][model_name]
+                            # Convert class_weight keys to integers as they are saved as strings in json
+                            if "class_weight" in model_params:
+                                model_params["class_weight"] = {
+                                    int(k): v
+                                    for k, v in model_params["class_weight"].items()
+                                }
+
+                            model.model.set_params(**model_params)
+                            print(
+                                f"Pre-tuned parameters for {model_name}: {model_params}"
+                            )
+
+                        model.model.fit(X_train, y_train)
+                        model.save_model(embedding_save_dir)
+
+            # Case for no hyperparameter tuning
+            else:
+                for constructor in self.model_constructor:
+                    model = constructor()
+                    model_name = model.model_name
+                    print(
+                        f"Training {model_name} with {embedding_name} embeddings with default parameters"
                     )
-
-                    model.model = best_model
-
-                    tuning_results.append(
-                        {
-                            "model": model_name,
-                            "data": embedding_name,
-                            "best_params": best_params,
-                            "best_score": best_score,
-                        }
-                    )
-                else:
                     model.model.fit(X_train, y_train)
+                    model.save_model(embedding_save_dir)
 
-                model.save_model(embedding_save_dir)
-
-        if tune:
-            tuning_results_df = pd.DataFrame(tuning_results)
-            tuning_results_df.to_csv(
-                save_directory / f"tuning_results.csv",
-                index=False,
-            )
+            # Save tuning results if there was hyperparameter tuning
+            if tune and tuning_results:
+                tuning_results_df = pd.DataFrame(tuning_results)
+                tuning_results_df.to_csv(
+                    save_directory / f"hyperparameter_tuning_results.csv",
+                    index=False,
+                )
 
     def evaluate_models(self, save_directory):
         columns = [
@@ -169,20 +214,6 @@ def load_embeddings(embeddings_path):
     return embeddings
 
 
-def load_labels(labels_path):
-    train_labels_df = pd.read_csv(
-        labels_path / "processed/training_data_preprocessed.csv"
-    )
-    test_labels_df = pd.read_csv(
-        labels_path / "evaluation/gold_standard_preprocessed.csv"
-    )
-
-    y_train = train_labels_df["Label"]
-    y_test = test_labels_df["Label"]
-
-    return y_train, y_test
-
-
 def load_pickle(file_path):
     with open(file_path, "rb") as file:
         return pickle.load(file)
@@ -190,41 +221,66 @@ def load_pickle(file_path):
 
 def main():
     project_dir = Path(__file__).resolve().parents[2]
+    print(project_dir)
 
     is_tuned = False
-    dataset_variant = "separate"  # or "combined"
-    use_pca_variant = False  # or True
-    dataset_dir = "pca" if use_pca_variant else "normal"
+    dataset_variant = "combined"  # combined or separate
     tuned_dir = "tuned" if is_tuned else "no_tuning"
-
-    labels_path = project_dir / "data/"
-
-    # Load labels
-    y_train, y_test = load_labels(labels_path)
 
     # Initialize a dictionary to store the datasets
     embeddings = {}
 
-    embedding_path = (
-        project_dir / f"data/processed/datasets/{dataset_dir}/{dataset_variant}"
-    )
-    # Process each type of embedding for Dataset 2
-    for emb_type in ["gpt", "ft", "w2v", "glove", "bert", "tfidf"]:
-        # Load the dataset for separate process and legal text embeddings
-        X_train = load_pickle(embedding_path / f"{emb_type}_train.pkl")
-        X_test = load_pickle(embedding_path / f"{emb_type}_test.pkl")
+    embedding_files = os.listdir(project_dir / "data/processed/embeddings")
 
-        # Add the dataset to the dictionary
-        embeddings[emb_type] = (X_train, X_test)
+    # Process each type of embedding for Dataset 2
+    for emb_type in ["gpt", "fasttext", "word2vec", "glove", "bert", "tfidf"]:
+        print(emb_type)
+        variant_files = [
+            f
+            for f in embedding_files
+            if dataset_variant in f and f.startswith(emb_type)
+        ]
+        print("Variant Files here", variant_files)
+
+        training_data = None
+        test_data = None
+
+        for file_name in variant_files:
+            if "train" in file_name:
+                training_data = load_pickle(
+                    project_dir / f"data/processed/embeddings/{file_name}"
+                )
+            elif "test" in file_name:
+                test_data = load_pickle(
+                    project_dir / f"data/processed/embeddings/{file_name}"
+                )
+        if training_data is not None and test_data is not None:
+            y_train = training_data["Label"]
+            y_test = test_data["Label"]
+            columns_to_drop = [
+                "Text",
+                "Label",
+                "Process",
+                "Process_description",
+                "Combined_Text",
+            ]
+            X_train = training_data.drop(columns=columns_to_drop)
+            X_test = test_data.drop(columns=columns_to_drop)
+
+            # Add the dataset to the dictionary
+            embeddings[emb_type] = (X_train, X_test)
+        else:
+            print(f"Training or test data not found for {emb_type} embeddings.")
 
     model_manager = ModelManager(embeddings, (y_train, y_test))
 
-    models_path = project_dir / "models" / dataset_dir / dataset_variant / tuned_dir
-
-    model_manager.train_and_save_models(
-        models_path,
-        is_tuned,
+    models_path = (
+        project_dir / "models" / "trained_models" / dataset_variant / tuned_dir
     )
+
+    hparams_path = project_dir / "data/processed/hyperparameters"
+
+    model_manager.train_and_save_models(models_path, is_tuned, hparams_path)
 
     results_df = model_manager.evaluate_models(models_path)
     timestamp = datetime.now().strftime("%m%d-%H%M")
@@ -233,7 +289,7 @@ def main():
         details = "_".join(sys.argv[1:])
     else:
         details = input(
-            "Add details of this experiement e.g which dataset, which features: "
+            "Add details of this experiment e.g which dataset, which features: "
         )
 
     results_filename = f"model_evaluation_results_{details}_{timestamp}.csv"
