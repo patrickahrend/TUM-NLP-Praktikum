@@ -6,7 +6,7 @@ I worked on Case A with an ML Approach.
 
 ## Project Organization
 
-    ├── Makefile           <- Makefile with commands like `make data` or `make train`
+    ├── Makefile           <- Makefile with commands like `make data` or `make models`
     ├── README.md          <- The top-level README for documentation and instruction on how to run the code.
     ├── data
     │   ├── evaluation     <- Gold Standard of the project for evaluation.
@@ -23,46 +23,63 @@ I worked on Case A with an ML Approach.
     │   ├── presentation     <- Intermediate and Final presentation of the project.
     │   ├── report
     │   └── graphics     <- Graphics used in the report.
-    ├── models             <- Trained and serialized models, model predictions, or model summaries
-    │   ├── embeddings   <- Glove, Tf-IDF, Word2Vec and Fasttext models used for Embedding step.    
-    │   ├── legal_text   <- Models trained on solely the legal text.
-    │   └── trained_models <- Models trained on combined seperate approach either fine-tuned or with default parameters.
     │
-    ├── notebooks          <- Jupyter notebooks. Contains utils notebooks like merging predictions, but also all the Notebooks, which I ran on Google Colab
-    │   │   ├── Advanced Approach      
-    │   │   └── Outlook Approach
+    ├── docker-compose.yml <- Docker compose file to run the frontend and backend together
+    ├── Dockerfile_backend        <- Dockerfile for the backend    
     │
-    ├── references         <- Data dictionaries, manuals, and all other explanatory materials to understand the data better.
+    ├── models             <- Models trained on different embeddings as well as the embeddings models itself     │   ├── embeddings   
+    │   ├── legal_text   
+    │   └── trained_models 
+    │
+    ├── notebooks          <-  Contains notebooks like merging predictions, but also all the notebooks, which I ran on Google Colab
+    │   ├── utilities
+    │   ├── advanced approach      
+    │   └── outlook approach
+    │
+    ├── references         <- Data dictionaries with all results and other explanatory materials.
     │   ├── umap     <- Umap html files for visualization of the word embeddings. _combined is from the concateated process description and legal text prior to embeddings. 
-    │                         _seperate is from the seperate embeddings, while single uses on umap to visualse it and _multiple used multiple to display the different embeddings in one plot. 
-    │                         _increases is where I increased the vector size in order to test for better results. _legal_text is simple the legal text embeddings visualized.    
-    │
+    │   │                  _seperate is from the seperate embeddings, while single uses on umap to visualse it and _multiple used multiple to display the different embeddings in one plot. 
+    │   │                  _increases is where I increased the vector size in order to test for better results. _legal_text is simple the legal text embeddings visualized.    
+    │   ├── model results    <- Predictions of the models on the gold standard. 
+    │   └── feature importance   <- Feature importance of cosinus similarity and word frequency 
+    │   
     ├── requirements.txt   <- The requirements file for reproducing the environment
     │
+    ├── frontend           <- Frontend to display the results of the models and call the api to get predictions for new text    
+    │   ├── Dockerfile   
+    │   ├── requirment.txt <- Requirements of frontend for docker  
+    │   └── streamlit_app.py 
     │
     ├── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
     ├── src                <- Source code for use in this project.
+    │   ├── api.py    <- API for the models to get predictions for new text
+    │   │   └── api.py
+    │   │
     │   ├── __init__.py    <- Makes src a Python module
     │   │
     │   ├── data           <- Scripts to download or generate data
+    │   │   ├── data_processor.py
     │   │   └── make_dataset.py
     │   │
     │   ├── features       <- Scripts to turn raw data into features for modeling and create word embeddings
-    │   │   └── build_features.py
+    │   │   ├── not used <- Contains script for feature importance of cosinus similarity and word frequency
+    │   │   ├── make_embeddings.py
     │   │   └── build_word_embeddings.py
     │   │
-    │   ├── models         <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
+    │   ├── models         <- Scripts to train models and then use trained models to make predictions on gold standard
+    │   │   ├── build_models.py    
+    │   │   ├── make_models.py
+    │   │   ├── model_base.py
+    │   │   ├── model_classes.py
+    │   │   └── tune_hyperparameters.py
     │   │
     │   └── visualization  <- Scripts to create exploratory and results-oriented visualizations as well as visualizations of the word embeddings
-    │       └── visualize_map.py
+    │       └── visualize_umap.py
     └
 
 The "advanced approaches" are in the notebook folder, but I trained them in GoogleColab as I need computation resources to fine-tune and hyperparameter tune
 them. Lastly I also put the outlook approaches GPT and Rule-based in a Colab notebook for consistency. If you like to run them you can find the links for each method belo, the share link should give you write access
-[Recurrent Neural Network](https://colab.research.google.com/drive/14nG_QaApOO6xSQNUHlBLPSqf_d_S3f4K?usp=sharing,) [BERTForClassification](https://colab.research.google.com/drive/1PXwm66FjTnwStpD-z0NKN8N9KqVxMsmd?usp=sharing), [Rule-based Approach](https://colab.research.google.com/drive/1UiXaIc9w0MBA2ZIIjqw9vVsIwon5yJWL?usp=sharing),
+[Recurrent Neural Network](https://colab.research.google.com/drive/14nG_QaApOO6xSQNUHlBLPSqf_d_S3f4K?usp=sharing,), [BERTForClassification](https://colab.research.google.com/drive/1PXwm66FjTnwStpD-z0NKN8N9KqVxMsmd?usp=sharing), [Rule-based Approach](https://colab.research.google.com/drive/1UiXaIc9w0MBA2ZIIjqw9vVsIwon5yJWL?usp=sharing),
 [GPT Fine-Tuning](https://colab.research.google.com/drive/1gwmay8KdfZieLmVLeNWrVJwavoktwt8J?usp=sharing). 
 You will also need a folder callend nlp, which the same content as in this [folder](https://drive.google.com/drive/folders/1qHmHNIZax_q-aFVHHMODvWGpqElVAhiF?usp=sharing). 
 

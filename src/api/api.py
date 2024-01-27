@@ -12,7 +12,7 @@ import uvicorn
 # API imports
 from fastapi import FastAPI, HTTPException
 
-from src.features.build_word_embedding import EmbeddingProcessor
+from src.features.build_word_embeddings import EmbeddingProcessor
 from pydantic import BaseModel, ValidationError
 
 # Logging
