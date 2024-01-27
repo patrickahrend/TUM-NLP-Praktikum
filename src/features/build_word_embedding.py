@@ -12,7 +12,7 @@ from openai import OpenAI
 from sklearn.feature_extraction.text import TfidfVectorizer
 from transformers import BertTokenizer, BertModel
 
-from .utils_embedding_functions import (
+from utils_embedding_functions import (
     get_sentence_vector_custom,
     get_embeddings_bert,
     get_embeddings_gpt,
@@ -31,10 +31,13 @@ def load_model_if_exists(filepath):
 
 
 def save_pickle(obj, filepath):
+    directory = os.path.dirname(filepath)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
     with open(filepath, "wb") as f:
         pickle.dump(obj, f)
 
-
+@staticmethod
 def load_training_data():
     # Load the training data needed for models like Word2Vec, GloVe, and FastText
     project_dir = Path(__file__).resolve().parents[2]
@@ -44,7 +47,7 @@ def load_training_data():
     # combine process description and legal text to train embeddings on whole corpus
     text = training_data["Process_description"] + " " + training_data["Text"]
 
-    ## Tokenize sentences for fasttext and w2v
+    # Tokenize sentences for fasttext and w2v
     tokenized_sentences = [statement.split() for statement in text]
 
     # Raw sentences for TF-IDF

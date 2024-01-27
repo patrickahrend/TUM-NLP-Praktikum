@@ -107,6 +107,12 @@ Turn raw data into preprocessed data:
 ```bash
 make data
 ```
+Create different embeddings for the different models:
+```bash
+make embeddings
+```
+I decided to run two embeddings approaches, one where the process description and legal text is concatenated and then 
+embedded and one where they are embedded separately and then concatenated. First is called _combined and second _separate.
 
 
 ---

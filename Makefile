@@ -43,7 +43,7 @@ install_spacy_model:
 ## Make Embeddings
 embeddings:
 	@echo "Creating embeddings..."
-	$(PYTHON_INTERPRETER) src/data/make_embeddings.py
+	$(PYTHON_INTERPRETER) src/features/make_embeddings.py
 
 ## Make Dataset
 data: requirements install_spacy_model

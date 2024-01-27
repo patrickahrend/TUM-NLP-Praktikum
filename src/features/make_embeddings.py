@@ -1,3 +1,4 @@
+import logging
 import pickle
 from pathlib import Path
 
@@ -53,7 +54,7 @@ def concat_embeddings_with_df(embedding1, embedding2, embedding1_name, embedding
 def process_and_save_embeddings(
     embedding_processor, df_train, df_test, embedding_type, project_dir
 ):
-    print(f"Computing {embedding_type} embeddings ...")
+    logging.info(f"Computing {embedding_type} embeddings ...")
 
     # dynamically call the right method
     compute_embedding_method = getattr(
@@ -127,6 +128,8 @@ def process_and_save_embeddings(
 
 
 def main():
+    logger = logging.getLogger(__name__)
+    logger.info("Creating Embeddings out of the preprocessed data")
     project_dir = Path(__file__).resolve().parents[2]
     embedding_processor = EmbeddingProcessor()
 
@@ -141,6 +144,7 @@ def main():
     df_train["Combined_Text"] = df_train["Process_description"] + " " + df_train["Text"]
     df_test["Combined_Text"] = df_test["Process_description"] + " " + df_test["Text"]
 
+    logger.info("Training Embeddings models ...")
     # training embeddings models
     embedding_processor.train_model("tfidf")
     embedding_processor.train_model("word2vec")
@@ -152,7 +156,10 @@ def main():
         process_and_save_embeddings(
             embedding_processor, df_train, df_test, embedding_type, project_dir
         )
+    logger.info("Embeddings have been saved in /data/processed/embeddings folder")
 
 
 if __name__ == "__main__":
+    log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    logging.basicConfig(level=logging.INFO, format=log_fmt)
     main()
