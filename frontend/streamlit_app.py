@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -6,8 +7,9 @@ import streamlit as st
 
 
 class UserInterface:
-    def __init__(self, api_url):
+    def __init__(self, api_url, base_path):
         self.api_url = api_url
+        self.base_path= base_path
         self.initialize_app()
         self.text_input = None
         self.selected_model = None
@@ -85,8 +87,7 @@ class UserInterface:
             self.display_results()
 
     def load_test_data(self):
-        base_path = Path(__file__).resolve().parents[1]
-        test_data_path = base_path / "data/evaluation/gold_standard.csv"
+        test_data_path = self.base_path / "data/evaluation/gold_standard.csv"
         self.test_data = pd.read_csv(test_data_path)
         self.processes = self.test_data["Process"].unique().tolist()
 
@@ -174,9 +175,8 @@ class UserInterface:
             st.write("No data available for the selected process.")
 
     def display_results(self):
-        base_path = Path(__file__).parents[1]
-        model_results_dir = base_path / "references" / "model results"
-        feature_importance_dir = base_path / "references" / "feature importance"
+        model_results_dir = self.base_path / "references" / "model results"
+        feature_importance_dir = self.base_path / "references" / "feature importance"
 
         model_results_files = list(model_results_dir.glob("*.csv"))
         feature_importance_files = list(feature_importance_dir.glob("*.csv"))
@@ -244,5 +244,9 @@ class UserInterface:
             return None
 
 
+
+
 if __name__ == "__main__":
-    app = UserInterface("http://localhost:8000")
+    backend_env_url = os.getenv('BACKEND_URL') or "http://localhost:8000"
+    base_path = Path(os.getenv('BASE_PATH')) or Path(__file__).resolve().parents[1]
+    app = UserInterface(backend_env_url, base_path)
