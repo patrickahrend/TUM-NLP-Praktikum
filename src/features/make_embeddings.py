@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from build_word_embeddings import EmbeddingProcessor
+from src.features.build_word_embeddings import EmbeddingProcessor
 
 
 def save_df_with_embeddings(original_df: pd.DataFrame, embeddings: pd.DataFrame, embedding_type: str, filename: Path) -> None:

@@ -7,7 +7,7 @@ from sklearn.tree import DecisionTreeClassifier
 from torch import nn
 from transformers import BertModel
 
-from model_base import ModelBase
+from src.models.model_base import ModelBase
 
 
 class LogisticRegressionModel(ModelBase):

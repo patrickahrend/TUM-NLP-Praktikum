@@ -6,7 +6,7 @@ import click
 import pandas as pd
 from dotenv import find_dotenv, load_dotenv
 
-from data_processor import DataProcessor
+from src.data.data_processor import DataProcessor
 
 
 @click.command()
