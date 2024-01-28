@@ -52,7 +52,7 @@ I worked on Case A with an ML Approach.
     │
     ├── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
     ├── src                <- Source code for use in this project.
-    │   ├── api.py    <- API for the models to get predictions for new text
+    │   ├── api    <- API for the models to get predictions for new text
     │   │   └── api.py
     │   │
     │   ├── __init__.py    <- Makes src a Python module
@@ -72,7 +72,10 @@ I worked on Case A with an ML Approach.
     │   │   ├── model_base.py
     │   │   ├── model_classes.py
     │   │   └── tune_hyperparameters.py
-    │   │
+    │ 
+    │   ├── test    <- Unit tests for pipeline steps 
+    │   │   └── test_pipeline.py     
+    │
     │   └── visualization  <- Scripts to create exploratory and results-oriented visualizations as well as visualizations of the word embeddings
     │       └── visualize_umap.py
     └
@@ -149,8 +152,15 @@ make start-frontend
 The api will be running on localhost:8000 and the frontend on localhost:8501.
 
 For each step I already included the output files in the respective folders, if you want to skip any steps. 
----
 
+---
+## Testing
+I did include unit tests, but not for every function, but for the pipeline steps. After running make data, it checks that 
+the preprocessed files have been created. After running make embeddings, it checks that the embeddings have been created.
+After running make models, it checks that the models have been created for each variant.
+Tests can be found in the src/test folder.
+
+---
 ## Extensions of the project
 
 As this projects was done on a prototype level, there are several extensions that could be done to have fully functional
@@ -164,16 +174,13 @@ product.
   a case distinction in the api to check if this is new text and implementing the embed_new_text function in the 
   embedding class to embed new text. I also mocked how this could look like in the frontend. However, as I saw how time-intensive
   this became, I moved the focus to more relevant topics for the project. 
+- Unit tests for every function in the pipeline. 
 
 ---
 
 ## Best Practises I tried to follow
 - Dynamic Path with Pathlib
 - Pylint and Black as formatting and linter
-- Poetry for dependency management
-- Makefile for reproducibility of whole pipeline with docker
-- Testing (Showed how supposed to be done by unit testing single function, then went one step up and tested each
-  pipeline step )
+- Makefile for reproducibility of whole pipeline 
+- Testings for the pipeline steps 
 - MyPy for type checking
-
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. </small></p>
