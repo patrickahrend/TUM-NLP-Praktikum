@@ -172,5 +172,6 @@ product.
 - Makefile for reproducibility of whole pipeline with docker
 - Testing (Showed how supposed to be done by unit testing single function, then went one step up and tested each
   pipeline step )
+- MyPy for type checking
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. </small></p>

@@ -109,7 +109,7 @@ class ModelAPI:
         list: The classification results.
         """
         legal_passages = text_passage.split("\n\n")
-        classification_results = []
+        classification_results :List[int]= []
         for passage in legal_passages:
             if dataset_type == "separate":
                 combined_embedding_vector = self.embedding_processor.embed_new_text(

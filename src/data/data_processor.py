@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import nltk
 import pandas as pd
 import spacy
@@ -17,7 +19,7 @@ class DataProcessor:
     Turns the raw data from Use Case Data(2).xlsx into the dataset used in the project.
     """
 
-    def __init__(self, excel_filepath, process_to_file, nlp_model="en_core_web_sm"):
+    def __init__(self, excel_filepath: Path, process_to_file: dict, nlp_model: str ="en_core_web_sm"):
         """
         Initializes the DataProcessor object.
 
@@ -30,7 +32,7 @@ class DataProcessor:
         self.process_to_file = process_to_file
         self.nlp = spacy.load(nlp_model)
 
-    def process_matching_data(self, process_name: str, sheet_name: str):
+    def process_matching_data(self, process_name: str, sheet_name: str) -> pd.DataFrame:
         """
         Processes the matching data from the Excel file.
 
@@ -70,7 +72,7 @@ class DataProcessor:
         df_labels["Process_description"] = process_description
         return df_labels
 
-    def read_process_description(self, process_name):
+    def read_process_description(self, process_name) -> str:
         """
         Reads the process description from a file.
 
@@ -84,7 +86,7 @@ class DataProcessor:
             return file.read().strip()
 
     @staticmethod
-    def create_gold_standard_subset(df, sample_sizes):
+    def create_gold_standard_subset(df: pd.DataFrame, sample_sizes:dict) -> (pd.DataFrame, list):
         """
         Creates a gold standard subset from the DataFrame.
 
@@ -112,7 +114,7 @@ class DataProcessor:
         gold_standard_subset = pd.concat(subsets, ignore_index=True)
         return gold_standard_subset, gold_standard_indices
 
-    def preprocess_lemma(self, statements):
+    def preprocess_lemma(self, statements) -> pd.Series:
         """
         Preprocesses the statements by lemmatizing the words.
 
@@ -127,7 +129,7 @@ class DataProcessor:
         )
 
     @staticmethod
-    def preprocess_text_nltk(text):
+    def preprocess_text_nltk(text) -> str:
         """
         Preprocesses the text by tokenizing the words and removing punctuation.
 
@@ -143,7 +145,7 @@ class DataProcessor:
 
         return " ".join(tokens)
 
-    def preprocess_statements_nltk(self, statements):
+    def preprocess_statements_nltk(self, statements) -> pd.Series:
         """
         Preprocesses the statements by applying the preprocess_text_nltk method.
 

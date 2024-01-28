@@ -31,14 +31,44 @@ def main(input_filepath, output_filepath):
     # Define the path to the data file
     data_file_path = project_dir / "data/raw/Use_Case_Data_With_All_Proccesses.xlsx"
 
-    # Define the mapping of process names to file paths
     process_to_file = {
-        # ...
+        "Know Your Customer": project_dir
+                              / "data/raw/processes/textual_description/know_your_customer.txt",
+        "Hiring Employee": project_dir
+                           / "data/raw/processes/textual_description/hiring_employee.txt",
+        "Travel Insurance Claim": project_dir
+                                  / "data/raw/processes/textual_description/travel_insurance_claim.txt",
+        "GDPR_1": project_dir / "data/raw/processes/textual_description/GDPR_1.txt",
+        "GDPR_2": project_dir / "data/raw/processes/textual_description/GDPR_2.txt",
+        "GDPR_3": project_dir / "data/raw/processes/textual_description/GDPR_3.txt",
+        "GDPR_4": project_dir / "data/raw/processes/textual_description/GDPR_4.txt",
+        "GDPR_5": project_dir / "data/raw/processes/textual_description/GDPR_5.txt",
+        "GDPR_6": project_dir / "data/raw/processes/textual_description/GDPR_6.txt",
+        "GDPR_7": project_dir / "data/raw/processes/textual_description/GDPR_7.txt",
+        "SM2_1": project_dir / "data/raw/processes/textual_description/SM2_1.txt",
+        "SM2_2": project_dir / "data/raw/processes/textual_description/SM2_2.txt",
+        "SM2_3": project_dir / "data/raw/processes/textual_description/SM2_3.txt",
+        "SM2_5": project_dir / "data/raw/processes/textual_description/SM2_5.txt",
+        "SM6_1": project_dir / "data/raw/processes/textual_description/SM6_1.txt",
+        "SM6_3": project_dir / "data/raw/processes/textual_description/SM6_3.txt",
     }
-
-    # Define the mapping of process names to sheet names
     process_sheet_mapping = {
-        # ...
+        "Travel Insurance Claim": "1_matching_reordered",
+        "Know Your Customer": "2_matching_reordered",
+        "Hiring Employee": "3_training_matching",
+        "GDPR_1": "4_GDPR_1_matching",
+        "GDPR_2": "5_GDPR_2_matching",
+        "GDPR_3": "6_GDPR_3_matching",
+        "GDPR_4": "7_GDPR_4_matching",
+        "GDPR_5": "8_GDPR_5_matching",
+        "GDPR_6": "9_GDPR_6_matching",
+        "GDPR_7": "10_GDPR_7_matching",
+        "SM2_1": "11_SM_2.1_matching",
+        "SM2_2": "12_SM_2.2_matching",
+        "SM2_3": "13_SM_2.3_matching",
+        "SM2_5": "14_SM_2.5_matching",
+        "SM6_1": "15_SM_6.1_matching",
+        "SM6_3": "16_SM_6.3_matching",
     }
 
     # Initialize the DataProcessor
@@ -62,7 +92,13 @@ def main(input_filepath, output_filepath):
 
     # Define the sample sizes for the gold standard subset
     gold_standard_samples = {
-        # ...
+        "Travel Insurance Claim": (10, 88),
+        "Know Your Customer": (7, 55),
+        "Hiring Employee": (2, 12),
+        "GDPR_2": (3, 29),
+        "GDPR_3": (3, 19),
+        "SM2_1": (2, 14),
+        "SM2_2": (3, 19),
     }
 
     # Create the gold standard subset
