@@ -52,7 +52,7 @@ embeddings: requirements download-glove
 models: requirements
 	@echo "Building models and making predictions..."
 	$(PYTHON_INTERPRETER) src/models/make_models.py --dataset_variant combined --no-tune
-	$(PYTHON_INTERPRETER) src/models/make_models.py --dataset_variant combined -is_tuned
+	$(PYTHON_INTERPRETER) src/models/make_models.py --dataset_variant combined --is_tuned
 	$(PYTHON_INTERPRETER) src/models/make_models.py --dataset_variant separate --no-tune
 	$(PYTHON_INTERPRETER) src/models/make_models.py --dataset_variant separate --is_tuned
 
