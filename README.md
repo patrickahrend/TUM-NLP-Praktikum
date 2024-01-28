@@ -121,6 +121,9 @@ docker exec -it <container-id> /bin/bash
 ```
 The container id can be found with docker container ls.
 
+In the docker I included poetry as well, run poetry shell to activate it. I incurred a subprocess terminate error sometimes 
+when running the make file outside of poetry, so I recommend to run it inside of poetry.
+
 ### Make File
 I included a make file to run every step of the pipline 
 
