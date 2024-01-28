@@ -98,4 +98,10 @@ target/
 /models/embeddings/word2vec.pkl
 /models/embeddings/fasttext.pkl
 
+/data/external/glove.6B.50d.txt
+/data/external/glove.6B.100d.txt
+/data/external/glove.6B.200d.txt
+/data/external/glove.6B.300d.txt
+/data/external/glove.6B.300d.zip
+
 poetry.lock

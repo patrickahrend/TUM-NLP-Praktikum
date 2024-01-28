@@ -58,7 +58,7 @@ class EmbeddingProcessor:
         )
         self.glove = load_model_if_exists(project_dir / "models/embeddings/glove.pkl")
 
-    def compute_tfidf_embedding(self, text: str) -> np.array:
+    def compute_tfidf_embedding(self, text: str) -> np.ndarray:
         """
         Computes the TF-IDF embedding for the given text.
 
@@ -66,12 +66,12 @@ class EmbeddingProcessor:
         text (str): The text to compute the embedding for.
 
         Returns:
-        np.array: The computed TF-IDF embedding.
+        np.ndarray: The computed TF-IDF embedding.
         """
         tfidf_text = self.tfidf.transform(text).toarray()
         return tfidf_text
 
-    def compute_word2vec_embedding(self, text: str) -> np.array:
+    def compute_word2vec_embedding(self, text: str) -> np.ndarray:
         """
         Computes the Word2Vec embedding for the given text.
 
@@ -79,10 +79,10 @@ class EmbeddingProcessor:
         text (str): The text to compute the embedding for.
 
         Returns:
-        np.array: The computed Word2Vec embedding.
+        np.ndarray: The computed Word2Vec embedding.
         """
 
-        def get_embeddings(statements: str) -> np.array:
+        def get_embeddings(statements: str) -> np.ndarray:
             tokenized_statements = [statement.split() for statement in statements]
             embeddings = pd.Series(tokenized_statements).apply(
                 lambda x: get_sentence_vector_custom(x, self.word2vec)
@@ -93,7 +93,7 @@ class EmbeddingProcessor:
 
         return w2v_text
 
-    def compute_bert_embedding(self, text):
+    def compute_bert_embedding(self, text: str) -> np.ndarray:
         """
         Computes the BERT embedding for the given text.
 
@@ -101,10 +101,10 @@ class EmbeddingProcessor:
         text (str): The text to compute the embedding for.
 
         Returns:
-        np.array: The computed BERT embedding.
+        np.ndarray: The computed BERT embedding.
         """
 
-        def get_embeddings(statements):
+        def get_embeddings(statements: pd.Series):
             embeddings = statements.apply(
                 lambda x: get_embeddings_bert(x, self.bert_tokenizer, self.bert_model)
             )
@@ -114,7 +114,7 @@ class EmbeddingProcessor:
 
         return bert_text
 
-    def compute_fasttext_embedding(self, text) -> np.array:
+    def compute_fasttext_embedding(self, text: str) -> np.ndarray:
         """
         Computes the FastText embedding for the given text.
 
@@ -122,7 +122,7 @@ class EmbeddingProcessor:
         text (str): The text to compute the embedding for.
 
         Returns:
-        np.array: The computed FastText embedding.
+        np.ndarray: The computed FastText embedding.
         """
 
         def get_embeddings(statements):
@@ -136,7 +136,7 @@ class EmbeddingProcessor:
 
         return ft_text
 
-    def compute_glove_embedding(self, text):
+    def compute_glove_embedding(self, text: str) -> np.ndarray:
         """
         Computes the GloVe embedding for the given text.
 
@@ -144,7 +144,7 @@ class EmbeddingProcessor:
         text (str): The text to compute the embedding for.
 
         Returns:
-        np.array: The computed GloVe embedding.
+        np.ndarray: The computed GloVe embedding.
         """
 
         def get_embeddings(statements):
@@ -160,8 +160,8 @@ class EmbeddingProcessor:
 
     def compute_gpt_embedding(
         self,
-        text,
-    ):
+        text: str,
+    ) -> np.ndarray:
         """
         Computes the GPT embedding for the given text.
 
@@ -169,10 +169,10 @@ class EmbeddingProcessor:
         text (str): The text to compute the embedding for.
 
         Returns:
-        np.array: The computed GPT embedding.
+        np.ndarray: The computed GPT embedding.
         """
 
-        def get_embeddings(statements):
+        def get_embeddings(statements: pd.Series):
             embeddings = statements.apply(lambda x: get_embeddings_gpt(x, self.openai))
             return np.array(embeddings.tolist())
 
@@ -180,7 +180,7 @@ class EmbeddingProcessor:
 
         return gpt_text
 
-    def train_model(self, embedding_type):
+    def train_model(self, embedding_type: str) -> None:
         """
         Trains the specified embedding model on the training data.
 
@@ -202,7 +202,7 @@ class EmbeddingProcessor:
         else:
             raise ValueError(f"Unknown model type for training: {embedding_type}")
 
-    def train_word2vec(self, sentences):
+    def train_word2vec(self, sentences: list) -> Word2Vec:
         """
         Trains a Word2Vec model on the given sentences.
 
@@ -220,7 +220,7 @@ class EmbeddingProcessor:
         save_pickle(self.word2vec, project_dir / "models/embeddings/word2vec.pkl")
         return self.word2vec
 
-    def train_glove(self):
+    def train_glove(self) -> KeyedVectors:
         """
         Loads the GloVe model from the given path.
 
@@ -239,7 +239,7 @@ class EmbeddingProcessor:
 
         return self.glove
 
-    def train_fasttext(self, sentences):
+    def train_fasttext(self, sentences: list) -> FastText:
         """
         Trains a FastText model on the given sentences.
 
@@ -257,7 +257,7 @@ class EmbeddingProcessor:
         save_pickle(self.fasttext, project_dir / "models/embeddings/fasttext.pkl")
         return self.fasttext
 
-    def train_tfidf(self, sentences):
+    def train_tfidf(self, sentences: list) -> TfidfVectorizer:
         """
         Trains a TF-IDF model on the given sentences.
 
@@ -277,7 +277,7 @@ class EmbeddingProcessor:
 
         return self.tfidf
 
-    def embed_new_text(self, proc_desc, legal_text, embedding_type, dataset_type):
+    def embed_new_text(self, proc_desc: str, legal_text: str, embedding_type: str, dataset_type: str) -> np.ndarray:
         """
         Embeds new text using the specified embedding model and dataset type.
 
@@ -288,7 +288,7 @@ class EmbeddingProcessor:
         dataset_type (str): The type of the dataset.
 
         Returns:
-        np.array: The computed embedding.
+        np.ndarray: The computed embedding.
         """
         if dataset_type == "separate":
             proc_desc_vector = self.get_embedding(proc_desc, embedding_type)
@@ -304,7 +304,7 @@ class EmbeddingProcessor:
 
         return combined_vector.reshape(1, -1)
 
-    def get_embedding(self, text, embedding_type):
+    def get_embedding(self, text: str, embedding_type: str) -> np.ndarray:
         """
         Gets the embedding for the given text using the specified embedding model.
 
@@ -313,7 +313,7 @@ class EmbeddingProcessor:
         embedding_type (str): The type of the embedding model to use.
 
         Returns:
-        np.array: The computed embedding.
+        np.ndarray: The computed embedding.
         """
         if embedding_type in ["glove", "fasttext", "word2vec"]:
             embedding_model = getattr(self, f"{embedding_type}", None)

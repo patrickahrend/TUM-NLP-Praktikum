@@ -81,14 +81,11 @@ The "advanced approaches" are in the notebook folder, but I trained them in Goog
 them. Lastly I also put the outlook approaches GPT and Rule-based in a Colab notebook for consistency. If you like to run them you can find the links for each method belo, the share link should give you write access
 [Recurrent Neural Network](https://colab.research.google.com/drive/14nG_QaApOO6xSQNUHlBLPSqf_d_S3f4K?usp=sharing,), [BERTForClassification](https://colab.research.google.com/drive/1PXwm66FjTnwStpD-z0NKN8N9KqVxMsmd?usp=sharing), [Rule-based Approach](https://colab.research.google.com/drive/1UiXaIc9w0MBA2ZIIjqw9vVsIwon5yJWL?usp=sharing),
 [GPT Fine-Tuning](https://colab.research.google.com/drive/1gwmay8KdfZieLmVLeNWrVJwavoktwt8J?usp=sharing). 
-You will also need a folder callend nlp, which the same content as in this [folder](https://drive.google.com/drive/folders/1qHmHNIZax_q-aFVHHMODvWGpqElVAhiF?usp=sharing). 
+You will also need a folder called nlp, which the same content as in this [folder](https://drive.google.com/drive/folders/1qHmHNIZax_q-aFVHHMODvWGpqElVAhiF?usp=sharing). 
 
 ---
 
 ## How to run the project
-
-So there is a frontend with streamlit which displays the predictions of the different models and calls the api of the backend 
-to get predictions for new text. The backend is a fast api which loads the models and returns the predictions.
 
 I included the manual as well as the docker way to run the project. This was due to me using torch for the m1 chip, which 
 is different from the versions for windows and linux. As the version is just specified in the requirements.txt, it should
@@ -103,6 +100,11 @@ It only contains this line:
 ```bash
 OPENAI_API_KEY= <API_Key>
 ```
+I personally use poetry, so there is also a pyproject.toml file in the root folder. Install it with the following command:
+```bash
+poetry install
+```
+
 
 ### Docker
 I included a requirements.txt file in the frontend folder, as it only needs 3 packages and builds faster this way.
@@ -166,7 +168,7 @@ product.
 ---
 
 ## Best Practises I tried to follow
-
+- Dynamic Path with Pathlib
 - Pylint and Black as formatting and linter
 - Poetry for dependency management
 - Makefile for reproducibility of whole pipeline with docker

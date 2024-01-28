@@ -8,15 +8,15 @@ import pandas as pd
 from build_word_embeddings import EmbeddingProcessor
 
 
-def save_df_with_embeddings(original_df, embeddings, embedding_type, filename):
+def save_df_with_embeddings(original_df: pd.DataFrame, embeddings: pd.DataFrame, embedding_type: str, filename: Path) -> None:
     """
     Saves a DataFrame with embeddings to a pickle file.
 
     Parameters:
     original_df (DataFrame): The original DataFrame.
-    embeddings (np.array): The computed embeddings.
+    embeddings (pd.DataFrame): The computed embeddings.
     embedding_type (str): The type of the embeddings.
-    filename (str): The path to the output file.
+    filename (Path): The path to the output file.
     """
     # If the embeddings are 3-dimensional and the second dimension is 1, squeeze it
     if len(embeddings.shape) == 3 and embeddings.shape[1] == 1:
@@ -40,13 +40,13 @@ def save_df_with_embeddings(original_df, embeddings, embedding_type, filename):
         pickle.dump(final_df, file)
 
 
-def concat_embeddings_with_df(embedding1, embedding2, embedding1_name, embedding2_name):
+def concat_embeddings_with_df(embedding1: pd.DataFrame, embedding2: pd, embedding1_name: str, embedding2_name: str) -> pd.DataFrame:
     """
     Concatenates two sets of embeddings into a DataFrame.
 
     Parameters:
-    embedding1 (np.array): The first set of embeddings.
-    embedding2 (np.array): The second set of embeddings.
+    embedding1 (pd.DataFrame): The first set of embeddings.
+    embedding2 (pd.DataFrame): The second set of embeddings.
     embedding1_name (str): The name of the first set of embeddings.
     embedding2_name (str): The name of the second set of embeddings.
 
@@ -73,8 +73,8 @@ def concat_embeddings_with_df(embedding1, embedding2, embedding1_name, embedding
 
 
 def process_and_save_embeddings(
-    embedding_processor, df_train, df_test, embedding_type, project_dir
-):
+    embedding_processor: EmbeddingProcessor, df_train: pd.DataFrame, df_test: pd.DataFrame, embedding_type: str, project_dir: Path
+) -> None:
     """
     Processes and saves embeddings for the training and test data.
 

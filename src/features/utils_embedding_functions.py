@@ -5,9 +5,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import torch
+from transformers import BertTokenizer, BertModel
+from openai import OpenAI
 
 
-def get_sentence_vector_custom(statement, model, is_glove=False) -> np.ndarray:
+def get_sentence_vector_custom(statement: list, model, is_glove: bool=False) -> np.ndarray:
     """
     Computes the sentence vector for a given statement using the provided model.
 
@@ -35,7 +37,7 @@ def get_sentence_vector_custom(statement, model, is_glove=False) -> np.ndarray:
             return np.zeros(model.vector_size)
 
 
-def get_embeddings_bert(statement, tokenizer, model) -> torch.Tensor:
+def get_embeddings_bert(statement: str, tokenizer: BertTokenizer, model: BertModel) -> torch.Tensor:
     """
     Computes the BERT embeddings for a given statement.
 
@@ -59,7 +61,7 @@ def get_embeddings_bert(statement, tokenizer, model) -> torch.Tensor:
     return embeddings_vector
 
 
-def get_embeddings_gpt(statement, client):
+def get_embeddings_gpt(statement: str, client: OpenAI) -> list:
     """
     Computes the GPT embeddings for a given statement.
 
@@ -84,7 +86,7 @@ def get_embeddings_gpt(statement, client):
         return None
 
 
-def load_model_if_exists(filepath):
+def load_model_if_exists(filepath: Path) -> None:
     """
     Loads a model from a pickle file if it exists.
 
@@ -100,7 +102,7 @@ def load_model_if_exists(filepath):
     return None
 
 
-def save_pickle(obj, filepath):
+def save_pickle(obj, filepath: Path) -> None:
     """
     Saves an object to a pickle file.
 
@@ -115,7 +117,7 @@ def save_pickle(obj, filepath):
         pickle.dump(obj, f)
 
 
-def load_training_data():
+def load_training_data() -> tuple:
     """
     Loads the training data needed for models like Word2Vec, GloVe, and FastText.
 
