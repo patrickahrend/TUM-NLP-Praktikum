@@ -3,9 +3,14 @@ FROM python:3.9.6
 RUN mkdir /app
 WORKDIR /app
 
+# RUN pip --version
+
 COPY requirements.txt /app
 COPY . /app
 
+#RUN pip --version
+
+RUN pip install --upgrade pip
 RUN pip install poetry
 RUN poetry config virtualenvs.create false && poetry install --no-dev
 RUN pip install -r requirements.txt
