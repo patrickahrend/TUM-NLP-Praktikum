@@ -101,7 +101,7 @@ class UserInterface:
                 "GaussianNB",
                 "Perceptron",
                 "SGDClassifier",
-                "KNeighborsClassifier",
+                "GradientBoostingClassifier",
                 "BertForClassification-Base",
                 "BertForClassification-Large",
                 "GPT3.5",
