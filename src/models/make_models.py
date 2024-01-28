@@ -133,7 +133,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dataset_variant", type=str, choices=["combined", "separate"], required=True
     )
-    parser.add_argument("--is_tuned", type=bool, required=True)
+    parser.add_argument('--is_tuned', dest='is_tuned', action='store_true')
+    parser.add_argument('--no-tune', dest='is_tuned', action='store_false')
+    parser.set_defaults(is_tuned=False)
 
     args = parser.parse_args()
     main(args.dataset_variant, args.is_tuned)

@@ -51,10 +51,10 @@ embeddings: requirements download-glove
 ## Train and Save models
 models: requirements
 	@echo "Building models and making predictions..."
-	$(PYTHON_INTERPRETER) src/models/make_models.py --dataset_variant combined --is_tuned False
-	$(PYTHON_INTERPRETER) src/models/make_models.py --dataset_variant combined --is_tuned True
-	$(PYTHON_INTERPRETER) src/models/make_models.py --dataset_variant separate --is_tuned False
-	$(PYTHON_INTERPRETER) src/models/make_models.py --dataset_variant separate --is_tuned True
+	$(PYTHON_INTERPRETER) src/models/make_models.py --dataset_variant combined --no-tune
+	$(PYTHON_INTERPRETER) src/models/make_models.py --dataset_variant combined -is_tuned
+	$(PYTHON_INTERPRETER) src/models/make_models.py --dataset_variant separate --no-tune
+	$(PYTHON_INTERPRETER) src/models/make_models.py --dataset_variant separate --is_tuned
 
 ## Start the API
 start-api:
