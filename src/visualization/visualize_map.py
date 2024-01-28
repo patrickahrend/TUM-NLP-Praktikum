@@ -10,6 +10,20 @@ from utils import load_pickle
 
 
 def create_umap_single(embeddings, labels, emb_type, file_path):
+    """
+    Create a UMAP visualization for a single type of embeddings.
+
+    Parameters
+    ----------
+    embeddings : array-like
+        The embeddings to visualize.
+    labels : array-like
+        The labels for the embeddings.
+    emb_type : str
+        The type of the embeddings.
+    file_path : Path
+        The path where the visualization will be saved.
+    """
     umap_model = umap.UMAP(metric="euclidean")
     embedding_umap = umap_model.fit_transform(embeddings)
     fig = create_plot(embedding_umap, labels, emb_type)
@@ -17,6 +31,22 @@ def create_umap_single(embeddings, labels, emb_type, file_path):
 
 
 def create_umap_combined(emb_proc_desc, emb_legal_text, labels, emb_type, file_path):
+    """
+    Create a UMAP visualization for combined embeddings.
+
+    Parameters
+    ----------
+    emb_proc_desc : array-like
+        The embeddings for the process descriptions.
+    emb_legal_text : array-like
+        The embeddings for the legal texts.
+    labels : array-like
+        The labels for the embeddings.
+    emb_type : str
+        The type of the embeddings.
+    file_path : Path
+        The path where the visualization will be saved.
+    """
     combined_embeddings = np.concatenate([emb_proc_desc, emb_legal_text])
     umap_model = umap.UMAP(metric="euclidean")
     umap_embeddings = umap_model.fit_transform(combined_embeddings)
@@ -38,6 +68,25 @@ def create_umap_combined(emb_proc_desc, emb_legal_text, labels, emb_type, file_p
 
 
 def create_plot(data, labels, emb_type, types=None):
+    """
+    Create a plotly express scatter plot for the UMAP visualization.
+
+    Parameters
+    ----------
+    data : array-like or DataFrame
+        The data to plot.
+    labels : array-like
+        The labels for the data.
+    emb_type : str
+        The type of the embeddings.
+    types : array-like, optional
+        The types of the embeddings.
+
+    Returns
+    -------
+    fig : plotly.graph_objs._figure.Figure
+        The created figure.
+    """
     if types is None:
         fig = px.scatter(
             x=data[:, 0],
@@ -65,6 +114,9 @@ def create_plot(data, labels, emb_type, types=None):
 
 
 def main():
+    """
+    Main function to load embeddings, create UMAP visualizations, and save the visualizations.
+    """
     base_path = Path(__file__).resolve().parents[2]
     df_train = pd.read_csv(base_path / "data/processed/training_data_preprocessed.csv")
 
@@ -113,7 +165,7 @@ def main():
             "gpt": 1536,
             "bert": 768,
         }
-        # seperate embeddings
+        # separate embeddings
         for file_name in seperate_files:
             file_path = base_path / f"data/processed/embeddings/{file_name}"
             embedding_separate = load_pickle(file_path)
