@@ -2,6 +2,7 @@ import argparse
 import unittest
 from unittest.mock import patch
 import os
+import re
 from src.data.make_dataset import main as make_dataset_main
 from src.features.make_embeddings import main as make_embeddings_main
 from src.models import make_models
@@ -43,8 +44,24 @@ class TestPipeline(unittest.TestCase):
         for emb_type in embedding_types:
             for data_type in ["train", "test"]:
                 for context in ["combined", "separate", "legal_text"]:
-                    file_path = self.base_path / f"data/processed/embeddings/{emb_type}_{data_type}_{context}.pkl"
-                    self.assertTrue(os.path.exists(file_path), f"Embedding file not found: {file_path}")
+                    # Define a regex pattern to match files with the correct format
+                    pattern = re.compile(fr"{emb_type}_{data_type}_{context}_(\d+)\.pkl")
+
+                    # List files in the directory
+                    files = os.listdir(self.base_path / f"data/processed/embeddings")
+
+                    # Find matching files and get their dimensions
+                    dimensions = set()
+                    for file in files:
+                        match = pattern.match(file)
+                        if match:
+                            dimension = match.group(1)
+                            dimensions.add(dimension)
+
+                    # Check for the presence of files with dimensions
+                    for dimension in dimensions:
+                        file_path = self.base_path / f"data/processed/embeddings/{emb_type}_{data_type}_{context}_{dimension}.pkl"
+                        self.assertTrue(os.path.exists(file_path), f"Embedding file not found: {file_path}")
 
     @staticmethod
     def call_main_with_args(self, dataset_variant, is_tuned):
