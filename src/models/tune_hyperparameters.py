@@ -55,7 +55,7 @@ param_grids = {
 }
 
 
-def tune_hyperparameters(model: object, param_grid, X_train, y_train, cv: int) :
+def tune_hyperparameters(model: object, param_grid, X_train, y_train, cv: int):
     """
     Tune the hyperparameters of a given model using GridSearchCV.
 
@@ -88,7 +88,9 @@ def tune_hyperparameters(model: object, param_grid, X_train, y_train, cv: int) :
     # Fit the grid search object to the data
     grid_search.fit(X_train, y_train)
     # Log the best parameters and the associated score
-    logging.info(f"Best parameters for {type(model).__name__}: {grid_search.best_params_}")
+    logging.info(
+        f"Best parameters for {type(model).__name__}: {grid_search.best_params_}"
+    )
     logging.info(f"Best cross-validation score: {grid_search.best_score_}")
     # Return the best estimator, its parameters, and the associated score
     return (

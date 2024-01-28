@@ -28,39 +28,40 @@ from src.models.tune_hyperparameters import param_grids, tune_hyperparameters
 
 class ModelManager:
     """
-        A class used to manage different machine learning models.
+    A class used to manage different machine learning models.
 
-        ...
+    ...
 
-        Attributes
-        ----------
-        model_constructor : list
-            a list of classes of different machine learning models
-        embeddings : dict
-            a dictionary of embeddings used for training the models
-        labels : tuple
-            a tuple containing the labels for the training and test sets
-        models : list
-            a list to store the trained models
+    Attributes
+    ----------
+    model_constructor : list
+        a list of classes of different machine learning models
+    embeddings : dict
+        a dictionary of embeddings used for training the models
+    labels : tuple
+        a tuple containing the labels for the training and test sets
+    models : list
+        a list to store the trained models
 
-        Methods
-        -------
-        train_and_save_models(save_directory, tune, hyperparamater_path)
-            Trains the models and saves them in the specified directory.
-        evaluate_models(save_directory)
-            Evaluates the performance of the models and returns the results.
-        """
+    Methods
+    -------
+    train_and_save_models(save_directory, tune, hyperparamater_path)
+        Trains the models and saves them in the specified directory.
+    evaluate_models(save_directory)
+        Evaluates the performance of the models and returns the results.
+    """
+
     def __init__(self, embeddings, labels):
         """
-       Constructs all the necessary attributes for the ModelManager object.
+        Constructs all the necessary attributes for the ModelManager object.
 
-       Parameters
-       ----------
-           embeddings : dict
-               a dictionary of embeddings used for training the models
-           labels : tuple
-               a tuple containing the labels for the training and test sets
-       """
+        Parameters
+        ----------
+            embeddings : dict
+                a dictionary of embeddings used for training the models
+            labels : tuple
+                a tuple containing the labels for the training and test sets
+        """
         self.model_constructor = [
             LogisticRegressionModel,
             RandomForestModel,
@@ -113,7 +114,9 @@ class ModelManager:
                     for constructor in self.model_constructor:
                         model = constructor()
                         model_name = model.model_name
-                        logging.info(f"Training {model_name} with {embedding_name} embeddings")
+                        logging.info(
+                            f"Training {model_name} with {embedding_name} embeddings"
+                        )
 
                         # Hyperparameter tuning
                         best_model, best_params, best_score = tune_hyperparameters(
@@ -217,7 +220,9 @@ class ModelManager:
                     # Extract model name from the file name
                     model_name = model_file.stem
 
-                    logging.info(f"Evaluating {model_name} with {embedding_name} embeddings")
+                    logging.info(
+                        f"Evaluating {model_name} with {embedding_name} embeddings"
+                    )
                     logging.info(
                         f"X_train shape: {X_train.shape}, X_test shape: {X_test.shape}"
                     )

@@ -14,6 +14,7 @@ class LogisticRegressionModel(ModelBase):
     """
     Logistic Regression model class which inherits from the ModelBase class.
     """
+
     def __init__(self):
         super().__init__(
             "Logistic_Regression",
@@ -25,6 +26,7 @@ class GaussianNBModel(ModelBase):
     """
     Gaussian Naive Bayes model class which inherits from the ModelBase class.
     """
+
     def __init__(self):
         super().__init__("GaussianNB", GaussianNB())
 
@@ -33,6 +35,7 @@ class BernoulliNBModel(ModelBase):
     """
     Bernoulli Naive Bayes model class which inherits from the ModelBase class.
     """
+
     def __init__(self):
         super().__init__("BernoulliNB", BernoulliNB())
 
@@ -41,36 +44,43 @@ class RandomForestModel(ModelBase):
     """
     Random Forest model class which inherits from the ModelBase class.
     """
+
     def __init__(self):
         super().__init__(
             "RandomForestClassifier",
             RandomForestClassifier(),
         )
 
+
 class GradientBoostingModel(ModelBase):
     """
     Gradient Boosting model class which inherits from the ModelBase class.
     """
+
     def __init__(self):
         super().__init__(
             "GradientBoostingClassifier",
             GradientBoostingClassifier(),
         )
 
+
 class DecisionTreeModel(ModelBase):
     """
     Decision Tree model class which inherits from the ModelBase class.
     """
+
     def __init__(self):
         super().__init__(
             "DecisionTreeClassifier",
             DecisionTreeClassifier(),
         )
 
+
 class SVCModel(ModelBase):
     """
     Support Vector Classifier model class which inherits from the ModelBase class.
     """
+
     def __init__(self):
         super().__init__(
             "SVC",
@@ -82,6 +92,7 @@ class PerceptronModel(ModelBase):
     """
     Perceptron model class which inherits from the ModelBase class.
     """
+
     def __init__(self):
         super().__init__(
             "Perceptron",
@@ -93,6 +104,7 @@ class SGDClassifierModel(ModelBase):
     """
     Stochastic Gradient Descent Classifier model class which inherits from the ModelBase class.
     """
+
     def __init__(self):
         super().__init__(
             "SGDClassifier",
@@ -107,6 +119,7 @@ class BERTForClassification(nn.Module):
     """
     BERT model for classification tasks. Inherits from the PyTorch nn.Module class.
     """
+
     def __init__(self):
         super(BERTForClassification, self).__init__()
         self.bert = BertModel.from_pretrained("bert-base-uncased")
@@ -137,6 +150,7 @@ class RnnTextClassifier(nn.Module):
     """
     RNN model for text classification tasks. Inherits from the PyTorch nn.Module class.
     """
+
     def __init__(self, input_size, hidden_size, num_layers, dropout=0, device="cpu"):
         super(RnnTextClassifier, self).__init__()
 
@@ -179,6 +193,3 @@ class RnnTextClassifier(nn.Module):
         out = self.fc(out[:, -1, :])
 
         return out
-
-
-

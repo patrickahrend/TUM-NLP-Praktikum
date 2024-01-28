@@ -81,6 +81,7 @@ class EmbeddingProcessor:
         Returns:
         np.array: The computed Word2Vec embedding.
         """
+
         def get_embeddings(statements: str) -> np.array:
             tokenized_statements = [statement.split() for statement in statements]
             embeddings = pd.Series(tokenized_statements).apply(
@@ -102,6 +103,7 @@ class EmbeddingProcessor:
         Returns:
         np.array: The computed BERT embedding.
         """
+
         def get_embeddings(statements):
             embeddings = statements.apply(
                 lambda x: get_embeddings_bert(x, self.bert_tokenizer, self.bert_model)
@@ -122,6 +124,7 @@ class EmbeddingProcessor:
         Returns:
         np.array: The computed FastText embedding.
         """
+
         def get_embeddings(statements):
             tokenized_statements = [statement.split() for statement in statements]
             embeddings = pd.Series(tokenized_statements).apply(
@@ -143,6 +146,7 @@ class EmbeddingProcessor:
         Returns:
         np.array: The computed GloVe embedding.
         """
+
         def get_embeddings(statements):
             tokenized_statements = [statement.split() for statement in statements]
             embeddings = pd.Series(tokenized_statements).apply(
@@ -167,6 +171,7 @@ class EmbeddingProcessor:
         Returns:
         np.array: The computed GPT embedding.
         """
+
         def get_embeddings(statements):
             embeddings = statements.apply(lambda x: get_embeddings_gpt(x, self.openai))
             return np.array(embeddings.tolist())

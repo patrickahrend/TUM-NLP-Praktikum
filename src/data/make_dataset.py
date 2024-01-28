@@ -8,6 +8,7 @@ from dotenv import find_dotenv, load_dotenv
 
 from data_processor import DataProcessor
 
+
 @click.command()
 @click.argument("input_filepath", type=click.Path(exists=True))
 @click.argument("output_filepath", type=click.Path())

@@ -3,6 +3,7 @@ from pathlib import Path
 import os
 import pandas as pd
 import requests
+from typing import List
 import streamlit as st
 from sklearn.metrics import (
     accuracy_score,
@@ -12,7 +13,7 @@ from sklearn.metrics import (
 )
 
 
-def load_pickle(file_path: str) -> object:
+def load_pickle(file_path: Path) -> pd.DataFrame:
     """
     Load a pickle file.
 
@@ -54,7 +55,7 @@ class UserInterface:
     display_results(): Display the results.
     """
 
-    def __init__(self, api_url: str, base_path: str):
+    def __init__(self, api_url: str, base_path: Path):
         """
         Initialize the UserInterface class.
 
@@ -74,7 +75,7 @@ class UserInterface:
         self.processes = None
         self.dataset_type = None
         self.is_tuned = None
-        self.model_options = []
+        self.model_options: List[str] = []
 
     def initialize_app(self):
         """
@@ -166,7 +167,7 @@ class UserInterface:
         with tab2:
             self.display_results()
 
-    def load_data(self, embedding_type: str, dataset_type: str):
+    def load_data(self, embedding_type: str, dataset_type: str) -> None:
         """
         Load the data for the selected embedding and dataset type.
 
@@ -190,7 +191,7 @@ class UserInterface:
         self.processes = embedding["Process"].unique().tolist()
         self.test_data = embedding
 
-    def load_model_results(self):
+    def load_model_results(self) -> None:
         """
         Load the model results.
         """
@@ -203,7 +204,7 @@ class UserInterface:
         self.test_data = pd.read_csv(model_results_path)
         self.processes = self.test_data["Process"].unique().tolist()
 
-    def display_all_test_data_points(self):
+    def display_all_test_data_points(self) -> None:
         """
         Display all test data points.
         """
@@ -418,10 +419,17 @@ class UserInterface:
             return response.json()["classification"]
         else:
             st.error(f"Error in classification: {response.status_code}")
-            return None
+            return -1
 
-    def classify_new_text(self, text_input: str, process_description: str, selected_model: str, selected_embedding: str,
-                          dataset_type: str, is_tuned: bool) -> int:
+    def classify_new_text(
+        self,
+        text_input: str,
+        process_description: str,
+        selected_model: str,
+        selected_embedding: str,
+        dataset_type: str,
+        is_tuned: bool,
+    ) -> int:
         """
         Classify for new text to classify
 
@@ -452,11 +460,11 @@ class UserInterface:
             return response.json()["classification"]
         else:
             st.error("Error in classification")
-            return None
+            return -1
 
-    def display_results(self):
+    def display_results(self) -> None:
         """
-        Display the results.
+        Display the results in the 2nd tab
         """
         model_results_dir = self.base_path / "references" / "model results"
         feature_importance_dir = self.base_path / "references" / "feature importance"

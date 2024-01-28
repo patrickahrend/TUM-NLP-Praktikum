@@ -6,7 +6,9 @@ import plotly.express as px
 import umap
 
 
-def create_umap_single(embeddings: pd.DataFrame, labels: pd.Series, emb_type: str, file_path: Path) -> None:
+def create_umap_single(
+    embeddings: pd.DataFrame, labels: pd.Series, emb_type: str, file_path: Path
+) -> None:
     """
     Create a UMAP visualization for a single type of embeddings.
 
@@ -27,7 +29,13 @@ def create_umap_single(embeddings: pd.DataFrame, labels: pd.Series, emb_type: st
     fig.write_html(str(file_path.with_suffix(".html")))
 
 
-def create_umap_combined(emb_proc_desc: pd.DataFrame, emb_legal_text : pd.DataFrame, labels: pd.Series, emb_type: str,file_path: Path) -> None:
+def create_umap_combined(
+    emb_proc_desc: pd.DataFrame,
+    emb_legal_text: pd.DataFrame,
+    labels: pd.Series,
+    emb_type: str,
+    file_path: Path,
+) -> None:
     """
     Create a UMAP visualization for combined embeddings.
 
@@ -64,7 +72,9 @@ def create_umap_combined(emb_proc_desc: pd.DataFrame, emb_legal_text : pd.DataFr
     fig.write_html(str(file_path.with_suffix(".html")))
 
 
-def create_plot(data: pd.DataFrame, labels: pd.Series, emb_type: str, types=None) -> px.scatter:
+def create_plot(
+    data: pd.DataFrame, labels: pd.Series, emb_type: str, types=None
+) -> px.scatter:
     """
     Create a plotly express scatter plot for the UMAP visualization.
 
@@ -108,4 +118,3 @@ def create_plot(data: pd.DataFrame, labels: pd.Series, emb_type: str, types=None
         )
     fig.update_layout(legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
     return fig
-

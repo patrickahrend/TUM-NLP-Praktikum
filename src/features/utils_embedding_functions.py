@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import torch
 
+
 def get_sentence_vector_custom(statement, model, is_glove=False) -> np.ndarray:
     """
     Computes the sentence vector for a given statement using the provided model.
@@ -32,6 +33,7 @@ def get_sentence_vector_custom(statement, model, is_glove=False) -> np.ndarray:
             return np.mean(model.wv[words], axis=0).reshape(1, -1)
         else:
             return np.zeros(model.vector_size)
+
 
 def get_embeddings_bert(statement, tokenizer, model) -> torch.Tensor:
     """

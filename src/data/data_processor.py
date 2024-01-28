@@ -9,6 +9,7 @@ nltk.download("stopwords")
 
 stop_words = set(stopwords.words("english"))
 
+
 class DataProcessor:
     """
     This class is responsible for processing raw data from an Excel file into a dataset used in the project.

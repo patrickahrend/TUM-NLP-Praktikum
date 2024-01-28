@@ -25,6 +25,7 @@ class ClassificationRequest(BaseModel):
     """
     Pydantic model for the classification request data.
     """
+
     text_passage: Optional[str] = None
     process_description: Optional[str] = None
     model_name: str
@@ -38,6 +39,7 @@ class ModelAPI:
     """
     API for loading models and classifying text.
     """
+
     def __init__(self, model_path: Path):
         """
         Initializes the ModelAPI object.
@@ -92,7 +94,7 @@ class ModelAPI:
         text_passage: str,
         embedding_type: str,
         dataset_type: str,
-    ) -> list[int] :
+    ) -> list[int]:
         """
         Classifies a text passage using the given model and embedding.
 
