@@ -55,7 +55,7 @@ param_grids = {
 }
 
 
-def tune_hyperparameters(model, param_grid, X_train, y_train, cv):
+def tune_hyperparameters(model: object, param_grid, X_train, y_train, cv: int) :
     """
     Tune the hyperparameters of a given model using GridSearchCV.
 

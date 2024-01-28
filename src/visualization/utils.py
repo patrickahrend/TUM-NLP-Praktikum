@@ -1,7 +1,7 @@
 import pickle
 
 
-def load_pickle(file_path):
+def load_pickle(file_path: str) -> object:
     """
     Load a pickle file.
 
@@ -19,7 +19,7 @@ def load_pickle(file_path):
         return pickle.load(file)
 
 
-def save_pickle(obj, file_path):
+def save_pickle(obj: object, file_path: str) -> None:
     """
     Save an object to a pickle file.
 

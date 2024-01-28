@@ -17,7 +17,7 @@ def main():
 
     embedding_files = os.listdir(base_path / "data/processed/embeddings")
 
-    for emb_type in ["fasttext", "word2vec", "tfidf"]:
+    for emb_type in ["fasttext", "word2vec", "tfidf", "bert", "gpt", "glove"]:
         combined_files = [
             f
             for f in embedding_files

@@ -62,9 +62,9 @@ start-api:
 	cd src && uvicorn api.api:app --host 0.0.0.0 --port 8000
 
 ### Start the Streamlit frontend
-start-frontend:
+start-frontend: requirements
 	echo "Starting Streamlit frontend..."
-	streamlit run frontend/streamlit_app.py
+	@$(PYTHON_INTERPRETER) -m streamlit run frontend/streamlit_app.py
 
 ### Make UMAP visualizations
 umap:

@@ -12,7 +12,7 @@ from sklearn.metrics import (
 )
 
 
-def load_pickle(file_path):
+def load_pickle(file_path: str) -> object:
     with open(file_path, "rb") as file:
         return pickle.load(file)
 
