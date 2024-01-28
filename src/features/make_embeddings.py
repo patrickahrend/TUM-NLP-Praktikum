@@ -182,7 +182,7 @@ def main():
     # training embeddings models
     embedding_processor.train_model("tfidf")
     embedding_processor.train_model("word2vec")
-    # embedding_processor.train_model("glove")
+    embedding_processor.train_model("glove")
     embedding_processor.train_model("fasttext")
 
     # Loop through each embedding type and create/save the embeddings
