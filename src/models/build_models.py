@@ -12,7 +12,7 @@ from sklearn.metrics import (
 )
 
 # Custom imports
-from model_classes import (
+from src.models.model_classes import (
     LogisticRegressionModel,
     RandomForestModel,
     GaussianNBModel,
