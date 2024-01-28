@@ -1,4 +1,4 @@
-.PHONY: clean data lint requirements start-api start-frontend
+.PHONY: clean data lint requirements start-api start-frontend models help
 
 #################################################################################
 # GLOBALS                                                                       #
@@ -65,6 +65,12 @@ start-api:
 start-frontend:
 	echo "Starting Streamlit frontend..."
 	streamlit run frontend/streamlit_app.py
+
+### Make UMAP visualizations
+umap:
+	@echo "Creating UMAP visualizations..."
+	$(PYTHON_INTERPRETER) src/visualization/make_umap.py
+
 
 ## Delete all compiled Python files
 clean:

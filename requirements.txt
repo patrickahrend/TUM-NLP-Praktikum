@@ -27,3 +27,4 @@ bokeh~=2.3.2
 holoviews~=1.14.3
 scikit-image~=0.18.1
 colorcet~=2.0.6
+plotly~=5.18.0
