@@ -1,4 +1,4 @@
-embedding_type,orginal_feature_count,n_components,top_feature_indices,cos_sim_importance,word_freq_importances
+embedding_type,orginal_feature_count,after_pca_feature_count,top_feature_indices,cos_sim_importance,word_freq_importances
 gpt,1737,168,[  4  23  24   2   0   1  69 105   3 128],0.0,"[0.01763478 0.01688832 0.01789388 0.01424253 0.01885531 0.0116047
  0.0136903  0.00818744 0.01333507 0.01041662 0.01034819 0.0086564
  0.00606991 0.00877529 0.0128487  0.01126845 0.00382718 0.01055022
