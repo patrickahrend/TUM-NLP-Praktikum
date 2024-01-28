@@ -13,12 +13,55 @@ from sklearn.metrics import (
 
 
 def load_pickle(file_path: str) -> object:
+    """
+    Load a pickle file.
+
+    Parameters:
+    file_path (str): The path to the pickle file.
+
+    Returns:
+    object: The content of the pickle file.
+    """
     with open(file_path, "rb") as file:
         return pickle.load(file)
 
 
 class UserInterface:
-    def __init__(self, api_url, base_path):
+    """
+    A class used to create a user interface for a legal text classifier.
+
+    Attributes:
+    api_url (str): The URL of the API.
+    base_path (str): The base path of the application.
+    text_input (str): The text input from the user.
+    selected_model (str): The selected model by the user.
+    selected_embedding (str): The selected embedding by the user.
+    process_description (str): The process description.
+    result_path (str): The path to the result.
+    test_data (DataFrame): The test data.
+    processes (list): The list of processes.
+    dataset_type (str): The type of the dataset.
+    is_tuned (bool): A flag indicating whether the model is tuned.
+    model_options (list): The list of model options.
+
+    Methods:
+    initialize_app(): Initialize the Streamlit app.
+    load_data(embedding_type: str, dataset_type: str): Load the data for the selected embedding and dataset type.
+    load_model_results(): Load the model results.
+    display_all_test_data_points(): Display all test data points.
+    classify_text_with_embeddings(embeddings: list): Classify text with embeddings.
+    classify_new_text(text_input: str, process_description: str, selected_model: str, selected_embedding: str, dataset_type: str, is_tuned: bool): Classify new text.
+    display_results(): Display the results.
+    """
+
+    def __init__(self, api_url: str, base_path: str):
+        """
+        Initialize the UserInterface class.
+
+        Parameters:
+        api_url (str): The URL of the API.
+        base_path (str): The base path of the application.
+        """
         self.api_url = api_url
         self.base_path = base_path
         self.initialize_app()
@@ -34,6 +77,9 @@ class UserInterface:
         self.model_options = []
 
     def initialize_app(self):
+        """
+        Initialize the Streamlit app.
+        """
         st.set_page_config(
             layout="wide", page_icon="🚀", page_title="Legal Text Classifier"
         )
@@ -120,7 +166,14 @@ class UserInterface:
         with tab2:
             self.display_results()
 
-    def load_data(self, embedding_type, dataset_type):
+    def load_data(self, embedding_type: str, dataset_type: str):
+        """
+        Load the data for the selected embedding and dataset type.
+
+        Parameters:
+        embedding_type (str): The type of the embedding.
+        dataset_type (str): The type of the dataset.
+        """
         embedding_path = self.base_path / "data/processed/embeddings"
         all_embeddings = list(embedding_path.glob("*.pkl"))
         filtered_files = [
@@ -138,6 +191,9 @@ class UserInterface:
         self.test_data = embedding
 
     def load_model_results(self):
+        """
+        Load the model results.
+        """
         model_results_path = (
             self.base_path
             / "references"
@@ -148,6 +204,9 @@ class UserInterface:
         self.processes = self.test_data["Process"].unique().tolist()
 
     def display_all_test_data_points(self):
+        """
+        Display all test data points.
+        """
         process_options = ["All Processes"] + self.processes
         selected_process = st.selectbox("Select a Process", process_options)
 
@@ -333,10 +392,16 @@ class UserInterface:
         else:
             st.write("No data available for the selected process.")
 
-    def classify_text_with_embeddings(
-        self,
-        embeddings,
-    ):
+    def classify_text_with_embeddings(self, embeddings: list) -> int:
+        """
+        Classify text with embeddings.
+
+        Parameters:
+        embeddings (list): The list of embeddings.
+
+        Returns:
+        int: The classification result.
+        """
         request_data = {
             "model_name": self.selected_model,
             "embedding_name": self.selected_embedding,
@@ -355,16 +420,22 @@ class UserInterface:
             st.error(f"Error in classification: {response.status_code}")
             return None
 
-    # Method for New text to classify
-    def classify_new_text(
-        self,
-        text_input,
-        process_description,
-        selected_model,
-        selected_embedding,
-        dataset_type,
-        is_tuned,
-    ):
+    def classify_new_text(self, text_input: str, process_description: str, selected_model: str, selected_embedding: str,
+                          dataset_type: str, is_tuned: bool) -> int:
+        """
+        Classify for new text to classify
+
+        Parameters:
+        text_input (str): The text input from the user.
+        process_description (str): The process description.
+        selected_model (str): The selected model by the user.
+        selected_embedding (str): The selected embedding by the user.
+        dataset_type (str): The type of the dataset.
+        is_tuned (bool): A flag indicating whether the model is tuned.
+
+        Returns:
+        int: The classification result.
+        """
         request_data = {
             "text_passage": text_input,
             "process_description": process_description,
@@ -384,6 +455,9 @@ class UserInterface:
             return None
 
     def display_results(self):
+        """
+        Display the results.
+        """
         model_results_dir = self.base_path / "references" / "model results"
         feature_importance_dir = self.base_path / "references" / "feature importance"
 
