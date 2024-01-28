@@ -17,9 +17,6 @@ def load_pickle(file_path):
         return pickle.load(file)
 
 
-
-
-
 class UserInterface:
     def __init__(self, api_url, base_path):
         self.api_url = api_url
@@ -118,8 +115,6 @@ class UserInterface:
                     "Enter the process description here:"
                 )
                 st.button("Classify", key="classify_mock")
-
-
 
         ## here show model evaluation results
         with tab2:
@@ -335,8 +330,6 @@ class UserInterface:
                                 st.error("Wrongly Predicted")
                     st.divider()
 
-
-
         else:
             st.write("No data available for the selected process.")
 
@@ -425,12 +418,15 @@ class UserInterface:
             )
             df_feature_importance = df_feature_importance[selected_columns]
             st.dataframe(
-                df_feature_importance.sort_values(by=selected_columns[0], ascending=True)
+                df_feature_importance.sort_values(
+                    by=selected_columns[0], ascending=True
+                )
             )
 
+
 if __name__ == "__main__":
-    backend_env_url = os.getenv('BACKEND_URL', "http://localhost:8000")
-    base_path_env = os.getenv('BASE_PATH')
+    backend_env_url = os.getenv("BACKEND_URL", "http://localhost:8000")
+    base_path_env = os.getenv("BASE_PATH")
 
     if base_path_env is not None:
         base_path = Path(base_path_env)

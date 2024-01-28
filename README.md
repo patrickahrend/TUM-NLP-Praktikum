@@ -141,7 +141,7 @@ It will also save the predictions of the models in the reference/model results f
 
 4.To display the results of the models in the frontend:
 ```bash
-make run-api
+make start-api
 make start-frontend
 ```
 

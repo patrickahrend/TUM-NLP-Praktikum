@@ -1,4 +1,4 @@
-.PHONY: clean data lint requirements run-api start-frontend
+.PHONY: clean data lint requirements start-api start-frontend
 
 #################################################################################
 # GLOBALS                                                                       #
@@ -48,20 +48,23 @@ embeddings: requirements download-glove
 	@echo "Creating embeddings..."
 	$(PYTHON_INTERPRETER) src/features/make_embeddings.py
 
-## Make predictions
+## Train and Save models
 models: requirements
 	@echo "Building models and making predictions..."
-	$(PYTHON_INTERPRETER) src/models/make_models.py
+	$(PYTHON_INTERPRETER) src/models/make_models.py --dataset_variant combined --is_tuned False
+	$(PYTHON_INTERPRETER) src/models/make_models.py --dataset_variant combined --is_tuned True
+	$(PYTHON_INTERPRETER) src/models/make_models.py --dataset_variant separate --is_tuned False
+	$(PYTHON_INTERPRETER) src/models/make_models.py --dataset_variant separate --is_tuned True
 
 ## Start the API
-run-api:
+start-api:
 	@echo "Starting FastAPI application..."
-	cd src && poetry run uvicorn api.api:app --host 0.0.0.0 --port 8000
+	cd src && uvicorn api.api:app --host 0.0.0.0 --port 8000
 
 ### Start the Streamlit frontend
 start-frontend:
 	echo "Starting Streamlit frontend..."
-	poetry run streamlit run frontend/streamlit_app.py
+	streamlit run frontend/streamlit_app.py
 
 ## Delete all compiled Python files
 clean:

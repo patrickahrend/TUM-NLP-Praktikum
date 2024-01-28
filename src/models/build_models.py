@@ -1,4 +1,5 @@
 import json
+import logging
 import pickle
 
 
@@ -26,7 +27,40 @@ from src.models.tune_hyperparameters import param_grids, tune_hyperparameters
 
 
 class ModelManager:
+    """
+        A class used to manage different machine learning models.
+
+        ...
+
+        Attributes
+        ----------
+        model_constructor : list
+            a list of classes of different machine learning models
+        embeddings : dict
+            a dictionary of embeddings used for training the models
+        labels : tuple
+            a tuple containing the labels for the training and test sets
+        models : list
+            a list to store the trained models
+
+        Methods
+        -------
+        train_and_save_models(save_directory, tune, hyperparamater_path)
+            Trains the models and saves them in the specified directory.
+        evaluate_models(save_directory)
+            Evaluates the performance of the models and returns the results.
+        """
     def __init__(self, embeddings, labels):
+        """
+       Constructs all the necessary attributes for the ModelManager object.
+
+       Parameters
+       ----------
+           embeddings : dict
+               a dictionary of embeddings used for training the models
+           labels : tuple
+               a tuple containing the labels for the training and test sets
+       """
         self.model_constructor = [
             LogisticRegressionModel,
             RandomForestModel,
@@ -49,6 +83,18 @@ class ModelManager:
         tune,
         hyperparamater_path,
     ):
+        """
+        Trains the models and saves them in the specified directory.
+
+        Parameters
+        ----------
+            save_directory : Path
+                the directory where the trained models will be saved
+            tune : bool
+                a flag indicating whether to tune the hyperparameters of the models
+            hyperparamater_path : Path
+                the path to the file containing the hyperparameters
+        """
         save_directory.mkdir(parents=True, exist_ok=True)
         hyperparameters_file = hyperparamater_path / "hyperparameters.json"
 
@@ -67,7 +113,7 @@ class ModelManager:
                     for constructor in self.model_constructor:
                         model = constructor()
                         model_name = model.model_name
-                        print(f"Training {model_name} with {embedding_name} embeddings")
+                        logging.info(f"Training {model_name} with {embedding_name} embeddings")
 
                         # Hyperparameter tuning
                         best_model, best_params, best_score = tune_hyperparameters(
@@ -93,7 +139,7 @@ class ModelManager:
                     for constructor in self.model_constructor:
                         model = constructor()
                         model_name = model.model_name
-                        print(
+                        logging.info(
                             f"Training {model_name} with {embedding_name} embeddings using pre-tuned hyperparameters"
                         )
 
@@ -108,7 +154,7 @@ class ModelManager:
                                 }
 
                             model.model.set_params(**model_params)
-                            print(
+                            logging.info(
                                 f"Pre-tuned parameters for {model_name}: {model_params}"
                             )
 
@@ -120,7 +166,7 @@ class ModelManager:
                 for constructor in self.model_constructor:
                     model = constructor()
                     model_name = model.model_name
-                    print(
+                    logging.info(
                         f"Training {model_name} with {embedding_name} embeddings with default parameters"
                     )
                     model.model.fit(X_train, y_train)
@@ -135,6 +181,19 @@ class ModelManager:
                 )
 
     def evaluate_models(self, save_directory):
+        """
+        Evaluates the performance of the models and returns the results.
+
+        Parameters
+        ----------
+            save_directory : Path
+                the directory where the trained models are saved
+
+        Returns
+        -------
+            results : DataFrame
+                a DataFrame containing the evaluation results of the models
+        """
         columns = [
             "model",
             "data",
@@ -158,8 +217,8 @@ class ModelManager:
                     # Extract model name from the file name
                     model_name = model_file.stem
 
-                    print(f"Evaluating {model_name} with {embedding_name} embeddings")
-                    print(
+                    logging.info(f"Evaluating {model_name} with {embedding_name} embeddings")
+                    logging.info(
                         f"X_train shape: {X_train.shape}, X_test shape: {X_test.shape}"
                     )
 
@@ -185,7 +244,7 @@ class ModelManager:
                             "f1_oos": f1_oos,
                         }
                     )
-                    print(
+                    logging.info(
                         f"Model: {model_name}\n"
                         f"Data: {embedding_name}\n"
                         f"In-sample accuracy: {accuracy_train:.3f}\n"
