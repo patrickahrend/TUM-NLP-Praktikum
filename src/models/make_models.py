@@ -14,7 +14,7 @@ def load_pickle(file_path):
         return pickle.load(file)
 
 
-def load_embeddings(embeddings_path):
+def load_embeddings(embeddings_path: Path) -> dict:
     """
     Load embeddings from pickle files.
 
@@ -43,7 +43,7 @@ def load_embeddings(embeddings_path):
     return embeddings
 
 
-def main(dataset_variant, is_tuned):
+def main(dataset_variant: str, is_tuned: bool) -> None:
     """
     Main function to load embeddings, train models, save models, and evaluate models.
 

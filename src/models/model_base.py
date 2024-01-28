@@ -1,5 +1,9 @@
 import logging
 import pickle
+from pathlib import Path
+from sklearn.base import BaseEstimator
+import numpy as np
+import pandas as pd
 
 
 class ModelBase:
@@ -27,7 +31,7 @@ class ModelBase:
         Sets the parameters of the model.
     """
 
-    def __init__(self, model_name, model_instance):
+    def __init__(self, model_name: str, model_instance: BaseEstimator):
         """
         Constructs all the necessary attributes for the ModelBase object.
 
@@ -35,7 +39,7 @@ class ModelBase:
         ----------
             model_name : str
                 The name of the machine learning model.
-            model_instance : object
+            model_instance : BaseEstimator from Sklearn
                 The instance of the machine learning model.
         """
         self.model_name = model_name
@@ -43,8 +47,8 @@ class ModelBase:
 
     def save_model(
         self,
-        directory,
-    ):
+        directory: Path,
+    ) -> None:
         """
         Saves the model to a pickle file in the specified directory.
 
@@ -58,37 +62,37 @@ class ModelBase:
             pickle.dump(self.model, f)
         logging.info(f"Model saved to {filepath}")
 
-    def train_model(self, X_train, y_train):
+    def train_model(self, X_train: pd.DataFrame , y_train: pd.Series) -> None:
         """
         Trains the model using the provided training data and labels.
 
         Parameters
         ----------
-            X_train : array-like
+            X_train : pd.DataFrame
                 The training data.
-            y_train : array-like
+            y_train : pd.Series
                 The labels for the training data.
         """
         self.model.fit(X_train, y_train)
         logging.info(f"{self.model_name} trained successfully.")
 
-    def predict(self, X):
+    def predict(self, X: pd.DataFrame) -> np.ndarray:
         """
         Makes predictions using the model.
 
         Parameters
         ----------
-            X : array-like
+            X : pd.DataFrame
                 The data to make predictions on.
 
         Returns
         -------
-            array-like
+            np.ndarray
                 The predictions made by the model.
         """
         return self.model.predict(X)
 
-    def set_params(self, **params):
+    def set_params(self, **params: dict) -> None:
         """
         Sets the parameters of the model.
 

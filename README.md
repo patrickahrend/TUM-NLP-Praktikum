@@ -129,8 +129,7 @@ make data
 ```bash
 make embeddings
 ```
-This command may take up to 30 minutes. I included the embeddings in git already, if anyone wants to skip this step.
-This step also includes downloading the Glove Input data and saving it in the data/external folder. In the project I used the [6G.300D](https://nlp.stanford.edu/projects/glove/) version.
+This command may take up to 30 minutes. This step also includes downloading the Glove Input data and saving it in the data/external folder. In the project I used the [6G.300D](https://nlp.stanford.edu/projects/glove/) version.
 I decided to run two embeddings approaches, one where the process description and legal text is concatenated and then 
 embedded and one where they are embedded separately and then concatenated. First is called _combined and second _separate.
 
@@ -149,6 +148,7 @@ make start-frontend
 
 The api will be running on localhost:8000 and the frontend on localhost:8501.
 
+For each step I already included the output files in the respective folders, if you want to skip any steps. 
 ---
 
 ## Extensions of the project

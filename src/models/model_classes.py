@@ -125,7 +125,7 @@ class BERTForClassification(nn.Module):
         self.bert = BertModel.from_pretrained("bert-base-uncased")
         self.fc = nn.Linear(self.bert.config.hidden_size, 1)
 
-    def forward(self, input_ids, attention_mask):
+    def forward(self, input_ids: torch.Tensor, attention_mask:torch.Tensor) -> torch.Tensor:
         """
         Forward pass for the BERT model.
 
@@ -151,7 +151,7 @@ class RnnTextClassifier(nn.Module):
     RNN model for text classification tasks. Inherits from the PyTorch nn.Module class.
     """
 
-    def __init__(self, input_size, hidden_size, num_layers, dropout=0, device="cpu"):
+    def __init__(self, input_size: int, hidden_size: int, num_layers:int, dropout=0, device="cpu"):
         super(RnnTextClassifier, self).__init__()
 
         # model params
@@ -165,7 +165,7 @@ class RnnTextClassifier(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.fc = nn.Linear(hidden_size, 1)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Forward pass for the RNN model.
 

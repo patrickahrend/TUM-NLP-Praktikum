@@ -1,5 +1,9 @@
 import logging
+
+import numpy as np
+import pandas as pd
 from sklearn.model_selection import GridSearchCV
+from sklearn.base import BaseEstimator
 
 # Define the parameter grids for the different models
 param_grids = {
@@ -55,13 +59,13 @@ param_grids = {
 }
 
 
-def tune_hyperparameters(model: object, param_grid, X_train, y_train, cv: int):
+def tune_hyperparameters(model: BaseEstimator, param_grid, X_train: pd.DataFrame, y_train: np.ndarray, cv: int)-> tuple:
     """
     Tune the hyperparameters of a given model using GridSearchCV.
 
     Parameters
     ----------
-    model : estimator object
+    model : BaseEstimator object
         This is assumed to implement the scikit-learn estimator interface.
     param_grid : dict or list of dictionaries
         Dictionary with parameters names (str) as keys and lists of parameter settings to try as values.

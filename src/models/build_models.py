@@ -1,7 +1,7 @@
 import json
 import logging
 import pickle
-
+from pathlib import Path
 
 import pandas as pd
 from sklearn.metrics import (
@@ -51,7 +51,7 @@ class ModelManager:
         Evaluates the performance of the models and returns the results.
     """
 
-    def __init__(self, embeddings, labels):
+    def __init__(self, embeddings:  dict, labels: tuple):
         """
         Constructs all the necessary attributes for the ModelManager object.
 
@@ -80,10 +80,10 @@ class ModelManager:
 
     def train_and_save_models(
         self,
-        save_directory,
-        tune,
-        hyperparamater_path,
-    ):
+        save_directory: Path,
+        tune: bool,
+        hyperparamater_path: Path,
+    ) -> None:
         """
         Trains the models and saves them in the specified directory.
 
@@ -183,7 +183,7 @@ class ModelManager:
                     index=False,
                 )
 
-    def evaluate_models(self, save_directory):
+    def evaluate_models(self, save_directory: Path) -> pd.DataFrame:
         """
         Evaluates the performance of the models and returns the results.
 
