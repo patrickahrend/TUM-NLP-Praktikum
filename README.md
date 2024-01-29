@@ -95,7 +95,9 @@ is different from the versions for windows and linux. As the version is just spe
 be resolved by this, but I developed quite a long time on this project and wanted to make 100% that it works for you.
 Thus is used cross compling with Docker. 
 ### Manual
-The requirements.txt file is in the root folder for the backend and frontend, as it also installs the streamlit package. 
+I highly recommend using poetry to install the requirements with the command poetry install and than poetry shell to activate it.
+This is due to me creating a name space to easily import modules from the different folders. Otherwise I also incldued a 
+requirements.txt file is in the root folder for the whole project.
 The requirements.txt in the frontend folder is for only for docker to build faster.
 For the embeddings of GPT an API-Key is needed, download the [.env](https://drive.google.com/file/d/1h3TMa5V326YKW5ZlirlouZkp2nuG2MfY/view?usp=sharing) from the following link and put it into the 
 root folder. Creating the embeddings are less than 5 cents, so I included it for the reproducibility of this project.

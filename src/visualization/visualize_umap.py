@@ -7,7 +7,7 @@ import umap
 
 
 def create_umap_single(
-    embeddings: pd.DataFrame, labels: pd.Series, emb_type: str, file_path: Path
+    embeddings: pd.DataFrame, labels: pd.Series, emb_type: str, title_extension: str, file_path: Path
 ) -> None:
     """
     Create a UMAP visualization for a single type of embeddings.
@@ -20,12 +20,14 @@ def create_umap_single(
         The labels for the embeddings.
     emb_type : str
         The type of the embeddings.
+    title_extension : str
+        The extension for the title of the visualization.
     file_path : Path
         The path where the visualization will be saved.
     """
     umap_model = umap.UMAP(metric="euclidean")
     embedding_umap = umap_model.fit_transform(embeddings)
-    fig = create_plot(embedding_umap, labels, emb_type)
+    fig = create_plot(embedding_umap, labels, title_extension, emb_type)
     fig.write_html(str(file_path.with_suffix(".html")))
 
 
@@ -68,12 +70,12 @@ def create_umap_combined(
         }
     )
 
-    fig = create_plot(df_umap, labels, emb_type, types)
+    fig = create_plot(df_umap, labels, emb_type,"Multiple UMAPs", types)
     fig.write_html(str(file_path.with_suffix(".html")))
 
 
 def create_plot(
-    data: pd.DataFrame, labels: pd.Series, emb_type: str, types=None
+    data: pd.DataFrame, labels: pd.Series, emb_type: str, title_extension: str, types=None,
 ) -> px.scatter:
     """
     Create a plotly express scatter plot for the UMAP visualization.
@@ -86,6 +88,8 @@ def create_plot(
         The labels for the data.
     emb_type : str
         The type of the embeddings.
+    title_extension : str
+        The extension for the title of the visualization.
     types : array-like, optional
         The types of the embeddings.
 
@@ -114,7 +118,7 @@ def create_plot(
             color="Process",
             symbol="Type",
             labels={"UMAP_1": "UMAP Dimension 1", "UMAP_2": "UMAP Dimension 2"},
-            title=f"UMAP Visualization of {emb_type} Embeddings (Process Description vs Legal Text)",
+            title=f"UMAP Visualization of {emb_type} Embeddings (Process Description vs Legal Text) {title_extension}",
         )
     fig.update_layout(legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
     return fig

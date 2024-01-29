@@ -1,4 +1,4 @@
-.PHONY: clean data lint requirements start-api start-frontend models help
+.PHONY: clean data lint requirements start-api start-frontend models help umap
 
 #################################################################################
 # GLOBALS                                                                       #

@@ -17,13 +17,13 @@ def main():
 
     embedding_files = os.listdir(base_path / "data/processed/embeddings")
 
-    for emb_type in ["fasttext", "word2vec", "tfidf", "bert", "gpt", "glove"]:
+    for emb_type in ["tfidf", "glove", "bert", "word2vec", "fasttext", "gpt"]:
         combined_files = [
             f
             for f in embedding_files
             if "train_combined" in f and f.startswith(emb_type)
         ]
-        seperate_files = [
+        separate_files = [
             f
             for f in embedding_files
             if "train_separate" in f and f.startswith(emb_type)
@@ -49,8 +49,8 @@ def main():
             ]
             embedding_df = embedding_combined.drop(columns=columns_to_drop)
 
-            file_map = base_path / f"references/umap/{emb_type}_umap_combined_increased"
-            create_umap_single(embedding_df, labels, emb_type, file_map)
+            file_map = base_path / f"references/umap/{emb_type}_umap_combined_process"
+            create_umap_single(embedding_df, labels, emb_type, "Combined", file_map)
 
         embedding_dims = {
             "glove": 300,
@@ -61,7 +61,7 @@ def main():
             "bert": 768,
         }
         # separate embeddings
-        for file_name in seperate_files:
+        for file_name in separate_files:
             file_path = base_path / f"data/processed/embeddings/{file_name}"
             embedding_separate = load_pickle(file_path)
 
@@ -86,14 +86,14 @@ def main():
             embedding_legal_text = embedding_df.iloc[:, dim : dim * 2]
 
             file_map = (
-                base_path / f"references/umap/{emb_type}_umap_separate_single_increased"
+                base_path / f"references/umap/{emb_type}_umap_separate_single_process"
             )
             file_multiple = (
                 base_path
-                / f"references/umap/{emb_type}_umap_separate_multiple_increased"
+                / f"references/umap/{emb_type}_umap_separate_multiple"
             )
 
-            create_umap_single(embedding_df, labels, emb_type, file_map)
+            create_umap_single(embedding_df, labels, emb_type,"Separate", file_map)
             create_umap_combined(
                 embedding_proc_desc,
                 embedding_legal_text,
@@ -117,9 +117,9 @@ def main():
             ]
             embedding_legal_text = embedding_legal_text.drop(columns=columns_to_drop)
             file_legal = (
-                base_path / f"references/umap/{emb_type}_umap_legal_text_increased"
+                base_path / f"references/umap/{emb_type}_umap_legal_text_process"
             )
-            create_umap_single(embedding_legal_text, labels, emb_type, file_legal)
+            create_umap_single(embedding_legal_text, labels, emb_type,"Just Legal Text", file_legal)
 
 
 if __name__ == "__main__":
