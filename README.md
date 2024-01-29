@@ -95,8 +95,8 @@ is different from the versions for windows and linux. As the version is just spe
 be resolved by this, but I developed quite a long time on this project and wanted to make 100% that it works for you.
 Thus is used cross compling with Docker. 
 ### Manual
-I highly recommend using poetry to install the requirements with the command poetry install and than poetry shell to activate it.
-This is due to me creating a name space to easily import modules from the different folders. Otherwise I also incldued a 
+I highly recommend using poetry to install the requirements with the command poetry install and then poetry shell to activate it.
+As it fixes 2 of the 3 issues I know of(see below). Otherwise, I also included a 
 requirements.txt file is in the root folder for the whole project.
 The requirements.txt in the frontend folder is for only for docker to build faster.
 For the embeddings of GPT an API-Key is needed, download the [.env](https://drive.google.com/file/d/1h3TMa5V326YKW5ZlirlouZkp2nuG2MfY/view?usp=sharing) from the following link and put it into the 
@@ -166,6 +166,14 @@ After running make models, it checks that the models have been created for each 
 Tests can be found in the src/test folder.
 
 ---
+## Issues I know of 
+- The frontend test sets of GPT and the rule-based approachs differs in some data point. This is due to my running the pipeline
+  which randomly samples from the same processes for the test data. I noticed it, but did not train GPT again, as it costed around 10 euros. For evaluation 
+  of the prior approved gold standard, just switch out the test set in the /data/evaluation folder.
+- I highly recommend running the make file with poerty. Thus doing poetry shell before running the make file. I incurred a subprocess terminate error sometimes 
+  when running the make file outside of poetry, which was unsolvable for me.
+- Dynamic import path work with poetry, but not with pip. This is due to me creating a name space to easily import modules from the different folders. 
+--- 
 ## Extensions of the project
 
 As this projects was done on a prototype level, there are several extensions that could be done to have fully functional
