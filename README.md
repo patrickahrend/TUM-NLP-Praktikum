@@ -1,8 +1,7 @@
 # TUM-NLP-Praktikum
 
 NLP Project for text classification based on relevance for several processes.
-Submission of Patrick Ahrend.
-I worked on Case A with an ML Approach.
+I worked on Case A with an ML Approach. This is the submission of Patrick Ahrend for the NLP Praktikum at TUM.
 
 ## Project Organization
 
