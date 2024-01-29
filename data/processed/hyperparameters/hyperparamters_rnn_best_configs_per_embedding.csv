@@ -1,0 +1,7 @@
+embedding_type,hidden_size,num_layers,learning_rate,batch_size
+gpt,150,3,0.01,128
+bert,100,2,0.001,128
+tfidf,150,4,0.001,64
+glove,50,2,0.01,128
+word2vec,150,3,0.001,128
+fasttext,100,2,0.001,32
