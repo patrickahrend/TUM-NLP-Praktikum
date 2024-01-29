@@ -277,7 +277,9 @@ class EmbeddingProcessor:
 
         return self.tfidf
 
-    def embed_new_text(self, proc_desc: str, legal_text: str, embedding_type: str, dataset_type: str) -> np.ndarray:
+    def embed_new_text(
+        self, proc_desc: str, legal_text: str, embedding_type: str, dataset_type: str
+    ) -> np.ndarray:
         """
         Embeds new text using the specified embedding model and dataset type.
 

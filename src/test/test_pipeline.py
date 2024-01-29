@@ -9,8 +9,10 @@ from src.models import make_models
 from pathlib import Path
 
 import logging
+
 log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.INFO, format=log_fmt)
+
 
 class TestPipeline(unittest.TestCase):
     def setUp(self):
@@ -18,20 +20,32 @@ class TestPipeline(unittest.TestCase):
 
     def test_make_data(self):
         # Run the pipeline
-        make_dataset_main(self.base_path / "data/raw", self.base_path / "data/processed")
+        make_dataset_main(
+            self.base_path / "data/raw", self.base_path / "data/processed"
+        )
 
         # Check that the gold standard subset CSV file was created
         gold_standard_path = self.base_path / "data/evaluation/gold_standard.csv"
-        self.assertTrue(os.path.exists(gold_standard_path), f"File not found: {gold_standard_path}")
+        self.assertTrue(
+            os.path.exists(gold_standard_path), f"File not found: {gold_standard_path}"
+        )
 
         # Check that the preprocessed training data CSV file was created
-        training_data_path = self.base_path / "data/processed/training_data_preprocessed.csv"
-        self.assertTrue(os.path.exists(training_data_path), f"File not found: {training_data_path}")
+        training_data_path = (
+            self.base_path / "data/processed/training_data_preprocessed.csv"
+        )
+        self.assertTrue(
+            os.path.exists(training_data_path), f"File not found: {training_data_path}"
+        )
 
         # Check that the preprocessed gold standard subset CSV file was created
-        gold_standard_preprocessed_path = self.base_path / "data/evaluation/gold_standard_preprocessed.csv"
-        self.assertTrue(os.path.exists(gold_standard_preprocessed_path),
-                        f"File not found: {gold_standard_preprocessed_path}")
+        gold_standard_preprocessed_path = (
+            self.base_path / "data/evaluation/gold_standard_preprocessed.csv"
+        )
+        self.assertTrue(
+            os.path.exists(gold_standard_preprocessed_path),
+            f"File not found: {gold_standard_preprocessed_path}",
+        )
 
     def test_make_embeddings(self):
         # Run the embeddings pipeline
@@ -45,7 +59,9 @@ class TestPipeline(unittest.TestCase):
             for data_type in ["train", "test"]:
                 for context in ["combined", "separate", "legal_text"]:
                     # Define a regex pattern to match files with the correct format
-                    pattern = re.compile(fr"{emb_type}_{data_type}_{context}_(\d+)\.pkl")
+                    pattern = re.compile(
+                        rf"{emb_type}_{data_type}_{context}_(\d+)\.pkl"
+                    )
 
                     # List files in the directory
                     files = os.listdir(self.base_path / f"data/processed/embeddings")
@@ -60,36 +76,63 @@ class TestPipeline(unittest.TestCase):
 
                     # Check for the presence of files with dimensions
                     for dimension in dimensions:
-                        file_path = self.base_path / f"data/processed/embeddings/{emb_type}_{data_type}_{context}_{dimension}.pkl"
-                        self.assertTrue(os.path.exists(file_path), f"Embedding file not found: {file_path}")
+                        file_path = (
+                            self.base_path
+                            / f"data/processed/embeddings/{emb_type}_{data_type}_{context}_{dimension}.pkl"
+                        )
+                        self.assertTrue(
+                            os.path.exists(file_path),
+                            f"Embedding file not found: {file_path}",
+                        )
 
     @staticmethod
     def call_main_with_args(self, dataset_variant, is_tuned):
-        with patch('argparse._sys.argv', ['make_models.py',
-                                          '--dataset_variant', dataset_variant,
-                                          '--is_tuned' if is_tuned else '--no-tune']):
+        with patch(
+            "argparse._sys.argv",
+            [
+                "make_models.py",
+                "--dataset_variant",
+                dataset_variant,
+                "--is_tuned" if is_tuned else "--no-tune",
+            ],
+        ):
             make_models.main()
 
     def test_make_models(self):
         # Call the main function with the desired sets of arguments
-        self.call_main_with_args('combined', False)
-        self.call_main_with_args('combined', True)
-        self.call_main_with_args('separate', False)
-        self.call_main_with_args('separate', True)
-        variants = ['combined', 'separate']
-        tunings = ['tuned', 'no_tuning']
-        embedding_types = ['word2vec', 'glove', 'fasttext', 'tfidf', 'bert', 'gpt']
-        model_types = ["Logistic_Regression","RandomForestClassifier","SVC","DecisionTreeClassifier","BernoulliNB",
-                       "GaussianNB", "Perceptron","SGDClassifier","GradientBoostingClassifier"]
+        self.call_main_with_args("combined", False)
+        self.call_main_with_args("combined", True)
+        self.call_main_with_args("separate", False)
+        self.call_main_with_args("separate", True)
+        variants = ["combined", "separate"]
+        tunings = ["tuned", "no_tuning"]
+        embedding_types = ["word2vec", "glove", "fasttext", "tfidf", "bert", "gpt"]
+        model_types = [
+            "Logistic_Regression",
+            "RandomForestClassifier",
+            "SVC",
+            "DecisionTreeClassifier",
+            "BernoulliNB",
+            "GaussianNB",
+            "Perceptron",
+            "SGDClassifier",
+            "GradientBoostingClassifier",
+        ]
 
         # Iterate over each combination of variant, tuning, embedding, and model type
         for variant in variants:
             for tuning in tunings:
                 for emb_type in embedding_types:
                     for model_type in model_types:
-                        model_file = self.base_path / f"models/trained_models/{variant}/{tuning}/{emb_type}/{model_type}.pkl"
-                        self.assertTrue(os.path.exists(model_file), f"Model file not found: {model_file}")
+                        model_file = (
+                            self.base_path
+                            / f"models/trained_models/{variant}/{tuning}/{emb_type}/{model_type}.pkl"
+                        )
+                        self.assertTrue(
+                            os.path.exists(model_file),
+                            f"Model file not found: {model_file}",
+                        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

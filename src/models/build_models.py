@@ -51,7 +51,7 @@ class ModelManager:
         Evaluates the performance of the models and returns the results.
     """
 
-    def __init__(self, embeddings:  dict, labels: tuple):
+    def __init__(self, embeddings: dict, labels: tuple):
         """
         Constructs all the necessary attributes for the ModelManager object.
 

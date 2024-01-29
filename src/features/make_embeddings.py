@@ -8,7 +8,12 @@ import pandas as pd
 from src.features.build_word_embeddings import EmbeddingProcessor
 
 
-def save_df_with_embeddings(original_df: pd.DataFrame, embeddings: pd.DataFrame, embedding_type: str, filename: Path) -> None:
+def save_df_with_embeddings(
+    original_df: pd.DataFrame,
+    embeddings: pd.DataFrame,
+    embedding_type: str,
+    filename: Path,
+) -> None:
     """
     Saves a DataFrame with embeddings to a pickle file.
 
@@ -40,7 +45,9 @@ def save_df_with_embeddings(original_df: pd.DataFrame, embeddings: pd.DataFrame,
         pickle.dump(final_df, file)
 
 
-def concat_embeddings_with_df(embedding1: pd.DataFrame, embedding2: pd, embedding1_name: str, embedding2_name: str) -> pd.DataFrame:
+def concat_embeddings_with_df(
+    embedding1: pd.DataFrame, embedding2: pd, embedding1_name: str, embedding2_name: str
+) -> pd.DataFrame:
     """
     Concatenates two sets of embeddings into a DataFrame.
 
@@ -73,7 +80,11 @@ def concat_embeddings_with_df(embedding1: pd.DataFrame, embedding2: pd, embeddin
 
 
 def process_and_save_embeddings(
-    embedding_processor: EmbeddingProcessor, df_train: pd.DataFrame, df_test: pd.DataFrame, embedding_type: str, project_dir: Path
+    embedding_processor: EmbeddingProcessor,
+    df_train: pd.DataFrame,
+    df_test: pd.DataFrame,
+    embedding_type: str,
+    project_dir: Path,
 ) -> None:
     """
     Processes and saves embeddings for the training and test data.

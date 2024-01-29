@@ -7,7 +7,11 @@ import umap
 
 
 def create_umap_single(
-    embeddings: pd.DataFrame, labels: pd.Series, emb_type: str, title_extension: str, file_path: Path
+    embeddings: pd.DataFrame,
+    labels: pd.Series,
+    emb_type: str,
+    title_extension: str,
+    file_path: Path,
 ) -> None:
     """
     Create a UMAP visualization for a single type of embeddings.
@@ -70,12 +74,16 @@ def create_umap_combined(
         }
     )
 
-    fig = create_plot(df_umap, labels, emb_type,"Multiple UMAPs", types)
+    fig = create_plot(df_umap, labels, emb_type, "Multiple UMAPs", types)
     fig.write_html(str(file_path.with_suffix(".html")))
 
 
 def create_plot(
-    data: pd.DataFrame, labels: pd.Series, emb_type: str, title_extension: str, types=None,
+    data: pd.DataFrame,
+    labels: pd.Series,
+    emb_type: str,
+    title_extension: str,
+    types=None,
 ) -> px.scatter:
     """
     Create a plotly express scatter plot for the UMAP visualization.

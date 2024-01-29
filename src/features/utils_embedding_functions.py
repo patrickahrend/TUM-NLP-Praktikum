@@ -9,7 +9,9 @@ from transformers import BertTokenizer, BertModel
 from openai import OpenAI
 
 
-def get_sentence_vector_custom(statement: list, model, is_glove: bool=False) -> np.ndarray:
+def get_sentence_vector_custom(
+    statement: list, model, is_glove: bool = False
+) -> np.ndarray:
     """
     Computes the sentence vector for a given statement using the provided model.
 
@@ -37,7 +39,9 @@ def get_sentence_vector_custom(statement: list, model, is_glove: bool=False) -> 
             return np.zeros(model.vector_size)
 
 
-def get_embeddings_bert(statement: str, tokenizer: BertTokenizer, model: BertModel) -> torch.Tensor:
+def get_embeddings_bert(
+    statement: str, tokenizer: BertTokenizer, model: BertModel
+) -> torch.Tensor:
     """
     Computes the BERT embeddings for a given statement.
 

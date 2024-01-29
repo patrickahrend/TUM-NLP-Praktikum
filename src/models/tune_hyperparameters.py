@@ -59,7 +59,13 @@ param_grids = {
 }
 
 
-def tune_hyperparameters(model: BaseEstimator, param_grid, X_train: pd.DataFrame, y_train: np.ndarray, cv: int)-> tuple:
+def tune_hyperparameters(
+    model: BaseEstimator,
+    param_grid,
+    X_train: pd.DataFrame,
+    y_train: np.ndarray,
+    cv: int,
+) -> tuple:
     """
     Tune the hyperparameters of a given model using GridSearchCV.
 

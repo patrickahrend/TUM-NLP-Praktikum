@@ -33,11 +33,11 @@ def main(input_filepath, output_filepath):
 
     process_to_file = {
         "Know Your Customer": project_dir
-                              / "data/raw/processes/textual_description/know_your_customer.txt",
+        / "data/raw/processes/textual_description/know_your_customer.txt",
         "Hiring Employee": project_dir
-                           / "data/raw/processes/textual_description/hiring_employee.txt",
+        / "data/raw/processes/textual_description/hiring_employee.txt",
         "Travel Insurance Claim": project_dir
-                                  / "data/raw/processes/textual_description/travel_insurance_claim.txt",
+        / "data/raw/processes/textual_description/travel_insurance_claim.txt",
         "GDPR_1": project_dir / "data/raw/processes/textual_description/GDPR_1.txt",
         "GDPR_2": project_dir / "data/raw/processes/textual_description/GDPR_2.txt",
         "GDPR_3": project_dir / "data/raw/processes/textual_description/GDPR_3.txt",

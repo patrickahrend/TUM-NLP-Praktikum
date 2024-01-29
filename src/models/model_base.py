@@ -62,7 +62,7 @@ class ModelBase:
             pickle.dump(self.model, f)
         logging.info(f"Model saved to {filepath}")
 
-    def train_model(self, X_train: pd.DataFrame , y_train: pd.Series) -> None:
+    def train_model(self, X_train: pd.DataFrame, y_train: pd.Series) -> None:
         """
         Trains the model using the provided training data and labels.
 

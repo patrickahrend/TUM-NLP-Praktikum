@@ -19,7 +19,12 @@ class DataProcessor:
     Turns the raw data from Use Case Data(2).xlsx into the dataset used in the project.
     """
 
-    def __init__(self, excel_filepath: Path, process_to_file: dict, nlp_model: str ="en_core_web_sm"):
+    def __init__(
+        self,
+        excel_filepath: Path,
+        process_to_file: dict,
+        nlp_model: str = "en_core_web_sm",
+    ):
         """
         Initializes the DataProcessor object.
 
@@ -86,7 +91,9 @@ class DataProcessor:
             return file.read().strip()
 
     @staticmethod
-    def create_gold_standard_subset(df: pd.DataFrame, sample_sizes:dict) -> (pd.DataFrame, list):
+    def create_gold_standard_subset(
+        df: pd.DataFrame, sample_sizes: dict
+    ) -> (pd.DataFrame, list):
         """
         Creates a gold standard subset from the DataFrame.
 

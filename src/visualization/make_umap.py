@@ -89,11 +89,10 @@ def main():
                 base_path / f"references/umap/{emb_type}_umap_separate_single_process"
             )
             file_multiple = (
-                base_path
-                / f"references/umap/{emb_type}_umap_separate_multiple"
+                base_path / f"references/umap/{emb_type}_umap_separate_multiple"
             )
 
-            create_umap_single(embedding_df, labels, emb_type,"Separate", file_map)
+            create_umap_single(embedding_df, labels, emb_type, "Separate", file_map)
             create_umap_combined(
                 embedding_proc_desc,
                 embedding_legal_text,
@@ -119,7 +118,9 @@ def main():
             file_legal = (
                 base_path / f"references/umap/{emb_type}_umap_legal_text_process"
             )
-            create_umap_single(embedding_legal_text, labels, emb_type,"Just Legal Text", file_legal)
+            create_umap_single(
+                embedding_legal_text, labels, emb_type, "Just Legal Text", file_legal
+            )
 
 
 if __name__ == "__main__":
