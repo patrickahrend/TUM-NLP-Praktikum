@@ -89,7 +89,8 @@ class UserInterface:
         (
             tab1,
             tab2,
-        ) = st.tabs(["Classify", "Model Evaluation"])
+            tab3
+        ) = st.tabs(["Classify", "Model Evaluation", "UMAP"])
 
         with tab1:
             self.model_options = [
@@ -163,9 +164,57 @@ class UserInterface:
                 )
                 st.button("Classify", key="classify_mock")
 
-        ## here show model evaluation results
         with tab2:
             self.display_results()
+
+        # UMAP
+        with tab3:
+            self.display_umap()
+
+    def display_umap(self):
+        """
+        Display the UMAP plot.
+        """
+        embeddings = ['bert', 'fasttext', 'glove', 'gpt', 'tfidf', 'word2vec']
+
+        # Create a selector for embeddings
+        selected_embedding = st.selectbox("Select an embedding:", embeddings)
+
+        # Create a radio button to select clustering by label or process
+        clustering_option = st.radio("Choose clustering option:", ['Label', 'Process'],  index=1)
+        clustering_option = clustering_option.lower()
+
+        umap_legal = self.base_path / f'references/umap/{selected_embedding}_umap_legal_text_{clustering_option}.html'
+        umap_separate_single = self.base_path / f'references/umap/{selected_embedding}_umap_separate_single_{clustering_option}.html'
+        umap_separate_multiple = self.base_path / f'references/umap/{selected_embedding}_umap_separate_multiple.html'
+        umap_combined = self.base_path / f'references/umap/{selected_embedding}_umap_combined_{clustering_option}.html'
+
+        # Create headings for each UMAP visualization
+        st.header("UMAP Visualizations")
+
+        # Check if each UMAP file exists and display it with its heading
+        if os.path.exists(umap_legal):
+            st.subheader("Legal Text UMAP")
+            with open(umap_legal, 'r', encoding='utf-8') as umap_file:
+                st.components.v1.html(umap_file.read() , height=1000)
+
+        if os.path.exists(umap_combined):
+            st.subheader("Combined UMAP")
+            with open(umap_combined, 'r', encoding='utf-8') as umap_file:
+                st.components.v1.html(umap_file.read(), height=1000)
+
+        if os.path.exists(umap_separate_single):
+            st.subheader("Separate Single UMAP")
+            with open(umap_separate_single, 'r', encoding='utf-8') as umap_file:
+                st.components.v1.html(umap_file.read(), height=1000)
+
+        if os.path.exists(umap_separate_multiple):
+            st.subheader("Separate Multiple UMAP")
+            with open(umap_separate_multiple, 'r', encoding='utf-8') as umap_file:
+                st.components.v1.html(umap_file.read(), height=1000)
+
+
+
 
     def load_data(self, embedding_type: str, dataset_type: str) -> None:
         """
@@ -326,10 +375,10 @@ class UserInterface:
 
                 accuracy = accuracy_score(true_labels, predicted_labels)
                 precision = precision_score(
-                    true_labels, predicted_labels, average="weighted"
+                    true_labels, predicted_labels
                 )
-                recall = recall_score(true_labels, predicted_labels, average="weighted")
-                f1 = f1_score(true_labels, predicted_labels, average="weighted")
+                recall = recall_score(true_labels, predicted_labels)
+                f1 = f1_score(true_labels, predicted_labels)
                 correct_predictions = sum(
                     t == p for t, p in zip(true_labels, predicted_labels)
                 )
@@ -342,12 +391,12 @@ class UserInterface:
                         st.metric(label="Accuracy", value=round(accuracy, 2))
                     with col2:
                         st.metric(
-                            label="Precision (Weighted)", value=round(precision, 2)
+                            label="Precision ", value=round(precision, 2)
                         )
                     with col3:
-                        st.metric(label="Recall (Weighted)", value=round(recall, 2))
+                        st.metric(label="Recall", value=round(recall, 2))
                     with col4:
-                        st.metric(label="F1 Score (Weighted)", value=round(f1, 2))
+                        st.metric(label="F1 Score", value=round(f1, 2))
                     with col5:
                         st.metric(
                             label="Correct Predictions", value=correct_predictions

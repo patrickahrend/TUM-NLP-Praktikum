@@ -233,10 +233,10 @@ class ModelManager:
                     accuracy_train = accuracy_score(y_train, y_pred_train)
                     accuracy_test = accuracy_score(y_test, y_pred_test)
                     precision_oos = precision_score(
-                        y_test, y_pred_test, average="weighted"
+                        y_test, y_pred_test
                     )
-                    recall_oos = recall_score(y_test, y_pred_test, average="weighted")
-                    f1_oos = f1_score(y_test, y_pred_test, average="weighted")
+                    recall_oos = recall_score(y_test, y_pred_test)
+                    f1_oos = f1_score(y_test, y_pred_test)
 
                     results_list.append(
                         {
