@@ -19,11 +19,10 @@ I worked on Case A with an ML Approach. This is the submission of Patrick Ahrend
     │   └── raw            <- The original, immutable data from the other repository which I decided to use.
     │
     ├── deliverables
-    │   ├── presentation     <- Intermediate and Final presentation of the project.
-    │   ├── report
-    │   └── graphics     <- Graphics used in the report.
+    │   ├── presentation   <- Intermediate and Final presentation of the project.
+    │   └── report        
     │
-    ├── docker-compose.yml <- Docker compose file to run the frontend and backend together
+    ├── docker-compose.yml        <- Docker compose file to run the frontend and backend together
     ├── Dockerfile_backend        <- Dockerfile for the backend    
     │
     ├── models             <- Models trained on different embeddings as well as the embeddings models itself     │   ├── embeddings   
