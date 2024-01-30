@@ -1,0 +1,165 @@
+Process,document_title,Text,label
+SM2_2,Oesterreich Smart Metering,The prepayment function is realized via the central system.,1
+SM2_2,Oesterreich Smart Metering,The terminal only acts as a switching device.,1
+SM2_2,Oesterreich Smart Metering,The central system generates the shutdown command by comparing credits with consumption.,1
+SM2_2,Oesterreich Smart Metering,The comparison of credits with actual consumption value should be made periodically.,1
+SM2_2,Oesterreich Smart Metering,The basis is the daily readings.,1
+SM2_2,Oesterreich Smart Metering,"A ""real-time monitoring"" is therefore not necessary.",1
+SM2_2,Oesterreich Smart Metering,Shutdown may only be carried out in compliance with legal conditions.,1
+SM2_2,Oesterreich Smart Metering,Each status change of the terminal must be displayed on the device and also create an entry in the logbook.,1
+SM2_2,Oesterreich Smart Metering,There may be a corresponding customer information about the current balance from the central system to the customer.,1
+SM2_2,Oesterreich Smart Metering,Credit or credit limit is consumed and shutdown time is within the legally allowed time window.,1
+SM2_2,Oesterreich Smart Metering,"The supply of electrical energy is interrupted and the status of the breaker is displayed on the terminal, an entry in the logbook of the terminal is generated and the status is transmitted to the central system.",1
+SM2_2,Oesterreich Smart Metering,"In this case, a terminal is enabled by a command via the service interface (WZ) the on-site (re) engagement.",0
+SM2_2,Oesterreich Smart Metering,The activation takes place as follows: a) A release command is transmitted to the terminal via the service interface (WZ).,0
+SM2_2,Oesterreich Smart Metering,"The terminal indicates this condition (e.g., READY) and an entry in the logbook is generated.",0
+SM2_2,Oesterreich Smart Metering,This state is transmitted to the central system as ALARM or EVENT.,0
+SM2_2,Oesterreich Smart Metering,b) From this time can be turned on directly on the control of the terminal.,0
+SM2_2,Oesterreich Smart Metering,"The terminal must indicate this status change (e.g., CONNECTED). An entry in the logbook is generated.",0
+SM2_2,Oesterreich Smart Metering,This state is transmitted to the central system as an ALARM or EVENT when the transmission link (WAN) is available.,0
+SM2_2,Oesterreich Smart Metering,The operating limit of the meter is set by the control panel. Optionally this is possible for both energy directions.,0
+SM2_2,Oesterreich Smart Metering,"Change requirement threshold of the power limitation, for example due to contract adjustments.",0
+SM2_2,Oesterreich Smart Metering,"New threshold set, EVENT sent to the central system and logbook entry made on the meter.",0
+SM2_2,Oesterreich Smart Metering,The integration time of the counter for determining the power related to the power limitation is set by the control panel.,0
+SM2_2,Oesterreich Smart Metering,The active power limit value of the meter must be able to be set locally via the service interface (WZ) of the meter. Optionally this is possible for both energy directions.,0
+SM2_2,Oesterreich Smart Metering,A logbook entry is generated. This state is transmitted to the central system as an ALARM or EVENT when the transmission link (WAN) is available.,0
+SM2_2,Oesterreich Smart Metering,The integration time of the counter can be set locally via the service interface (WZ).,0
+SM2_2,Oesterreich Smart Metering,"For reasons of data protection law, the display of consumption time series, for example: load profile on the display via the call button, is only permitted in special cases. It must be possible to activate or deactivate the display of the consumption time series via the meter's WAN interface. The status is to be transmitted to the central system as ALARM or EVENT and entered in the logbook. In the basic setting of the meter, the display of the consumption time series must always be deactivated.",0
+SM2_2,Oesterreich Smart Metering,"Whether the display of the consumption time series, for example: load profile is active or inactive, is decided by the customer. He informs the NB (via web portal, via the call center, letter, ...). A synchronization of the device setting with respect to consumption time series display is usefully 1 - 2 times a day",0
+SM2_2,Oesterreich Smart Metering,(Customer should not be able to change the setting for load profile display every minute).,0
+SM2_2,Oesterreich Smart Metering,"When the consumption time series display is activated, the customer has the option to view the load profile for the last 60 days directly on the meter display. Unless it is in the course of a customer change to a new customer, based on the plant. Then a 60-day deactivation of the consumption time series display for data protection reasons is necessary.",0
+SM2_2,Oesterreich Smart Metering,Customer wishes to activate the consumption time series display on the meter display and notify the NB or the customer wishes to deactivate the consumption time series display on the meter display and inform the NB about this.,0
+SM2_2,Oesterreich Smart Metering,"When activated, the consumption time series is available on the meter display for customers.",0
+SM2_2,Oesterreich Smart Metering,"When deactivated, the consumption time series is no longer visible on the meter display for customers.",0
+SM2_2,Oesterreich Smart Metering,"In both cases, the meter reports its status to the central system as ALARM or EVENT (""LP Display OFF"" or ""LP Display ON"") and entry in the logbook of the meter.",0
+SM2_2,Oesterreich Smart Metering,"For reasons of data protection law, the display of the consumption time series, for example: load profile on the display via the call key, is only permitted in special cases. It must be possible to activate or deactivate the display of the consumption time series via the local service interface (TO) of the meter. The status is to be entered in the logbook. In the basic setting of the counter, the display of the consumption time series must always be deactivated.",0
+SM2_2,Oesterreich Smart Metering,"Whether the display of the consumption time series is active or inactive is decided by the customer. He informs the NB (eg via web portal, call center, letter, ...).",0
+SM2_2,Oesterreich Smart Metering,"When the consumption time series display is activated, the customer has the option of viewing the consumption time series, for example: load profile for the last 60 days, directly on the counter display. Unless it is in the course of a customer change to a new customer, based on the plant. Then a 60-day deactivation of the consumption time series display for data protection reasons is necessary.",0
+SM2_2,Oesterreich Smart Metering,A time can be stored in the counter from which the load profile is displayed on the meter.,0
+SM2_2,Oesterreich Smart Metering,This function can be relaunched via the central system. The central system sends the time from which the load profile may be displayed.,0
+SM2_2,Oesterreich Smart Metering,"The customer interface (H1) on the meter is to be activated or deactivated from the central system, whereby it is deactivated by adefault. The control center receives an information status as ALARM or EVENT.",0
+SM2_2,Oesterreich Smart Metering,Customer wants to use or not use customer interface (H1) anymore.,0
+SM2_2,Oesterreich Smart Metering,Customer interface (H1) on the meter is activated / deactivated and there is an entry in the logbook. meter reports its status to the control panel as ALARM or EVENT.,0
+SM2_2,Oesterreich Smart Metering,"The customer interface (H1) on the meter must be deactivated and activated locally via the service interface (WZ), whereby this is deactivated by default.",0
+SM2_2,Oesterreich Smart Metering,"The goal is to control the output interval for the customer interface (H1) - keyword: In Home Display. The meter should output the following instantaneous values: Meter reading and instantaneous power (in Watt) with date and time per energy direction - active energy (optionally also reactive energy) incl. Obiskennziffer. The output interval must be adjustable in a second grid (between 1 and 10 seconds) so that the meter readings are always output every full 1/4 hour (ie xx: 00, xx: 15, etc.). This allows comparison with the load profile registered in the meter. The output interval is set via the WAN interface of the meter.",0
+SM2_2,Oesterreich Smart Metering,The output interval for the customer interface (H1) in the meter has been successfully set / changed.,0
+SM2_2,Oesterreich Smart Metering,"Customer wishes to change the output interval for his customer interface (H1) and inform the NB about this. As part of a daily routine, the transfer takes place on his meter.",0
+SM2_2,Oesterreich Smart Metering,"In the course of the so-called opt-out regulation, it must be possible for customers who refuse to install an intelligent electricity meter to deactivate the load profile recording in the meter. Activation / deactivation of load profile recording must be possible remotely (WAN interface). Each of these changes must be logged in the relevant legal logbook of the meter.",0
+SM2_2,Oesterreich Smart Metering,"If the customer is opt-out, it must be displayed on the meter accordingly (for example, display, LED).",0
+SM2_2,Oesterreich Smart Metering,Opt-out request of the customer to implement at the NL.,0
+SM2_2,Oesterreich Smart Metering,Load profile recording is activated / deactivated and the information has been transmitted to the central system as ALARM or EVENT. A logbook entry has been made in the meter and the current status OPT-OUT is displayed on the meter.,0
+SM2_2,Oesterreich Smart Metering,"A change of the time and performance tables, accumulation times and pre-defined memory depth, which control the tariff recording, can take place via the central system. This functionality must be supported both ad hoc and via activation time.",0
+SM2_2,Oesterreich Smart Metering,"For a planned push operation, the readout plan (time (time grid) and data of any kind to be pushed) can be stored on the meter. This must be possible remotely from the central system - see also Use Case 1.1..",0
+SM2_2,Oesterreich Smart Metering,Configurable terminal parameters must be able to be changed remotely via the central system.,0
+SM2_2,Oesterreich Smart Metering,"e.g. Modification of the reading unit (registers, load profile, accumulation times and pre-memory depth, power quality etc.), permitted deletion commands (for example, once without calibration switch, logbooks). All EVENTs, ALARMs and logbook entries must be individually defined and set as such.",0
+SM2_2,Oesterreich Smart Metering,The current time is checked.,0
+SM2_2,Oesterreich Smart Metering,"With a recognized time deviation of up to 2 seconds, no action may be taken!",0
+SM2_2,Oesterreich Smart Metering,Behavior in case of deviations of the time:,0
+SM2_2,Oesterreich Smart Metering,"If there is a time difference between 2 and 9 seconds, the time must be synchronized, an entry in the logbook does not take place.",0
+SM2_2,Oesterreich Smart Metering,"If there is a time deviation greater than 9 seconds, the time must be set and the entry in the logbook and in the load profile (counter reading with date and time and status entry) must be made. The time chronology (""numbering"") of the measured values must be retained. The synchronization takes place via the WAN interface of the terminals/gateways from the central system.",0
+SM2_2,Oesterreich Smart Metering,"With a recognized time deviation of up to 2 seconds, no action may be taken!",0
+SM2_2,Oesterreich Smart Metering,"If there is a time deviation between 2 and 9 seconds, the time must be synchronized, an entry in the logbook does not take place with a time deviation greater than 9 seconds, the time must be set and entry in the logbook and in the load profile (counter reading with date and time and status entry). The time chronology (""numbering"") of the measured values must be retained. Synchronization must be possible via the service interface (WZ) / maintenance interface (WG) of the terminals / gateways.",0
+SM2_2,Oesterreich Smart Metering,This function must be relocated via the central system. The counter sends a message to the central station that the text has been accepted.,0
+SM2_2,Coffe House Five Employee,"We believe this method of roasting creates some of the best coffee you will ever taste for a few reasons. First, it has a unique method of removing the chaff that the coffee beans shed as they heat. This is important because coffee beans are so absorbent if the chaff remained in the chamber during the roast, as it does in drum roasters, it would soak up some of that unwanted flavor. ",0
+SM2_2,Coffe House Five Employee,"Another reason is its efficiency in heat transference. Our machine can reach higher temperatures in half of the time of many drum roasters, which is absolutely essential to ensuring a smooth cup of coffee with the least amount of acidity possible. Before the roasting process can truly extract the essential flavors of a given coffee bean, the natural moisture needs to be extracted and the longer it takes to do this the more time it allows for acids to build up and block the real flavor of the bean and potentially cause stomach irritation. So by reaching a higher temperature faster we minimize acid buildup and truly showcase the natural flavors of the bean. ",0
+SM2_2,Coffe House Five Employee,"Just like corn here in Indiana, coffee is a seasonal crop so you may notice different coffees during different times of the year. This is because we are committed to providing the freshest and tastiest cup of coffee we can, and that means sometimes a certain type of bean just isn’t in season. ",0
+SM2_2,Coffe House Five Employee,We provide brief descriptions of each bean and blend on the bags. Our goal is to present highly drinkable coffee through blends and single-origins (more information about these terms is in the About Coffee section of the handbook). ,0
+SM2_2,Coffe House Five Employee,"Nitro coffee is the next wave in enjoying cold coffee. We use our freshly roasted Colombian single-origin coffee and brew it in cold water for 12 hours. It then goes into a standard keg and is attached to a nitrogen tap. The cold brewing method keeps acidity low and caffeine high. Serving it through the nitrogen tap, like a stout beer, creates a creamy, cascading coffee. ",0
+SM2_2,Coffe House Five Employee,"The mixture of nitrogen gas and fresh roasted cold-brewed coffee delivers a creamy texture in the mouth, almost as if it already had cream. When served in-house we use a standard pilsner glass. We do sell it to go in a plastic cup, but encourage customers to drink it without a straw in order to get the full mouth feel of the creamy texture.",0
+SM2_2,Coffe House Five Employee,Customers often ask about the caffeine content in fear that Nitro Coffee is extra caffeinated. In reality it isn’t although many people do drink it faster than they would cold coffee and experience the effects faster. ,0
+SM2_2,Coffe House Five Employee,"You will need to know general information about each of our baked goods, including seasonals. All are baked daily right here in-house.Blueberry Muffins- More than a typical blueberry muffin, ours are incredibly moist and rich, give them a try! ",0
+SM2_2,Coffe House Five Employee,"Blueberry Power Bars- Completely Gluten Free and Vegan, these include Vegan protein powder in the base and no added sugar so they are the perfect healthy treat. ",0
+SM2_2,Online Safety Act 2021,"(1)  The Commissioner may, by legislative instrument, declare that a specified access-control system is a restricted access system in relation to material for the purposes of this Act. ",0
+SM2_2,Online Safety Act 2021,(2)  An instrument under subsection (1) may make different provision with respect to different kinds of material. ,0
+SM2_2,Online Safety Act 2021,(3)  Subsection (2) does not limit subsection 33(3A) of the Acts Interpretation Act 1901. ,0
+SM2_2,Online Safety Act 2021,"
+(4) In making an instrument under subsection (1), the Commissioner must have regard to:
+(a) the objective of protecting children from exposure to material that is unsuitable for children; and
+(b) the extent to which the instrument would be likely to result in a financial or administrative burden on providers of the following services:
+(i) social media services;
+(ii) relevant electronic services;
+(iii) designated internet services; and
+(c) such other matters (if any) as the Commissioner considers
+relevant.",0
+SM2_2,Online Safety Act 2021,"(1) If:
+(a) material is, or has been, provided on:
+(i) a social media service; or
+(ii) a relevant electronic service; or
+(iii) a designated internet service; and
+(b) the Commissioner is satisfied that the material is or was class 1 material; and
+(c) the material can be accessed by end-users in Australia; and
+(d) the service is not:
+(i) an exempt Parliamentary content service; or (ii) an exempt court/tribunal content service; or
+(iii) an exempt official-inquiry content service;
+the Commissioner may give the provider of the service a written notice, to be known as a removal notice, requiring the provider to:
+(e) take all reasonable steps to ensure the removal of the material from the service; and
+(f) do so within:
+(i) 24 hours after the notice was given to the provider; or
+(ii) such longer period as the Commissioner allows.",0
+SM2_2,Administrative Appeals Tribunal Act 1975,"(1) The Registrar may, by writing, appoint a person to be an officer of the Tribunal if the person is:
+(a) a member of the staff of the Tribunal referred to in subsection 24N(1); or
+(b) an APS employee made available to the Tribunal; or
+(c) an officer of the Supreme Court of Norfolk Island.",0
+SM2_2,Administrative Appeals Tribunal Act 1975,"(1) The Registrar may engage persons having suitable qualifications and experience as consultants to, or to perform services for, the Registrar.
+(2) An engagement under subsection (1) is to be made: (a) on behalf of the Commonwealth; and
+(b) by written agreement.",0
+SM2_2,Administrative Appeals Tribunal Act 1975,"
+(2) A report prepared after 30 June in a year must be given to the Minister by 15 October of that year.
+(3) The Minister must cause a copy of the report to be tabled in each House of the Parliament as soon as practicable.",0
+SM2_2,Administrative Appeals Tribunal Act 1975,"Any judicial or other proceeding relating to a matter arising out of the management of the administrative affairs of the Tribunal under this Part, including any proceeding relating to anything done by the Registrar under this Part, may be instituted by or against the Commonwealth, as the case requires. ",0
+SM2_2,Administrative Appeals Tribunal Act 1975,"(1) Except for the provisions specified in subsection (2), this Part does not apply in relation to a proceeding in the Migration and Refugee Division.
+Note 1: For the conduct of proceedings in the Migration and Refugee Division, see Parts 5 and 7 of the Migration Act 1958.
+Note 2: Enactments that authorise the making of applications for review to the Tribunal can add to, exclude or modify the operation of this Part.
+(2) The following provisions of this Part apply in relation to a proceeding in the Migration and Refugee Division:
+(a) section 25; (b) section 42.",0
+SM2_2,Administrative Appeals Tribunal Act 1975,"(3A) Where an enactment makes provision in accordance with this section for the making of applications to the Tribunal for the review of decisions of a person made in the exercise of a power conferred on that person, that provision of that enactment applies also in relation to decisions made in the exercise of that power:
+(a) by any person to whom that power has been delegated; (b) in the case where the provision specifies the person by
+reference to his or her being the holder of a particular office or appointment—by any person for the time being acting in, or performing any of the duties of, that office or appointment; or
+(c) by any other person lawfully authorized to exercise that power.",0
+SM2_2,Administrative Appeals Tribunal Act 1975,"For the purposes of an enactment that makes provision in accordance with this section for the making of applications to the Tribunal for review of decisions, a failure by a person to do an act or thing within the period prescribed by that enactment, or by another enactment having effect under that enactment, as the period within which that person is required or permitted to do that act or thing shall be deemed to constitute the making of a decision by that person at the expiration of that period not to do that act or thing. ",0
+SM2_2,Administrative Appeals Tribunal Act 1975,"(15) If a person invited or summoned to give evidence under subsection (14) is:
+(a) an ASIO employee or ASIO affiliate; or
+(b) an officer or employee of the Commonwealth agency, State or authority of a State to which the assessment was given;
+subsection (8) applies as if any evidence to be given by the person were evidence proposed to be adduced by or on behalf of the Director-General of Security or that agency, State or authority, as the case may be.",0
+SM2_2,Administrative Appeals Tribunal Act 1975,"(16) If:
+(a) a party presents his or her case to the Tribunal; and
+(b) after that case has been presented, the other party adduces evidence; and
+(c) the Tribunal thinks that, because of evidence adduced by the other party, the first-mentioned party should be further heard;
+the Tribunal must give the first-mentioned party an opportunity of adducing further evidence but must not give to the applicant any particulars of any evidence to which a certificate given under subsection (8) relates.",0
+SM2_2,Administrative Appeals Tribunal Act 1975,(17) A member of the Tribunal may ask questions of a witness before the Tribunal and the presiding member may require a witness to answer any such question.,0
+SM2_2,Administrative Appeals Tribunal Act 1975,"Review of security clearance decision or security clearance suitability assessment
+If an application for a review of a security clearance decision or security clearance suitability assessment is made to the Tribunal, the Tribunal is to review the decision or suitability assessment in accordance with this section.",0
+SM2_2,Administrative Appeals Tribunal Act 1975,"(4) Without limiting subsection (3), the Director-General of Security may present to the Tribunal:
+(a) a copy of any standard (or part thereof) certified in writing by the Director-General as a standard relating to the Commonwealth’s highest level of security clearance that was used to make the security clearance decision or security clearance suitability assessment; or
+(b) a copy of any standard (or part thereof) certified in writing by the Director-General as a current standard relating to the Commonwealth’s highest level of security clearance.",0
+SM2_2,Administrative Appeals Tribunal Act 1975,"Dismissal of application
+If the applicant fails within a reasonable time:
+(a) to proceed with the application; or
+(b) to comply with a direction by the Tribunal in relation to the application;
+the President or an authorised member may dismiss the application without proceeding to review the security clearance decision or security clearance suitability assessment.",0
+SM2_2,Administrative Appeals Tribunal Act 1975,"(2) If the ASIO Minister certifies, by signed writing, that the disclosure of information with respect to a matter stated in the certificate, or the disclosure of the contents of a document, would be contrary to the public interest:
+(a) because it would prejudice security or the defence or international relations of Australia; or
+(b) because it would involve the disclosure of deliberations or decisions of the Cabinet or a Committee of the Cabinet or of the Executive Council; or
+(c) for any other reason stated in the certificate that could form the basis for a claim by the Crown in right of the Commonwealth in a judicial proceeding that the information or the contents of the document should not be disclosed;
+the following provisions of this section have effect.",0
+SM2_2,Quest coffee Roaster Handbook,"Energy Monitors: Some owners like to see the power displayed in Watts, rather than amperes, as indicated by the current meter, as this is more precise. A Watt is a Watt. These owners often add an energy monitor, such as the KIll-a-Watt®, or one of its clones. This type of meter provides a more accurate indication of the consumed power, as it does not matter what the voltage is. Also, it allows users to compare settings between roasters, even if one operates on 120-Volts and the other on 220- V olts. ",0
+SM2_2,Quest coffee Roaster Handbook,"Digital Thermometers: Consumer-grade digital thermometers are available everywhere. The only important thing is that the type and the plug match with the thermocouple. If only a BT measurement is needed, many inexpensive single-channel meters are readily available. ",0
+SM2_2,Quest coffee Roaster Handbook,"Some multimeters include a single K-type socket and a selector-switch position to convert the voltage into the equivalent temperature. If using multiple probes, multichannel thermometers are available, the most common having either two or four ports. A quick search of popular online sites, such as Amazon, will turn up dozens. ",0
+SM2_2,Quest coffee Roaster Handbook,"Data Meters: However, digital thermometers and multimeters usually lack a computer interface. If a computer connection is wanted, lab-quality meters with a data port are available in one to four-channel versions. ",0
+SM2_2,Quest coffee Roaster Handbook,"Arguably the most popular is the Mastech MS-6514. It is a 2-port meter that can run on its internal battery or a standard 5-volt USB power supply. A meter’s advantage over a thermometer is that a thermometer cannot interface to a computer; it only provides a temperature reading. On the other hand, a meter provides both a computer interface and a digital readout. So, one can use it with or without a computer. ",0
+SM2_2,Quest coffee Roaster Handbook,"Custom Interfaces: Small single-board computers, such as the Arduino, can be used to interface between the Quest and a computer. Similar input/output devices such as those from Phidget are even more popular. ",0
+SM2_2,Quest coffee Roaster Handbook,How to use these is beyond the scope of this handbook. Find information on Arduino here: Click here. Find information on Phidgets here: Click here. Search the Home-Barista website. Click here for additional information. ,0
+SM2_2,Quest coffee Roaster Handbook,"Roasting Software: With the Quest linked to a computer, one can easily display the temperatures provided by the thermocouples as curves against time, using a software application. ",0
+SM2_2,Quest coffee Roaster Handbook,Such apps usually include the ability to develop and display a desired profile in the background. The user can then manipulate the heater and blower controls to duplicate the profile while roasting. ,0
+SM2_2,Quest coffee Roaster Handbook,"Blower Control: A common modification to the Quest is to remove the resistor on models that have a continuously running blower. After the change, the blower motor will no longer run from 0 to about 3.8 ",0
+SM2_2,Quest coffee Roaster Handbook,"Opening either the bean chute door or the chaff filter door has a similar effect, as it stops the blower from being able to draw air through the drum. In either case, one needs to be careful not to overheat the roaster.",0
+SM2_2,Quest coffee Roaster Handbook,"Air Intake: On some older models, air enters the roaster by suction through a small hole in the lower back of the drum enclosure. From there, it enters the drum via the gaps between the drum and the endplates. ",0
+SM2_2,Quest coffee Roaster Handbook,"Thus, the air entering at the back will be cooler than the air entering at the front. To overcome this imbalance, some owners install a 6” piece of copper pipe in the hole. This modification directs the air to the middle of the drum, heating it more evenly. The only downside of this modification is that it reduces the aperture’s size, thus reducing airflow. ",0
+SM2_2,Quest coffee Roaster Handbook,"Newer models do not have the aforementioned intake hole. Instead, several air intake tubes allow the air to enter the drum at critical points within the roasting chamber, ensuring incoming air flows over heaters before entering the roasting drum. ",0
+SM2_2,Quest coffee Roaster Handbook,"Typically, two of these tubes enter the U-shaped space between each of the heaters. There are one or two more, usually high in the chamber. It should be possible to change older Quests to this form of intake by removing the backplate, blocking the original intake hole at the bottom, and drilling holes for added tubes. ",0
+SM2_2,Quest coffee Roaster Handbook,"The latest Quests have neither intake hole nor tubes. Instead, there are two slits of about 3 mm width, one on each side, low down on the roaster. These slits run the entire length of the outer case. ",0
+SM2_2,Quest coffee Roaster Handbook,"At least some of the roasters with a lower chaff drawer have this feature, the slits being on either side of the drawer assembly. ",0
+SM2_2,Quest coffee Roaster Handbook,"To convert older Quests to something similar, block the air intake hole, cut narrow slits in the lower case and open the slits to about 3 mm by bending. Make adjustments by changing the bend. ",0
+SM2_2,Quest coffee Roaster Handbook,"Air Exhaust: The air from the blower exits the roaster at the back via slots in the case. The aperture size provided by these slots is significantly larger than the aperture of the air entrance hole, the tubes or the slits. ",0
+SM2_2,Quest coffee Roaster Handbook,"Nevertheless, some owners cut away the metal between the slots to increase airflow. This modification also makes it easier to clean the blower fan. Note that there are two sets of slots, side by side ",0
+SM2_2,Quest coffee Roaster Handbook,"The outboard set serves the blower, while the inboard set ventilates the electrical cabinet. The latest Quests have the metal between the slots opposite the blower exhaust twisted to direct the exhaust somewhat upward. ",0

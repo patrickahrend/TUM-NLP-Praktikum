@@ -89,9 +89,6 @@ target/
 .mypy_cache/
 
 
-# Custom files
-/data/interim/
-/data/leftover
 
 /models/embeddings/tfidf.pkl
 /models/embeddings/glove.pkl
